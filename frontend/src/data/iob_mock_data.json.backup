@@ -1,0 +1,897 @@
+{
+  "case_metadata": {
+    "case_id": "FRA-2026-IOB-00847",
+    "investigation_type": "RAPID_FUND_FRAGMENTATION",
+    "priority": "CRITICAL",
+    "initiated_at": "2026-03-27T10:45:32.847Z",
+    "fraud_pattern": "Mule Account Network - Multi-Level Cascade",
+    "total_suspected_amount": 200000,
+    "regulatory_flags": ["RBI_CIRCULAR_2025", "PMLA_SECTION_12AA", "DPIP_ALERT"]
+  },
+  "victim": {
+    "id": "VICTIM_01",
+    "type": "victim",
+    "label": "VICTIM",
+    "display_state": "confirmed",
+    "account_holder": "Ramesh Kumar Sharma",
+    "account_number": "185501000012847",
+    "ifsc_code": "IOBA0001855",
+    "branch": "IOB T. Nagar Branch, Chennai",
+    "balance_before_fraud": 547000,
+    "amount_defrauded": 200000,
+    "complaint_ref": "CYB-CHN-2026-3842",
+    "ai_reasoning": {
+      "classification": "CONFIRMED_VICTIM",
+      "confidence": 0.99,
+      "evidence": [
+        "Filed FIR within 24 hours of transaction",
+        "No prior relationship with beneficiary accounts",
+        "Transaction pattern inconsistent with history",
+        "Social engineering attack confirmed via call logs"
+      ],
+      "risk_score": 0
+    }
+  },
+  "transactions": {
+    "normal_feed": [
+      {
+        "id": "TXN-IOB-284751",
+        "utr_number": "IOBA26087284751N",
+        "txn_type": "UPI/P2P",
+        "amount": 450,
+        "merchant": "QUICKMART GROCERIES",
+        "mcc_code": "5411",
+        "mcc_description": "Grocery Stores, Supermarkets",
+        "timestamp": "2026-03-27T10:42:15.234Z",
+        "status": "CLEARED",
+        "from_account": "185501000045892",
+        "to_account": "918710000023841@ybl",
+        "device_fingerprint": "DEV-A7F2B",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.02,
+          "explanation": "Routine grocery payment. Amount and merchant consistent with customer profile."
+        }
+      },
+      {
+        "id": "TXN-IOB-284752",
+        "utr_number": "IOBA26087284752N",
+        "txn_type": "NEFT",
+        "amount": 12500,
+        "merchant": "TECHZONE ELECTRONICS PVT LTD",
+        "mcc_code": "5732",
+        "mcc_description": "Electronics Stores",
+        "timestamp": "2026-03-27T10:38:42.891Z",
+        "status": "CLEARED",
+        "from_account": "185501000078234",
+        "to_account": "185501000089123",
+        "device_fingerprint": "DEV-C9D4E",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.05,
+          "explanation": "Standard electronics purchase. Known merchant with verified GST registration."
+        }
+      },
+      {
+        "id": "TXN-IOB-284753",
+        "utr_number": "IOBA26087284753N",
+        "txn_type": "IMPS",
+        "amount": 2800,
+        "merchant": "MEDPLUS PHARMACY",
+        "mcc_code": "5912",
+        "mcc_description": "Drug Stores and Pharmacies",
+        "timestamp": "2026-03-27T10:35:18.456Z",
+        "status": "CLEARED",
+        "from_account": "185501000034521",
+        "to_account": "185501000056789",
+        "device_fingerprint": "DEV-E1F6G",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.03,
+          "explanation": "Pharmacy payment within normal range. Monthly recurring pattern detected."
+        }
+      },
+      {
+        "id": "TXN-IOB-284754",
+        "utr_number": "IOBA26087284754N",
+        "txn_type": "UPI/P2M",
+        "amount": 1250,
+        "merchant": "SWIGGY FOOD DELIVERY",
+        "mcc_code": "5812",
+        "mcc_description": "Eating Places, Restaurants",
+        "timestamp": "2026-03-27T10:32:05.123Z",
+        "status": "CLEARED",
+        "from_account": "185501000067432",
+        "to_account": "swiggy@ybl",
+        "device_fingerprint": "DEV-H3J8K",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.01,
+          "explanation": "Food delivery payment. Regular merchant with frequent interactions."
+        }
+      },
+      {
+        "id": "TXN-IOB-284755",
+        "utr_number": "IOBA26087284755N",
+        "txn_type": "IMPS",
+        "amount": 8500,
+        "merchant": "APOLLO HOSPITALS",
+        "mcc_code": "8062",
+        "mcc_description": "Hospitals",
+        "timestamp": "2026-03-27T10:28:45.789Z",
+        "status": "CLEARED",
+        "from_account": "185501000098765",
+        "to_account": "185501000011223",
+        "device_fingerprint": "DEV-L4M9N",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.04,
+          "explanation": "Hospital OPD payment. Medical expense within expected range."
+        }
+      },
+      {
+        "id": "TXN-IOB-284756",
+        "utr_number": "IOBA26087284756N",
+        "txn_type": "UPI/P2P",
+        "amount": 3200,
+        "merchant": "RELIANCE DIGITAL",
+        "mcc_code": "5732",
+        "mcc_description": "Electronics Stores",
+        "timestamp": "2026-03-27T10:25:12.456Z",
+        "status": "CLEARED",
+        "from_account": "185501000054321",
+        "to_account": "reliance@icici",
+        "device_fingerprint": "DEV-P5Q1R",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.02,
+          "explanation": "Electronics retail payment. Verified merchant."
+        }
+      },
+      {
+        "id": "TXN-IOB-284757",
+        "utr_number": "IOBA26087284757N",
+        "txn_type": "NEFT",
+        "amount": 25000,
+        "merchant": "STATE ELECTRICITY BOARD",
+        "mcc_code": "4900",
+        "mcc_description": "Utilities",
+        "timestamp": "2026-03-27T10:22:33.891Z",
+        "status": "CLEARED",
+        "from_account": "185501000087654",
+        "to_account": "185501000099887",
+        "device_fingerprint": "DEV-S6T2U",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.01,
+          "explanation": "Utility bill payment. Monthly scheduled transaction."
+        }
+      },
+      {
+        "id": "TXN-IOB-284758",
+        "utr_number": "IOBA26087284758N",
+        "txn_type": "UPI/P2M",
+        "amount": 780,
+        "merchant": "BIG BAZAAR",
+        "mcc_code": "5411",
+        "mcc_description": "Grocery Stores, Supermarkets",
+        "timestamp": "2026-03-27T10:18:55.234Z",
+        "status": "CLEARED",
+        "from_account": "185501000076543",
+        "to_account": "bigbazaar@paytm",
+        "device_fingerprint": "DEV-V7W3X",
+        "location": "Chennai, TN",
+        "ai_analysis": {
+          "risk_level": "LOW",
+          "anomaly_score": 0.02,
+          "explanation": "Grocery purchase. Regular shopping pattern."
+        }
+      }
+    ],
+    "critical_alerts": [
+      {
+        "id": "ALERT-FRA-2026-00847",
+        "alert_type": "RAPID_FUND_FRAGMENTATION",
+        "severity": "CRITICAL",
+        "risk_score": 94,
+        "timestamp": "2026-03-27T10:45:32.847Z",
+        "source_account": "185501000012847",
+        "source_ifsc": "IOBA0001855",
+        "total_amount": 200000,
+        "fragmentation_count": 3,
+        "time_window_seconds": 90,
+        "description": "HIGH VELOCITY SPLIT DETECTED. Rs.2,00,000 fragmented into 3 accounts within 90 seconds via IMPS.",
+        "trigger_rules": [
+          "VELOCITY_THRESHOLD_EXCEEDED",
+          "NEW_BENEFICIARY_CLUSTER",
+          "AMOUNT_ANOMALY_PATTERN",
+          "DEVICE_IP_MISMATCH"
+        ],
+        "outbound_transactions": [
+          {
+            "utr": "IOBA26087289014I",
+            "amount": 80000,
+            "beneficiary": "185502000087321",
+            "beneficiary_ifsc": "IOBA0001856",
+            "timestamp": "2026-03-27T10:45:32.847Z"
+          },
+          {
+            "utr": "IOBA26087289015I",
+            "amount": 60000,
+            "beneficiary": "039405001234567",
+            "beneficiary_ifsc": "HDFC0003940",
+            "timestamp": "2026-03-27T10:45:58.234Z"
+          },
+          {
+            "utr": "IOBA26087289016I",
+            "amount": 60000,
+            "beneficiary": "602305001987654",
+            "beneficiary_ifsc": "ICIC0006023",
+            "timestamp": "2026-03-27T10:46:41.891Z"
+          }
+        ],
+        "graph_structure_id": "fragmentation_network"
+      },
+      {
+        "id": "ALERT-ATO-2026-00923",
+        "alert_type": "ACCOUNT_TAKEOVER",
+        "severity": "CRITICAL",
+        "risk_score": 91,
+        "timestamp": "2026-03-27T11:15:42.123Z",
+        "source_account": "185501000034567",
+        "source_ifsc": "IOBA0001855",
+        "total_amount": 175000,
+        "fragmentation_count": 2,
+        "time_window_seconds": 120,
+        "description": "CREDENTIAL COMPROMISE DETECTED. Unusual device + location. Rs.1,75,000 moved to 2 new beneficiaries.",
+        "trigger_rules": [
+          "NEW_DEVICE_FINGERPRINT",
+          "GEOLOCATION_ANOMALY",
+          "PASSWORD_CHANGE_ATTEMPT",
+          "BULK_TRANSFER_PATTERN"
+        ],
+        "outbound_transactions": [
+          {
+            "utr": "IOBA26087312456I",
+            "amount": 100000,
+            "beneficiary": "501234000098765",
+            "beneficiary_ifsc": "SBIN0005012",
+            "timestamp": "2026-03-27T11:15:42.123Z"
+          },
+          {
+            "utr": "IOBA26087312457I",
+            "amount": 75000,
+            "beneficiary": "403201000054321",
+            "beneficiary_ifsc": "PUNB0403201",
+            "timestamp": "2026-03-27T11:16:55.456Z"
+          }
+        ],
+        "graph_structure_id": "ato_chain"
+      },
+      {
+        "id": "ALERT-SMF-2026-01124",
+        "alert_type": "SMURFING_NETWORK",
+        "severity": "CRITICAL",
+        "risk_score": 96,
+        "timestamp": "2026-03-27T12:22:18.456Z",
+        "source_account": "185501000056789",
+        "source_ifsc": "IOBA0001855",
+        "total_amount": 285000,
+        "fragmentation_count": 5,
+        "time_window_seconds": 180,
+        "description": "SMURFING PATTERN DETECTED. Rs.2,85,000 layered through 5 interconnected accounts forming circular network to evade detection.",
+        "trigger_rules": [
+          "CIRCULAR_FLOW_DETECTED",
+          "SMURFING_SIGNATURE",
+          "STRUCTURED_SPLITTING_PATTERN",
+          "BULK_CASH_DEPOSIT_BEFORE_SPLIT"
+        ],
+        "outbound_transactions": [
+          {
+            "utr": "IOBA26087398721I",
+            "amount": 55000,
+            "beneficiary": "712308000034521",
+            "beneficiary_ifsc": "BARB0VJTHUN",
+            "timestamp": "2026-03-27T12:22:18.456Z"
+          },
+          {
+            "utr": "IOBA26087398722I",
+            "amount": 60000,
+            "beneficiary": "185503000098765",
+            "beneficiary_ifsc": "IOBA0001857",
+            "timestamp": "2026-03-27T12:23:45.789Z"
+          },
+          {
+            "utr": "IOBA26087398723I",
+            "amount": 50000,
+            "beneficiary": "920020000087654",
+            "beneficiary_ifsc": "UTIB0000920",
+            "timestamp": "2026-03-27T12:24:32.123Z"
+          },
+          {
+            "utr": "IOBA26087398724I",
+            "amount": 65000,
+            "beneficiary": "234510000076543",
+            "beneficiary_ifsc": "FDRL0002345",
+            "timestamp": "2026-03-27T12:25:11.456Z"
+          },
+          {
+            "utr": "IOBA26087398725I",
+            "amount": 55000,
+            "beneficiary": "812205000012398",
+            "beneficiary_ifsc": "YESB0008122",
+            "timestamp": "2026-03-27T12:25:52.891Z"
+          }
+        ],
+        "graph_structure_id": "smurfing_network"
+      }
+    ]
+  },
+  "graph_structures": {
+    "fragmentation_network": {
+      "description": "Multi-level fund fragmentation through mule cascade",
+      "nodes": [
+        {
+          "id": "VICTIM_01",
+          "type": "victim",
+          "label": "VICTIM",
+          "display_state": "confirmed",
+          "reveal_order": 1,
+          "account_holder": "Ramesh Kumar Sharma",
+          "account_number": "185501000012847",
+          "ifsc_code": "IOBA0001855",
+          "branch": "IOB T. Nagar, Chennai",
+          "balance": 347000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.99,
+            "evidence": [
+              "Filed police complaint within 24 hours",
+              "No prior relationship with beneficiary accounts",
+              "Social engineering attack vector confirmed"
+            ]
+          }
+        },
+        {
+          "id": "MULE_PRIMARY_01",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "PRIMARY MULE",
+          "display_state": "hidden",
+          "reveal_order": 2,
+          "account_holder": "Unknown Entity",
+          "account_number": "185502000087321",
+          "ifsc_code": "IOBA0001856",
+          "branch": "IOB Mylapore, Chennai",
+          "received_amount": 80000,
+          "current_balance": 12450,
+          "velocity": 14,
+          "fragmentation_ratio": 4.2,
+          "outward_transfers": 4,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.96,
+            "is_mule": true,
+            "evidence": [
+              "Velocity exceeds threshold: 14 tx/min (limit: 5)",
+              "Fragmentation ratio critically high: 4.2",
+              "Account age: 18 days (recently opened)",
+              "Immediate outward fragmentation within 3 mins"
+            ],
+            "account_age_days": 18
+          }
+        },
+        {
+          "id": "MULE_SECONDARY_01",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "SECONDARY MULE",
+          "display_state": "hidden",
+          "reveal_order": 3,
+          "account_holder": "Unknown Entity",
+          "account_number": "039405001234567",
+          "ifsc_code": "HDFC0003940",
+          "branch": "HDFC Velachery, Chennai",
+          "received_amount": 60000,
+          "current_balance": 8320,
+          "velocity": 11,
+          "fragmentation_ratio": 3.8,
+          "outward_transfers": 3,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.94,
+            "is_mule": true,
+            "evidence": [
+              "Velocity exceeds threshold: 11 tx/min",
+              "Fragmentation ratio high: 3.8",
+              "Video KYC during suspicious period",
+              "Device fingerprint linked to primary mule"
+            ],
+            "account_age_days": 24
+          }
+        },
+        {
+          "id": "MULE_TERTIARY_01",
+          "type": "mule",
+          "mule_level": 3,
+          "label": "TERTIARY MULE",
+          "display_state": "hidden",
+          "reveal_order": 4,
+          "account_holder": "Unknown Entity",
+          "account_number": "602305001987654",
+          "ifsc_code": "ICIC0006023",
+          "branch": "ICICI Anna Nagar, Chennai",
+          "received_amount": 60000,
+          "current_balance": 5890,
+          "velocity": 9,
+          "fragmentation_ratio": 2.8,
+          "outward_transfers": 2,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.91,
+            "is_mule": true,
+            "evidence": [
+              "Velocity above threshold: 9 tx/min",
+              "Funds transferred to merchant within 4 mins",
+              "Account holder identity unverifiable"
+            ],
+            "account_age_days": 31
+          }
+        },
+        {
+          "id": "MERCHANT_01",
+          "type": "merchant",
+          "label": "MERCHANT",
+          "display_state": "hidden",
+          "reveal_order": 5,
+          "business_name": "Sharma Electronics & Appliances",
+          "account_holder": "Sharma Electronics Pvt Ltd",
+          "account_number": "916010000045678",
+          "ifsc_code": "UTIB0000234",
+          "branch": "Axis Bank T. Nagar, Chennai",
+          "gst_number": "33AABCS1234F1ZK",
+          "mcc_code": "5732",
+          "mcc_description": "Electronics Stores",
+          "business_vintage_years": 12,
+          "current_balance": 3145000,
+          "traced_funds": 50000,
+          "ai_reasoning": {
+            "classification": "PASSIVE_INNOCENT",
+            "confidence": 0.88,
+            "is_mule": false,
+            "evidence": [
+              "Valid GST registered POS merchant",
+              "Business vintage: 12 years",
+              "No outward fragmentation (ratio: 0.0)",
+              "HIGH COLLATERAL RISK if frozen"
+            ]
+          }
+        }
+      ],
+      "links": [
+        {
+          "source": "VICTIM_01",
+          "target": "MULE_PRIMARY_01",
+          "value": 80000,
+          "utr": "IOBA26087289014I",
+          "txn_type": "IMPS",
+          "reveal_order": 1
+        },
+        {
+          "source": "VICTIM_01",
+          "target": "MULE_SECONDARY_01",
+          "value": 60000,
+          "utr": "IOBA26087289015I",
+          "txn_type": "IMPS",
+          "reveal_order": 2
+        },
+        {
+          "source": "MULE_PRIMARY_01",
+          "target": "MULE_TERTIARY_01",
+          "value": 45000,
+          "utr": "IOBA26087289017I",
+          "txn_type": "IMPS",
+          "reveal_order": 3
+        },
+        {
+          "source": "MULE_TERTIARY_01",
+          "target": "MERCHANT_01",
+          "value": 50000,
+          "utr": "ICIC26087312847N",
+          "txn_type": "NEFT",
+          "reveal_order": 4
+        }
+      ]
+    },
+    "ato_chain": {
+      "description": "Account takeover with linear fund movement",
+      "nodes": [
+        {
+          "id": "VICTIM_02",
+          "type": "victim",
+          "label": "VICTIM",
+          "display_state": "confirmed",
+          "reveal_order": 1,
+          "account_holder": "Priya Venkatesh",
+          "account_number": "185501000034567",
+          "ifsc_code": "IOBA0001855",
+          "branch": "IOB Adyar, Chennai",
+          "balance": 225000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.97,
+            "evidence": [
+              "Reported unauthorized access immediately",
+              "Device and location mismatch confirmed",
+              "No recent password change request by user"
+            ]
+          }
+        },
+        {
+          "id": "MULE_COLLECTOR_01",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "COLLECTOR MULE",
+          "display_state": "hidden",
+          "reveal_order": 2,
+          "account_holder": "Unknown Entity",
+          "account_number": "501234000098765",
+          "ifsc_code": "SBIN0005012",
+          "branch": "SBI MG Road, Bangalore",
+          "received_amount": 100000,
+          "current_balance": 15200,
+          "velocity": 18,
+          "fragmentation_ratio": 5.1,
+          "outward_transfers": 6,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.98,
+            "is_mule": true,
+            "evidence": [
+              "Extreme velocity: 18 tx/min",
+              "Fragmentation ratio: 5.1 (critical)",
+              "Account dormant 6 months before spike",
+              "ATM withdrawals at 4 different cities in 2 hrs"
+            ],
+            "account_age_days": 210
+          }
+        },
+        {
+          "id": "MULE_RELAY_01",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "RELAY MULE",
+          "display_state": "hidden",
+          "reveal_order": 3,
+          "account_holder": "Unknown Entity",
+          "account_number": "403201000054321",
+          "ifsc_code": "PUNB0403201",
+          "branch": "PNB Koramangala, Bangalore",
+          "received_amount": 75000,
+          "current_balance": 4500,
+          "velocity": 12,
+          "fragmentation_ratio": 4.0,
+          "outward_transfers": 4,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.93,
+            "is_mule": true,
+            "evidence": [
+              "Velocity: 12 tx/min exceeds threshold",
+              "Linked to collector mule via crypto exchange",
+              "Rapid UPI collections + immediate NEFT out"
+            ],
+            "account_age_days": 45
+          }
+        },
+        {
+          "id": "CRYPTO_EXIT",
+          "type": "merchant",
+          "label": "CRYPTO EXIT",
+          "display_state": "hidden",
+          "reveal_order": 4,
+          "business_name": "CoinSwap Exchange",
+          "account_holder": "CoinSwap Technologies LLP",
+          "account_number": "918020000012345",
+          "ifsc_code": "KKBK0000918",
+          "branch": "Kotak Cyber City, Gurugram",
+          "gst_number": "06AADFC9876K1ZM",
+          "mcc_code": "6051",
+          "mcc_description": "Quasi Cash - Cryptocurrency",
+          "business_vintage_years": 3,
+          "current_balance": 8750000,
+          "traced_funds": 120000,
+          "ai_reasoning": {
+            "classification": "HIGH_RISK_MERCHANT",
+            "confidence": 0.72,
+            "is_mule": false,
+            "evidence": [
+              "Licensed P2P crypto exchange",
+              "Multiple fraud-linked inflows detected",
+              "KYC compliance under investigation",
+              "MEDIUM COLLATERAL RISK"
+            ]
+          }
+        }
+      ],
+      "links": [
+        {
+          "source": "VICTIM_02",
+          "target": "MULE_COLLECTOR_01",
+          "value": 100000,
+          "utr": "IOBA26087312456I",
+          "txn_type": "IMPS",
+          "reveal_order": 1
+        },
+        {
+          "source": "VICTIM_02",
+          "target": "MULE_RELAY_01",
+          "value": 75000,
+          "utr": "IOBA26087312457I",
+          "txn_type": "IMPS",
+          "reveal_order": 2
+        },
+        {
+          "source": "MULE_COLLECTOR_01",
+          "target": "CRYPTO_EXIT",
+          "value": 85000,
+          "utr": "SBIN26087345678N",
+          "txn_type": "NEFT",
+          "reveal_order": 3
+        },
+        {
+          "source": "MULE_RELAY_01",
+          "target": "CRYPTO_EXIT",
+          "value": 70000,
+          "utr": "PUNB26087398765N",
+          "txn_type": "NEFT",
+          "reveal_order": 4
+        }
+      ]
+    },
+    "smurfing_network": {
+      "description": "Circular layering network with cross-bank fund movement",
+      "nodes": [
+        {
+          "id": "VICTIM_03",
+          "type": "victim",
+          "label": "VICTIM",
+          "display_state": "confirmed",
+          "reveal_order": 1,
+          "account_holder": "Anita Deshmukh",
+          "account_number": "185501000056789",
+          "ifsc_code": "IOBA0001855",
+          "branch": "IOB Bandra West, Mumbai",
+          "balance": 415000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.98,
+            "evidence": [
+              "Bulk cash deposit of 3L followed by rapid fragmentation",
+              "Victim claims account compromise via phishing",
+              "Transaction pattern inconsistent with business profile"
+            ]
+          }
+        },
+        {
+          "id": "MULE_SMURF_ALPHA",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "SMURF ALPHA",
+          "display_state": "hidden",
+          "reveal_order": 2,
+          "account_holder": "Unknown Entity",
+          "account_number": "712308000034521",
+          "ifsc_code": "BARB0VJTHUN",
+          "branch": "Bank of Baroda Thane, Mumbai",
+          "received_amount": 55000,
+          "current_balance": 3200,
+          "velocity": 16,
+          "fragmentation_ratio": 4.5,
+          "outward_transfers": 5,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.97,
+            "is_mule": true,
+            "evidence": [
+              "Part of circular network pattern",
+              "Velocity: 16 tx/min (critical)",
+              "Cross-references with 3 other suspects",
+              "Account opened with minimal KYC"
+            ],
+            "account_age_days": 21
+          }
+        },
+        {
+          "id": "MULE_SMURF_BETA",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "SMURF BETA",
+          "display_state": "hidden",
+          "reveal_order": 3,
+          "account_holder": "Unknown Entity",
+          "account_number": "185503000098765",
+          "ifsc_code": "IOBA0001857",
+          "branch": "IOB Andheri, Mumbai",
+          "received_amount": 60000,
+          "current_balance": 4100,
+          "velocity": 13,
+          "fragmentation_ratio": 3.9,
+          "outward_transfers": 4,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.95,
+            "is_mule": true,
+            "evidence": [
+              "Receives and sends funds in circular pattern",
+              "Device fingerprint matches SMURF_ALPHA",
+              "Same IP address cluster detected",
+              "Video KYC suspicious timing"
+            ],
+            "account_age_days": 15
+          }
+        },
+        {
+          "id": "MULE_SMURF_GAMMA",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "SMURF GAMMA",
+          "display_state": "hidden",
+          "reveal_order": 4,
+          "account_holder": "Unknown Entity",
+          "account_number": "920020000087654",
+          "ifsc_code": "UTIB0000920",
+          "branch": "Axis Bank Goregaon, Mumbai",
+          "received_amount": 50000,
+          "current_balance": 2800,
+          "velocity": 10,
+          "fragmentation_ratio": 3.2,
+          "outward_transfers": 3,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.93,
+            "is_mule": true,
+            "evidence": [
+              "Acts as intermediate layering node",
+              "Funds received from multiple sources",
+              "Quick relay to aggregator account"
+            ],
+            "account_age_days": 28
+          }
+        },
+        {
+          "id": "MULE_SMURF_DELTA",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "SMURF DELTA",
+          "display_state": "hidden",
+          "reveal_order": 5,
+          "account_holder": "Unknown Entity",
+          "account_number": "234510000076543",
+          "ifsc_code": "FDRL0002345",
+          "branch": "Federal Bank Malad, Mumbai",
+          "received_amount": 65000,
+          "current_balance": 5400,
+          "velocity": 12,
+          "fragmentation_ratio": 3.5,
+          "outward_transfers": 4,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.94,
+            "is_mule": true,
+            "evidence": [
+              "High-value relay node in layering scheme",
+              "Cross-bank transfers to evade tracking",
+              "Linked to organized network"
+            ],
+            "account_age_days": 19
+          }
+        },
+        {
+          "id": "MULE_AGGREGATOR",
+          "type": "mule",
+          "mule_level": 3,
+          "label": "AGGREGATOR",
+          "display_state": "hidden",
+          "reveal_order": 6,
+          "account_holder": "Shell Company",
+          "account_number": "812205000012398",
+          "ifsc_code": "YESB0008122",
+          "branch": "Yes Bank BKC, Mumbai",
+          "received_amount": 185000,
+          "current_balance": 82000,
+          "velocity": 8,
+          "fragmentation_ratio": 1.2,
+          "outward_transfers": 2,
+          "ai_reasoning": {
+            "classification": "COLLECTOR_MULE",
+            "confidence": 0.99,
+            "is_mule": true,
+            "evidence": [
+              "Final aggregation point for layered funds",
+              "Receives from multiple intermediate mules",
+              "Shell company with no real operations",
+              "HIGH PRIORITY FREEZE TARGET"
+            ],
+            "account_age_days": 67
+          }
+        }
+      ],
+      "links": [
+        {
+          "source": "VICTIM_03",
+          "target": "MULE_SMURF_ALPHA",
+          "value": 55000,
+          "utr": "IOBA26087398721I",
+          "txn_type": "IMPS",
+          "reveal_order": 1
+        },
+        {
+          "source": "VICTIM_03",
+          "target": "MULE_SMURF_BETA",
+          "value": 60000,
+          "utr": "IOBA26087398722I",
+          "txn_type": "IMPS",
+          "reveal_order": 2
+        },
+        {
+          "source": "VICTIM_03",
+          "target": "MULE_SMURF_GAMMA",
+          "value": 50000,
+          "utr": "IOBA26087398723I",
+          "txn_type": "IMPS",
+          "reveal_order": 3
+        },
+        {
+          "source": "MULE_SMURF_ALPHA",
+          "target": "MULE_SMURF_DELTA",
+          "value": 48000,
+          "utr": "BARB26087401234I",
+          "txn_type": "IMPS",
+          "reveal_order": 4
+        },
+        {
+          "source": "MULE_SMURF_BETA",
+          "target": "MULE_AGGREGATOR",
+          "value": 52000,
+          "utr": "IOBA26087401567N",
+          "txn_type": "NEFT",
+          "reveal_order": 5
+        },
+        {
+          "source": "MULE_SMURF_GAMMA",
+          "target": "MULE_AGGREGATOR",
+          "value": 45000,
+          "utr": "UTIB26087401890N",
+          "txn_type": "NEFT",
+          "reveal_order": 6
+        },
+        {
+          "source": "MULE_SMURF_DELTA",
+          "target": "MULE_AGGREGATOR",
+          "value": 43000,
+          "utr": "FDRL26087402123N",
+          "txn_type": "NEFT",
+          "reveal_order": 7
+        }
+      ]
+    }
+  },
+  "audit_config": {
+    "worm_storage": true,
+    "encryption": {
+      "in_transit": "TLS_1.3",
+      "at_rest": "AES_256_GCM"
+    },
+    "compliance_frameworks": ["RBI_MASTER_DIRECTION_2024", "PMLA_2002", "IT_ACT_2000"],
+    "evidence_retention_years": 10,
+    "dpip_integration": true
+  }
+}
