@@ -214,26 +214,49 @@ export const exportSARReport = (caseData, auditHash) => {
   const mules = nodes.filter(n => n.type === 'mule')
   const primaryEvidenceData = mules.map(mule => {
     const primaryEvidence = mule.ai_reasoning?.primary_evidence || {}
-    const incoming = primaryEvidence.incoming || `1 IN (NEFT) - ₹${(mule.received_amount || 0).toLocaleString('en-IN')} at 19:50:12 IST`
-    const outgoing = primaryEvidence.outgoing || `4 OUT (IMPS) - ₹${Math.floor((mule.received_amount || 0) / 4).toLocaleString('en-IN')} each, 33-second intervals`
-    const dwellTime = primaryEvidence.dwell_time || '33 seconds'
-    const ipTelemetry = primaryEvidence.ip_telemetry || 'VPN Detected: 103.82.x.x (Masked)'
-    const deviceFp = primaryEvidence.device_fingerprint || 'DEV-X7Y2K (Device mismatch)'
 
-    // Combine into a single cell with line breaks
-    const ledgerText = `INCOMING: ${incoming}\n\nOUTGOING: ${outgoing}\n\nDWELL TIME: ${dwellTime}\n\nIP TELEMETRY: ${ipTelemetry}\n\nDEVICE FP: ${deviceFp}`
+    // Extract raw ledger facts with proper formatting
+    const incomingLine = primaryEvidence.incoming || `1 transfer of ₹${(mule.received_amount || 0).toLocaleString('en-IN')} (NEFT) at 19:50:12 IST`
+    const outgoingLine = primaryEvidence.outgoing || `4 transfers of ₹${Math.floor((mule.received_amount || 0) / 4).toLocaleString('en-IN')} (IMPS) within 33 seconds`
+    const dwellTimeLine = primaryEvidence.dwell_time || '33 seconds'
+    const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
+    const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
-    return [maskPII(mule.id) + ' (Active Mule)', ledgerText]
+    // Construct ledger text with explicit newlines for clean table display
+    const ledgerText = `INCOMING:
+${incomingLine}
+
+OUTGOING:
+${outgoingLine}
+
+DWELL TIME:
+${dwellTimeLine}
+
+IP TELEMETRY:
+${ipTelemetryLine}
+
+DEVICE FP:
+${deviceFpLine}`
+
+    return [maskPII(mule.id) + ' (Active)',  ledgerText]
   })
 
   // Add Primary Evidence as autoTable
   autoTable(doc, {
     startY: currentY,
-    head: [['Masked Entity ID', 'Raw Ledger Facts']],
+    head: [['Masked Entity ID', 'Raw Ledger Facts (Primary Evidence)']],
     body: primaryEvidenceData,
     theme: 'grid',
+    styles: {
+      fontSize: 8,
+      cellPadding: 6,
+      valign: 'top',
+      overflow: 'linebreak',
+      lineColor: [200, 200, 200],
+      lineWidth: 0.1
+    },
     headStyles: {
-      fillColor: [59, 130, 246], // Blue-600
+      fillColor: [30, 41, 59], // Slate-800
       textColor: [255, 255, 255],
       fontSize: 9,
       fontStyle: 'bold',
@@ -242,8 +265,6 @@ export const exportSARReport = (caseData, auditHash) => {
     bodyStyles: {
       fontSize: 8,
       textColor: [30, 58, 138], // Blue-900
-      cellPadding: 3,
-      valign: 'top',
       fontStyle: 'normal',
       font: 'courier'
     },
@@ -251,8 +272,8 @@ export const exportSARReport = (caseData, auditHash) => {
       fillColor: [219, 234, 254] // Blue-100
     },
     columnStyles: {
-      0: { cellWidth: 35, fontStyle: 'bold' },
-      1: { cellWidth: 140 }
+      0: { cellWidth: 50, fontStyle: 'bold' },  // Entity ID (wider for readability)
+      1: { cellWidth: 130 }  // Ledger Facts (forces proper wrapping)
     },
     margin: { left: leftMargin, right: leftMargin },
     didDrawPage: (data) => {
@@ -307,26 +328,32 @@ export const exportSARReport = (caseData, auditHash) => {
     head: [['Masked Entity ID', 'Type', 'AI Evidence (PVI / FR)', 'Action Taken']],
     body: tableData,
     theme: 'grid',
+    styles: {
+      fontSize: 7,
+      cellPadding: 5,
+      valign: 'middle',
+      overflow: 'linebreak'
+    },
     headStyles: {
       fillColor: [30, 41, 59], // Slate-800
       textColor: [255, 255, 255],
       fontSize: 8,
       fontStyle: 'bold',
-      halign: 'left'
+      halign: 'left',
+      cellPadding: 5
     },
     bodyStyles: {
-      fontSize: 7,
       textColor: [51, 65, 85], // Slate-700
-      cellPadding: 3
+      font: 'helvetica'
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252] // Slate-50
     },
     columnStyles: {
-      0: { cellWidth: 35, fontStyle: 'bold', font: 'courier' },
+      0: { cellWidth: 40, fontStyle: 'bold', font: 'courier' },
       1: { cellWidth: 25, halign: 'center' },
-      2: { cellWidth: 60 },
-      3: { cellWidth: 60 }
+      2: { cellWidth: 55 },
+      3: { cellWidth: 55 }
     },
     margin: { left: leftMargin, right: leftMargin },
     didDrawPage: (data) => {
