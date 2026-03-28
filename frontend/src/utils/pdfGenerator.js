@@ -193,7 +193,7 @@ export const exportSARReport = (caseData, auditHash) => {
   currentY += summaryLines.length * 5 + 8
 
   // ============================================
-  // 3. PRIMARY EVIDENCE LEDGER (Using autoTable)
+  // 3. PRIMARY EVIDENCE LEDGER (Forensic Log Blocks)
   // ============================================
 
   currentY += 5
@@ -208,84 +208,91 @@ export const exportSARReport = (caseData, auditHash) => {
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(71, 85, 105)
   doc.text('Raw transaction facts from Core Banking Ledger (Section 63 BSA - Primary Evidence)', leftMargin, currentY)
-  currentY += 6
+  currentY += 8
 
-  // Build Primary Evidence table data
-  const mules = nodes.filter(n => n.type === 'mule')
-  const primaryEvidenceData = mules.map(mule => {
-    const primaryEvidence = mule.ai_reasoning?.primary_evidence || {}
+  // Loop through each node to create dedicated Forensic Log Blocks
+  nodes.forEach((node) => {
+    // Determine header color based on node type
+    let headerColor = [30, 41, 59] // Default Slate
+    if (node.type === 'mule') headerColor = [185, 28, 28] // Red for active threats
+    if (node.type === 'merchant') headerColor = [4, 120, 87] // Green for merchants
+    if (node.type === 'victim') headerColor = [30, 58, 138] // Blue for victims
 
-    // Extract raw ledger facts with proper formatting
-    const incomingLine = primaryEvidence.incoming || `1 transfer of ₹${(mule.received_amount || 0).toLocaleString('en-IN')} (NEFT) at 19:50:12 IST`
-    const outgoingLine = primaryEvidence.outgoing || `4 transfers of ₹${Math.floor((mule.received_amount || 0) / 4).toLocaleString('en-IN')} (IMPS) within 33 seconds`
+    // Format the entity header
+    const entityTitle = `[ ${node.type.toUpperCase()} ] - ${maskPII(node.id)}`
+
+    // Extract primary evidence data
+    const primaryEvidence = node.ai_reasoning?.primary_evidence || {}
+    const incomingLine = primaryEvidence.incoming || `1 transfer of ₹${(node.received_amount || 0).toLocaleString('en-IN')} (NEFT) at 19:50:12 IST`
+    const outgoingLine = primaryEvidence.outgoing || `4 transfers of ₹${Math.floor((node.received_amount || 0) / 4).toLocaleString('en-IN')} (IMPS) within 33 seconds`
     const dwellTimeLine = primaryEvidence.dwell_time || '33 seconds'
     const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
     const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
-    // Pass ledger facts as Array directly to jspdf-autotable (no .join)
-    // The library natively renders arrays as perfect distinct lines
-    const ledgerFacts = [
-      `INCOMING: ${incomingLine}`,
-      `OUTGOING: ${outgoingLine}`,
-      `DWELL TIME: ${dwellTimeLine}`,
-      `IP TELEMETRY: ${ipTelemetryLine}`,
-      `DEVICE FP: ${deviceFpLine}`
-    ]
+    // Construct evidence text with bullet points
+    const evidenceText = [
+      `● INCOMING: ${incomingLine}`,
+      `● OUTGOING: ${outgoingLine}`,
+      `● DWELL TIME: ${dwellTimeLine}`,
+      `● IP TELEMETRY: ${ipTelemetryLine}`,
+      `● DEVICE FP: ${deviceFpLine}`
+    ].join('\n')
 
-    return [maskPII(mule.id) + ' (Active)', ledgerFacts]
-  })
-
-  // Add Primary Evidence as autoTable
-  autoTable(doc, {
-    startY: currentY,
-    head: [['Masked Entity ID', 'Raw Ledger Facts (Primary Evidence)']],
-    body: primaryEvidenceData,
-    theme: 'grid',
-    tableWidth: 182,
-    styles: {
-      fontSize: 8.5,
-      cellPadding: 4,
-      valign: 'top',
-      overflow: 'linebreak',
-      lineColor: [200, 200, 200],
-      lineWidth: 0.1
-    },
-    headStyles: {
-      fillColor: [30, 41, 59],
-      textColor: [255, 255, 255],
-      fontSize: 9,
-      fontStyle: 'bold',
-      halign: 'left'
-    },
-    bodyStyles: {
-      fontSize: 8.5,
-      textColor: [30, 58, 138],
-      fontStyle: 'normal',
-      font: 'courier'
-    },
-    alternateRowStyles: {
-      fillColor: [219, 234, 254]
-    },
-    columnStyles: {
-      0: { cellWidth: 40, fontStyle: 'bold' },
-      1: { cellWidth: 142 }
-    },
-    margin: { left: 14, right: 14 },
-    didDrawPage: (data) => {
-      const pageCount = doc.internal.getNumberOfPages()
-      doc.setFontSize(8)
-      doc.setTextColor(148, 163, 184)
-      doc.text(
-        `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
-        pageWidth / 2,
-        pageHeight - 10,
-        { align: 'center' }
-      )
+    // Check if we need a new page before drawing this block
+    if (currentY > pageHeight - 80) {
+      doc.addPage()
+      currentY = 20
     }
+
+    // Draw 1-column dossier block for this entity
+    autoTable(doc, {
+      startY: currentY,
+      head: [[entityTitle]],
+      body: [[evidenceText]],
+      theme: 'grid',
+      styles: {
+        fontSize: 9,
+        cellPadding: 5,
+        valign: 'top',
+        overflow: 'linebreak',
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1
+      },
+      headStyles: {
+        fillColor: headerColor,
+        textColor: [255, 255, 255],
+        fontSize: 10,
+        fontStyle: 'bold',
+        halign: 'left'
+      },
+      bodyStyles: {
+        fontSize: 9,
+        textColor: [30, 41, 59],
+        font: 'courier'
+      },
+      columnStyles: {
+        0: { cellWidth: 182 } // Full page width (14mm left + 182 + 14mm right margins)
+      },
+      margin: { left: 14, right: 14 },
+      didDrawPage: (data) => {
+        const pageCount = doc.internal.getNumberOfPages()
+        doc.setFontSize(8)
+        doc.setTextColor(148, 163, 184)
+        doc.text(
+          `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
+          pageWidth / 2,
+          pageHeight - 10,
+          { align: 'center' }
+        )
+      }
+    })
+
+    // Track Y position after this block
+    currentY = doc.lastAutoTable?.finalY + 10 || currentY + 50
   })
 
-  // Track Y position after Primary Evidence table
-  currentY = doc.lastAutoTable?.finalY + 15 || currentY + 50
+  // Add spacing before Derived Evidence Matrix
+  currentY += 5
 
   // Check if we need a new page
   if (currentY > pageHeight - 120) {
