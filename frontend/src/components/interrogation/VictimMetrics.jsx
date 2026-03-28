@@ -71,9 +71,9 @@ const VictimMetrics = ({ node }) => {
             AI VERIFICATION EVIDENCE
           </h3>
           <div className="space-y-1.5">
-            {aiReasoning.evidence.map((evidence, idx) => (
+            {(aiReasoning.evidence || []).map((evidence, idx) => (
               <div
-                key={idx}
+                key={`victim-evidence-${node.id}-${idx}-${evidence?.substring(0, 20) || 'empty'}`}
                 className="flex items-start gap-1.5 p-1.5 rounded-md bg-blue-950/20 border border-blue-500/10"
               >
                 <span className="text-blue-400 mt-0.5 text-[10px] flex-shrink-0">✓</span>

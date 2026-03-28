@@ -24,9 +24,9 @@ const RadarGrid = () => {
 
       {/* Concentric Circles */}
       <div className="relative w-[80%] h-[80%] max-w-[500px] max-h-[500px]">
-        {circles.map((circle, index) => (
+        {circles.map((circle) => (
           <motion.div
-            key={circle}
+            key={`radar-circle-${circle}`}
             className="absolute inset-0 rounded-full border border-dashed border-slate-700/50"
             style={{
               transform: `scale(${circle / circles.length})`,
@@ -40,11 +40,11 @@ const RadarGrid = () => {
               opacity: {
                 duration: 3,
                 repeat: Infinity,
-                delay: index * 0.5,
+                delay: (circle - 1) * 0.5,
               },
               scale: {
                 duration: 0.5,
-                delay: index * 0.1,
+                delay: (circle - 1) * 0.1,
               },
             }}
           />
@@ -98,7 +98,7 @@ const RadarGrid = () => {
         >
           {[0, 1, 2].map((i) => (
             <motion.div
-              key={i}
+              key={`radar-dot-${i}`}
               className="w-1.5 h-1.5 rounded-full bg-slate-600"
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}

@@ -11,13 +11,13 @@ const formatCurrency = (amount) => {
 }
 
 const MuleMetrics = ({ node, isContained = false }) => {
-  const { freezeNode, frozenNodes } = useApp()
+  const { deployNetworkContainment, frozenNodes } = useApp()
   const isFrozen = frozenNodes.includes(node.id) || isContained
   const aiReasoning = node.ai_reasoning || {}
 
-  const handleFreeze = () => {
+  const handleContainment = () => {
     if (!isFrozen) {
-      freezeNode(node.id, node)
+      deployNetworkContainment()
     }
   }
 
@@ -106,7 +106,7 @@ const MuleMetrics = ({ node, isContained = false }) => {
             'Device IP matches known risky cluster'
           ]).map((evidence, idx) => (
             <motion.div
-              key={idx}
+              key={`mule-evidence-${node.id}-${idx}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 }}
@@ -184,13 +184,13 @@ const MuleMetrics = ({ node, isContained = false }) => {
         </motion.div>
       ) : (
         <motion.button
-          onClick={handleFreeze}
+          onClick={handleContainment}
           className="w-full py-2.5 px-4 rounded-lg btn-danger text-white font-bold text-xs flex items-center justify-center gap-2"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
           <Shield className="w-4 h-4" />
-          INITIATE FULL ACCOUNT FREEZE
+          DEPLOY PROPORTIONAL LIEN
         </motion.button>
       )}
     </div>

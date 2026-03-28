@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Radio, Activity, ShieldCheck, Target, TrendingUp } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
+import { validateKeys } from '../../utils/keyValidator.jsx'
 import AlertCard from './AlertCard'
 import CriticalAlert from './CriticalAlert'
 
@@ -92,16 +93,20 @@ const Watchtower = () => {
           )}
 
           {/* Section Header */}
-          <div className="flex items-center gap-2 mb-3 px-1">
+          <div key="section-header" className="flex items-center gap-2 mb-3 px-1">
             <span className="text-xs font-mono text-slate-500">RECENT TRANSACTIONS</span>
             <div className="flex-1 h-px bg-slate-700/50" />
           </div>
 
           {/* Normal Transactions */}
-          <div className="flex flex-col space-y-3 w-full">
-            {transactions.map((txn, index) => (
+          <div key="transactions-list" className="flex flex-col space-y-3 w-full">
+            {validateKeys(
+              transactions.filter(txn => txn && txn.id),
+              'id',
+              'Watchtower'
+            ).map((txn, index) => (
               <motion.div
-                key={`${txn.id}-${index}`}
+                key={txn.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}

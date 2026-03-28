@@ -1,0 +1,14 @@
+{
+  "extends": ["react-app"],
+  "rules": {
+    "react/jsx-key": [
+      "error",
+      {
+        "checkFragmentShorthand": true,
+        "checkKeyMustBeforeSpread": true,
+        "warnOnDuplicates": true
+      }
+    ],
+    "react/no-array-index-key": "warn"
+  }
+}

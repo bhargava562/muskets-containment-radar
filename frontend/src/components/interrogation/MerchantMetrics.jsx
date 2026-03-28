@@ -11,7 +11,7 @@ const formatCurrency = (amount) => {
 }
 
 const MerchantMetrics = ({ node, isContained = false }) => {
-  const { freezeNode, frozenNodes } = useApp()
+  const { deployNetworkContainment, frozenNodes } = useApp()
   const isFrozen = frozenNodes.includes(node.id) || isContained
   const aiReasoning = node.ai_reasoning || {}
 
@@ -19,9 +19,9 @@ const MerchantMetrics = ({ node, isContained = false }) => {
   const tracedFunds = node.traced_funds || 50000
   const lienAmount = Math.min(currentBalance, tracedFunds)
 
-  const handleFreeze = () => {
+  const handleContainment = () => {
     if (!isFrozen) {
-      freezeNode(node.id, node)
+      deployNetworkContainment()
     }
   }
 
@@ -85,7 +85,7 @@ const MerchantMetrics = ({ node, isContained = false }) => {
             'No outward fragmentation detected (ratio: 0.0)'
           ]).map((evidence, idx) => (
             <motion.div
-              key={idx}
+              key={`merchant-evidence-${node.id}-${idx}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 }}
@@ -190,7 +190,7 @@ const MerchantMetrics = ({ node, isContained = false }) => {
         </motion.div>
       ) : (
         <motion.button
-          onClick={handleFreeze}
+          onClick={handleContainment}
           className="w-full py-2.5 px-4 rounded-lg btn-freeze text-white font-bold text-xs flex items-center justify-center gap-2"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

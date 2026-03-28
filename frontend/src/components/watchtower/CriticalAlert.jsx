@@ -119,14 +119,14 @@ const CriticalAlert = ({ alert }) => {
               <div className="p-4 rounded-xl bg-gradient-to-r from-red-950/40 to-amber-950/20 border border-red-500/20">
                 <p className="text-sm text-slate-200 leading-relaxed">
                   {alert.description || (
-                    <>
+                    <Fragment key="alert-desc">
                       <span className="text-red-400 font-semibold">ANOMALY DETECTED.</span>{' '}
                       <span className="text-amber-400 font-bold">{formatCurrency(alert.totalAmount)}</span>{' '}
                       fragmented into{' '}
                       <span className="text-red-400 font-semibold">{alert.fragmentationCount} accounts</span>{' '}
                       within{' '}
                       <span className="text-amber-400 font-semibold">{alert.timeWindowSeconds}s</span>.
-                    </>
+                    </Fragment>
                   )}
                 </p>
               </div>
@@ -146,9 +146,9 @@ const CriticalAlert = ({ alert }) => {
                 <div className="space-y-2">
                   <span className="text-xs text-slate-500 font-mono">TRIGGERED RULES:</span>
                   <div className="flex flex-wrap gap-2">
-                    {alert.triggerRules.map((rule, idx) => (
+                    {(alert.triggerRules || []).map((rule, idx) => (
                       <span
-                        key={idx}
+                        key={`trigger-rule-${alert.id}-${idx}-${rule?.substring(0, 15) || 'empty'}`}
                         className="px-2 py-1 rounded-md bg-red-500/15 text-red-400 text-xs font-mono border border-red-500/20"
                       >
                         {rule.replace(/_/g, ' ')}
@@ -163,8 +163,8 @@ const CriticalAlert = ({ alert }) => {
                 <div className="space-y-2">
                   <span className="text-xs text-slate-500 font-mono">OUTBOUND SPLITS:</span>
                   <div className="space-y-2">
-                    {alert.outboundTransactions.map((txn, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/40">
+                    {(alert.outboundTransactions || []).map((txn, idx) => (
+                      <div key={`outbound-txn-${alert.id}-${idx}-${txn?.beneficiary || 'unknown'}`} className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/40">
                         <ArrowRight className="w-4 h-4 text-red-400" />
                         <span className="font-mono text-xs text-slate-400">{txn.beneficiary}</span>
                         <span className="ml-auto font-mono text-sm font-semibold text-red-400">

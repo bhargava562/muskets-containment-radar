@@ -37,14 +37,14 @@ export const updatePulsePhase = () => {
 }
 
 // Draw node with custom styling based on type and display state
-export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = false, activeAnalyzingNode = null) => {
+export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = false, activeAnalyzingNode = null, isNetworkContained = false, isPlaybackActive = false) => {
   // Guard: skip rendering if coordinates are not valid numbers
   if (typeof node.x !== 'number' || typeof node.y !== 'number' ||
       !isFinite(node.x) || !isFinite(node.y)) {
     return
   }
 
-  const isFrozen = frozenNodes.includes(node.id)
+  const isFrozen = frozenNodes.includes(node.id) || isNetworkContained
   const isAnalyzing = node.displayState === NODE_DISPLAY_STATES.ANALYZING || node.id === activeAnalyzingNode
 
   let colors
@@ -119,9 +119,19 @@ export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = 
     drawFrostEffect(ctx, node.x, node.y, nodeSize)
   }
 
+  // Merchant lock icon on freeze
+  if (isFrozen && node.type === 'merchant') {
+    drawMerchantLockIcon(ctx, node.x, node.y, nodeSize)
+  }
+
   // Analyzing spinner effect
   if (isAnalyzing) {
     drawAnalyzingSpinner(ctx, node.x, node.y, nodeSize)
+  }
+
+  // Forensic playback glow outline
+  if (isPlaybackActive) {
+    drawForensicPlaybackGlow(ctx, node.x, node.y, nodeSize, node.type)
   }
 
   ctx.restore()
@@ -264,6 +274,35 @@ const drawAnalyzingSpinner = (ctx, x, y, size) => {
   ctx.restore()
 }
 
+// Draw merchant lock icon on freeze
+const drawMerchantLockIcon = (ctx, x, y, size) => {
+  ctx.save()
+
+  // Lock body
+  const lockWidth = size * 1.2
+  const lockHeight = size * 1.4
+  const lockX = x - lockWidth / 2
+  const lockY = y - lockHeight / 2
+
+  // Lock shackle (top arc)
+  ctx.strokeStyle = '#22d3ee'
+  ctx.lineWidth = 1.2
+  ctx.beginPath()
+  const shackleRadius = size * 0.8
+  ctx.arc(x, y - size * 0.2, shackleRadius, Math.PI, 2 * Math.PI)
+  ctx.stroke()
+
+  // Lock body (rounded rectangle)
+  ctx.fillStyle = 'rgba(34, 211, 238, 0.3)'
+  ctx.strokeStyle = '#22d3ee'
+  ctx.lineWidth = 1.2
+  roundRect(ctx, lockX + size * 0.1, lockY + size * 0.4, lockWidth * 0.8, lockHeight * 0.7, 2)
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.restore()
+}
+
 // Lighten a hex color
 const lightenColor = (hex, percent) => {
   const num = parseInt(hex.replace('#', ''), 16)
@@ -277,6 +316,133 @@ const lightenColor = (hex, percent) => {
 // Get node area for click detection
 export const getNodeArea = () => {
   return 18 // Larger area for easier clicking
+}
+
+// Draw forensic playback glow outline
+const drawForensicPlaybackGlow = (ctx, x, y, size, nodeType) => {
+  ctx.save()
+
+  const glowRadius = size + 5
+  const pulseAmount = 0.8 + Math.sin(pulsePhase) * 0.4
+
+  // Outer glow (neon effect)
+  ctx.strokeStyle = `rgba(99, 102, 241, ${0.8 * pulseAmount})`
+  ctx.lineWidth = 3
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+
+  if (nodeType === 'victim') {
+    // Double circle for victim
+    ctx.beginPath()
+    ctx.arc(x, y, glowRadius, 0, 2 * Math.PI)
+    ctx.stroke()
+  } else if (nodeType === 'mule') {
+    // Hexagon glow
+    ctx.beginPath()
+    const sides = 6
+    const angle = (2 * Math.PI) / sides
+    const rotationOffset = Math.PI / 6
+
+    ctx.moveTo(
+      x + (glowRadius + 2) * Math.cos(rotationOffset),
+      y + (glowRadius + 2) * Math.sin(rotationOffset)
+    )
+
+    for (let i = 1; i <= sides; i++) {
+      ctx.lineTo(
+        x + (glowRadius + 2) * Math.cos(i * angle + rotationOffset),
+        y + (glowRadius + 2) * Math.sin(i * angle + rotationOffset)
+      )
+    }
+    ctx.closePath()
+    ctx.stroke()
+  } else if (nodeType === 'merchant') {
+    // Rounded square glow
+    const halfSize = (size * 1.5 + 3) / 2
+    roundRect(ctx, x - halfSize, y - halfSize, size * 1.5 + 6, size * 1.5 + 6, 6)
+    ctx.stroke()
+  }
+
+  // Inner bright pulse
+  ctx.strokeStyle = `rgba(147, 112, 219, ${0.6 * pulseAmount})`
+  ctx.lineWidth = 1.5
+
+  if (nodeType === 'victim') {
+    ctx.beginPath()
+    ctx.arc(x, y, glowRadius + 3, 0, 2 * Math.PI)
+    ctx.stroke()
+  } else if (nodeType === 'mule') {
+    ctx.beginPath()
+    const sides = 6
+    const angle = (2 * Math.PI) / sides
+    const rotationOffset = Math.PI / 6
+    const innerGlow = glowRadius + 5
+
+    ctx.moveTo(
+      x + innerGlow * Math.cos(rotationOffset),
+      y + innerGlow * Math.sin(rotationOffset)
+    )
+
+    for (let i = 1; i <= sides; i++) {
+      ctx.lineTo(
+        x + innerGlow * Math.cos(i * angle + rotationOffset),
+        y + innerGlow * Math.sin(i * angle + rotationOffset)
+      )
+    }
+    ctx.closePath()
+    ctx.stroke()
+  }
+
+  ctx.restore()
+}
+
+// Draw forensic tooltip with data tags (minimal, compact)
+export const drawForensicTooltip = (ctx, x, y, nodeType, nodeData) => {
+  ctx.save()
+
+  // Position tooltip above the node, small size
+  const tooltipY = y - 18
+  const fontSize = 7
+  const padding = 2
+  const lineHeight = 9
+
+  let tooltipText = ''
+
+  if (nodeType === 'victim') {
+    tooltipText = '🚨STOLEN'
+  } else if (nodeType === 'mule') {
+    const velocity = nodeData?.velocity_per_minute || '14'
+    const fragRatio = nodeData?.fragmentation_ratio || '4.2'
+    tooltipText = `⚡${velocity}/m|FR${fragRatio}`
+  } else if (nodeType === 'merchant') {
+    const mcc = nodeData?.mcc_code || '5411'
+    tooltipText = `🟢MCC${mcc}`
+  }
+
+  if (!tooltipText) return
+
+  // Calculate minimal tooltip dimensions
+  const tooltipWidth = tooltipText.length * 3.8 + padding * 2
+  const tooltipHeight = lineHeight + padding * 2
+
+  // Draw minimal tooltip background
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.88)'
+  ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)'
+  ctx.lineWidth = 0.6
+
+  const tooltipX = x - tooltipWidth / 2
+  roundRect(ctx, tooltipX, tooltipY - tooltipHeight, tooltipWidth, tooltipHeight, 1)
+  ctx.fill()
+  ctx.stroke()
+
+  // Draw text (very small)
+  ctx.fillStyle = '#a5b4fc'
+  ctx.font = `500 ${fontSize}px 'JetBrains Mono', monospace`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(tooltipText, x, tooltipY - tooltipHeight / 2)
+
+  ctx.restore()
 }
 
 // Link styling

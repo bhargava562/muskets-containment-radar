@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import iobData from '../data/iob_mock_data.json'
+import { validateGraphData, sanitizeGraphData } from '../utils/dataValidation'
 
 const AppContext = createContext(null)
 
@@ -35,13 +36,22 @@ const getGraphStructure = (structureId) => {
     isRevealed: false
   }))
 
+  // Validate graph data integrity
+  const validation = validateGraphData({ nodes: graphNodes, links: graphLinks })
+  if (!validation.isValid) {
+    console.error('[MUSKETS] Graph data validation failed:', validation.errors)
+    // Sanitize to prevent runtime errors
+    const sanitized = sanitizeGraphData({ nodes: graphNodes, links: graphLinks })
+    return { graphNodes: sanitized.nodes, graphLinks: sanitized.links, maxRevealOrder: Math.max(...sanitized.nodes.map(n => n.reveal_order)) }
+  }
+
   return { graphNodes, graphLinks, maxRevealOrder: Math.max(...structure.nodes.map(n => n.reveal_order)) }
 }
 
 // Transform normal transactions
 const getNormalTransactions = () => {
-  return iobData.transactions.normal_feed.map(txn => ({
-    id: txn.id,
+  return iobData.transactions.normal_feed.map((txn, idx) => ({
+    id: txn.id || `TXN-INIT-${idx}-${Date.now()}`,
     utr: txn.utr_number,
     txnType: txn.txn_type,
     amount: txn.amount,
@@ -74,6 +84,10 @@ export function AppProvider({ children }) {
   const [activeAnalyzingNode, setActiveAnalyzingNode] = useState(null)
   const [revealedLinks, setRevealedLinks] = useState([])
 
+  // Forensic Playback state
+  const [isForensicPlaybackActive, setIsForensicPlaybackActive] = useState(false)
+  const [playbackActiveNodeId, setPlaybackActiveNodeId] = useState(null)
+
   // Transaction streaming state
   const [criticalAlertQueued, setCriticalAlertQueued] = useState(false)
   const [alertTypeIndex, setAlertTypeIndex] = useState(0)
@@ -88,9 +102,11 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (transactions.length === 0 && normalTxnPool.current.length > 0) {
       const firstTxn = normalTxnPool.current[0]
-      if (firstTxn) {
+      if (firstTxn && firstTxn.id) {
         setTransactions([{ ...firstTxn, timestamp: new Date().toISOString() }])
         transactionIndexRef.current = 1
+      } else {
+        console.error('[MUSKETS] Invalid transaction data - missing ID:', firstTxn)
       }
     }
   }, [transactions.length])
@@ -157,8 +173,14 @@ export function AppProvider({ children }) {
       // Add next safe transaction
       const nextTxn = {
         ...pool[nextIndex],
-        id: `TXN-IOB-${Date.now()}`,
+        id: `TXN-IOB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date().toISOString()
+      }
+
+      // Validate transaction has required fields
+      if (!nextTxn.id || nextTxn.id === '') {
+        console.error('[MUSKETS] Generated transaction with empty ID:', nextTxn)
+        return
       }
 
       setTransactions(prev => [nextTxn, ...prev.slice(0, 7)])
@@ -294,6 +316,15 @@ export function AppProvider({ children }) {
     setAppState(APP_STATES.CONTAINED)
   }, [])
 
+  const deployNetworkContainment = useCallback(() => {
+    // Freeze ALL nodes in the current visible graph (not hidden)
+    const visibleNodes = graphNodes.filter(n => n.displayState !== NODE_DISPLAY_STATES.HIDDEN)
+    const allNodeIds = visibleNodes.map(n => n.id)
+    setFrozenNodes(allNodeIds)
+    setContainedNode(null) // No single node focus - entire network is contained
+    setAppState(APP_STATES.CONTAINED)
+  }, [graphNodes])
+
   const resetInvestigation = useCallback(() => {
     // Clear any pending animations
     if (animationTimeoutRef.current) {
@@ -326,7 +357,22 @@ export function AppProvider({ children }) {
   // Build visible graph data for rendering
   const visibleGraphData = {
     nodes: graphNodes.filter(n => n.displayState !== NODE_DISPLAY_STATES.HIDDEN),
-    links: graphLinks.filter(l => revealedLinks.includes(l.reveal_order))
+    links: graphLinks.filter(l => {
+      if (!revealedLinks.includes(l.reveal_order)) return false
+      
+      // Only include links where BOTH source and target nodes are visible
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target
+      
+      const sourceVisible = graphNodes.some(n => 
+        n.id === sourceId && n.displayState !== NODE_DISPLAY_STATES.HIDDEN
+      )
+      const targetVisible = graphNodes.some(n => 
+        n.id === targetId && n.displayState !== NODE_DISPLAY_STATES.HIDDEN
+      )
+      
+      return sourceVisible && targetVisible
+    })
   }
 
   const value = {
@@ -344,14 +390,19 @@ export function AppProvider({ children }) {
     caseMetadata,
     activeAnalyzingNode,
     currentRevealStep,
+    isForensicPlaybackActive,
+    playbackActiveNodeId,
 
     // Actions
     initializeTrace,
     selectNode,
     freezeNode,
+    deployNetworkContainment,
     resetInvestigation,
     closePanel,
-    setSelectedNode
+    setSelectedNode,
+    setIsForensicPlaybackActive,
+    setPlaybackActiveNodeId
   }
 
   return (

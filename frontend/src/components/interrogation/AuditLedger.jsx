@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText, ExternalLink, RefreshCw, Lock, CheckCircle, Copy,
@@ -123,15 +124,15 @@ const AuditLedger = () => {
             whileTap={{ scale: 0.95 }}
           >
             {copied ? (
-              <>
+              <React.Fragment key="copied">
                 <Check className="w-2.5 h-2.5 text-emerald-400" />
                 <span className="text-[8px] text-emerald-400">Copied!</span>
-              </>
+              </React.Fragment>
             ) : (
-              <>
+              <React.Fragment key="copy">
                 <Copy className="w-2.5 h-2.5" />
                 <span className="text-[8px]">Copy</span>
-              </>
+              </React.Fragment>
             )}
           </motion.button>
         </div>
@@ -221,20 +222,20 @@ const AuditLedger = () => {
           whileTap={!sarExporting && !sarExported ? { scale: 0.99 } : {}}
         >
           {sarExporting ? (
-            <>
+            <React.Fragment key="sar-exporting">
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
               <span className="font-semibold text-[10px]">GENERATING SAR...</span>
-            </>
+            </React.Fragment>
           ) : sarExported ? (
-            <>
+            <React.Fragment key="sar-exported">
               <CheckCircle className="w-3.5 h-3.5" />
               <span className="font-semibold text-[10px]">SAR EXPORTED</span>
-            </>
+            </React.Fragment>
           ) : (
-            <>
+            <React.Fragment key="sar-default">
               <FileText className="w-3.5 h-3.5" />
               <span className="font-semibold text-[10px]">EXPORT SAR REPORT</span>
-            </>
+            </React.Fragment>
           )}
         </motion.button>
 
@@ -250,20 +251,20 @@ const AuditLedger = () => {
           whileTap={!dpipPushing && !dpipPushed ? { scale: 0.99 } : {}}
         >
           {dpipPushing ? (
-            <>
+            <React.Fragment key="dpip-pushing">
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
               <span className="font-semibold text-[10px]">PUSHING TO DPIP...</span>
-            </>
+            </React.Fragment>
           ) : dpipPushed ? (
-            <>
+            <React.Fragment key="dpip-pushed">
               <CheckCircle className="w-3.5 h-3.5" />
               <span className="font-semibold text-[10px]">PUSHED TO DPIP</span>
-            </>
+            </React.Fragment>
           ) : (
-            <>
+            <React.Fragment key="dpip-default">
               <ExternalLink className="w-3.5 h-3.5" />
               <span className="font-semibold text-[10px]">PUSH TO DPIP NETWORK</span>
-            </>
+            </React.Fragment>
           )}
         </motion.button>
       </motion.div>
