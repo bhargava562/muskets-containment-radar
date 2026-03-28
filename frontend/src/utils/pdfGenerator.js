@@ -54,6 +54,20 @@ const maskPII = (identifier) => {
 }
 
 /**
+ * Aggressively sanitize unsafe Unicode to protect jsPDF math engine
+ * Strips ₹, ●, and all non-ASCII characters that break doc.splitTextToSize()
+ * @param {string} text - Raw text from JSON/backend
+ * @returns {string} ASCII-safe text suitable for jsPDF
+ */
+const sanitizeForPdf = (text) => {
+  if (!text) return ''
+  return String(text)
+    .replace(/₹/g, 'INR ') // Catch the Rupee symbol from JSON
+    .replace(/●/g, '-') // Catch any rogue bullets
+    .replace(/[^\x00-\x7F]/g, '') // Nuke any other non-ASCII hidden characters
+}
+
+/**
  * Format currency for display
  */
 const formatCurrency = (amount) => {
@@ -236,21 +250,27 @@ export const exportSARReport = (caseData, auditHash) => {
 
     // Extract primary evidence data (ASCII only - no Unicode symbols)
     const primaryEvidence = node.ai_reasoning?.primary_evidence || {}
-    const incomingLine = primaryEvidence.incoming || `1 transfer of INR ${(node.received_amount || 0).toLocaleString('en-IN')} (NEFT) at 19:50:12 IST`
-    const outgoingLine = primaryEvidence.outgoing || `4 transfers of INR ${Math.floor((node.received_amount || 0) / 4).toLocaleString('en-IN')} (IMPS) within 33 seconds`
-    const dwellTimeLine = primaryEvidence.dwell_time || '33 seconds'
-    const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
-    const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
+    const incomingLine = sanitizeForPdf(primaryEvidence.incoming || `1 transfer of INR ${(node.received_amount || 0).toLocaleString('en-IN')} (NEFT) at 19:50:12 IST`)
+    const outgoingLine = sanitizeForPdf(primaryEvidence.outgoing || `4 transfers of INR ${Math.floor((node.received_amount || 0) / 4).toLocaleString('en-IN')} (IMPS) within 33 seconds`)
+    const dwellTimeLine = sanitizeForPdf(primaryEvidence.dwell_time || '33 seconds')
+    const ipTelemetryLine = sanitizeForPdf(primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)')
+    const deviceFpLine = sanitizeForPdf(primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login')
 
-    // Construct evidence text using ASCII dashes (no Unicode bullets)
-    const evidenceText = `- INCOMING: ${incomingLine}\n- OUTGOING: ${outgoingLine}\n- DWELL TIME: ${dwellTimeLine}\n- IP TELEMETRY: ${ipTelemetryLine}\n- DEVICE FP: ${deviceFpLine}`
+    // Construct evidence array with sanitized data (pass directly to splitTextToSize, no .join)
+    const evidenceArray = [
+      `- INCOMING: ${incomingLine}`,
+      `- OUTGOING: ${outgoingLine}`,
+      `- DWELL TIME: ${dwellTimeLine}`,
+      `- IP TELEMETRY: ${ipTelemetryLine}`,
+      `- DEVICE FP: ${deviceFpLine}`
+    ]
 
     // Wrap text using native jsPDF algorithm (guarantees no stretching)
     doc.setFontSize(9)
     doc.setFont('courier', 'normal')
     doc.setTextColor(30, 41, 59)
 
-    const splitText = doc.splitTextToSize(evidenceText, contentWidth - 8)
+    const splitText = doc.splitTextToSize(evidenceArray, contentWidth - 8)
     const boxHeight = splitText.length * 4.5 + 6 // 4.5mm per line + padding
 
     // Draw Body Box
