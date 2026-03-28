@@ -193,7 +193,7 @@ export const exportSARReport = (caseData, auditHash) => {
   currentY += summaryLines.length * 5 + 8
 
   // ============================================
-  // 3. PRIMARY EVIDENCE LEDGER (Forensic Log Blocks)
+  // 3. PRIMARY EVIDENCE LEDGER (Single autoTable)
   // ============================================
 
   currentY += 5
@@ -210,7 +210,9 @@ export const exportSARReport = (caseData, auditHash) => {
   doc.text('Raw transaction facts from Core Banking Ledger (Section 63 BSA - Primary Evidence)', leftMargin, currentY)
   currentY += 8
 
-  // Loop through each node to create dedicated Forensic Log Blocks
+  // Build Primary Evidence body array with styled header + evidence rows
+  const primaryEvidenceBody = []
+
   nodes.forEach((node) => {
     // Determine header color based on node type
     let headerColor = [30, 41, 59] // Default Slate
@@ -218,7 +220,7 @@ export const exportSARReport = (caseData, auditHash) => {
     if (node.type === 'merchant') headerColor = [4, 120, 87] // Green for merchants
     if (node.type === 'victim') headerColor = [30, 58, 138] // Blue for victims
 
-    // Format the entity header
+    // Format entity header
     const entityTitle = `[ ${node.type.toUpperCase()} ] - ${maskPII(node.id)}`
 
     // Extract primary evidence data
@@ -230,75 +232,68 @@ export const exportSARReport = (caseData, auditHash) => {
     const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
     // Construct evidence text with bullet points
-    const evidenceText = [
-      `● INCOMING: ${incomingLine}`,
-      `● OUTGOING: ${outgoingLine}`,
-      `● DWELL TIME: ${dwellTimeLine}`,
-      `● IP TELEMETRY: ${ipTelemetryLine}`,
-      `● DEVICE FP: ${deviceFpLine}`
-    ].join('\n')
+    const evidenceText = `● INCOMING: ${incomingLine}\n● OUTGOING: ${outgoingLine}\n● DWELL TIME: ${dwellTimeLine}\n● IP TELEMETRY: ${ipTelemetryLine}\n● DEVICE FP: ${deviceFpLine}`
 
-    // Check if we need a new page before drawing this block
-    if (currentY > pageHeight - 80) {
-      doc.addPage()
-      currentY = 20
-    }
-
-    // Draw 1-column dossier block for this entity
-    autoTable(doc, {
-      startY: currentY,
-      head: [[entityTitle]],
-      body: [[evidenceText]],
-      theme: 'grid',
-      styles: {
-        fontSize: 9,
-        cellPadding: 5,
-        valign: 'top',
-        overflow: 'linebreak',
-        lineColor: [200, 200, 200],
-        lineWidth: 0.1
-      },
-      headStyles: {
-        fillColor: headerColor,
-        textColor: [255, 255, 255],
-        fontSize: 10,
-        fontStyle: 'bold',
-        halign: 'left'
-      },
-      bodyStyles: {
-        fontSize: 9,
-        textColor: [30, 41, 59],
-        font: 'courier'
-      },
-      columnStyles: {
-        0: { cellWidth: 182 } // Full page width (14mm left + 182 + 14mm right margins)
-      },
-      margin: { left: 14, right: 14 },
-      didDrawPage: (data) => {
-        const pageCount = doc.internal.getNumberOfPages()
-        doc.setFontSize(8)
-        doc.setTextColor(148, 163, 184)
-        doc.text(
-          `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
-          pageWidth / 2,
-          pageHeight - 10,
-          { align: 'center' }
-        )
+    // Push header row (styled as decorative title bar)
+    primaryEvidenceBody.push([
+      {
+        content: entityTitle,
+        styles: {
+          fillColor: headerColor,
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 10,
+          cellPadding: 4,
+          halign: 'left',
+          valign: 'middle'
+        }
       }
-    })
+    ])
 
-    // Track Y position after this block
-    currentY = doc.lastAutoTable?.finalY + 10 || currentY + 50
+    // Push evidence row
+    primaryEvidenceBody.push([
+      {
+        content: evidenceText,
+        styles: {
+          textColor: [30, 41, 59],
+          font: 'courier',
+          fontSize: 9,
+          cellPadding: 6,
+          valign: 'top',
+          overflow: 'linebreak'
+        }
+      }
+    ])
   })
 
-  // Add spacing before Derived Evidence Matrix
-  currentY += 5
+  // Single autoTable call for all Primary Evidence (native pagination)
+  autoTable(doc, {
+    startY: currentY,
+    body: primaryEvidenceBody,
+    theme: 'plain',
+    styles: {
+      overflow: 'linebreak',
+      cellWidth: 'wrap'
+    },
+    columnStyles: {
+      0: { cellWidth: 182 }
+    },
+    margin: { left: 14, right: 14 },
+    didDrawPage: (data) => {
+      const pageCount = doc.internal.getNumberOfPages()
+      doc.setFontSize(8)
+      doc.setTextColor(148, 163, 184)
+      doc.text(
+        `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: 'center' }
+      )
+    }
+  })
 
-  // Check if we need a new page
-  if (currentY > pageHeight - 120) {
-    doc.addPage()
-    currentY = 20
-  }
+  // Track Y position exactly once after the entire table
+  currentY = doc.lastAutoTable?.finalY + 15 || currentY + 50
 
   // ============================================
   // 4. DERIVED EVIDENCE MATRIX (AI Scores & Actions)
