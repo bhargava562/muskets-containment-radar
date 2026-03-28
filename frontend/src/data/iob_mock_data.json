@@ -209,33 +209,32 @@
         "source_account": "185501000012847",
         "source_ifsc": "IOBA0001855",
         "total_amount": 200000,
-        "fragmentation_count": 3,
+        "fragmentation_count": 5,
         "time_window_seconds": 90,
-        "description": "HIGH VELOCITY SPLIT DETECTED. Rs.2,00,000 fragmented into 3 accounts within 90 seconds via IMPS.",
+        "description": "RAPID FRAGMENTATION: Rs.2,00,000 split through 3 mules to 2 innocent merchants within 90 seconds.",
         "trigger_rules": [
           "VELOCITY_THRESHOLD_EXCEEDED",
           "NEW_BENEFICIARY_CLUSTER",
-          "AMOUNT_ANOMALY_PATTERN",
-          "DEVICE_IP_MISMATCH"
+          "MULTI_HOP_PATTERN"
         ],
         "outbound_transactions": [
           {
             "utr": "IOBA26087289014I",
-            "amount": 80000,
+            "amount": 70000,
             "beneficiary": "185502000087321",
             "beneficiary_ifsc": "IOBA0001856",
             "timestamp": "2026-03-27T10:45:32.847Z"
           },
           {
             "utr": "IOBA26087289015I",
-            "amount": 60000,
+            "amount": 65000,
             "beneficiary": "039405001234567",
             "beneficiary_ifsc": "HDFC0003940",
             "timestamp": "2026-03-27T10:45:58.234Z"
           },
           {
             "utr": "IOBA26087289016I",
-            "amount": 60000,
+            "amount": 65000,
             "beneficiary": "602305001987654",
             "beneficiary_ifsc": "ICIC0006023",
             "timestamp": "2026-03-27T10:46:41.891Z"
@@ -244,117 +243,87 @@
         "graph_structure_id": "fragmentation_network"
       },
       {
-        "id": "ALERT-ML6-2026-00923",
-        "alert_type": "MULE_LAYERING_NETWORK",
+        "id": "ALERT-DFN-2026-00923",
+        "alert_type": "DUAL_FUNNEL_NETWORK",
         "severity": "CRITICAL",
         "risk_score": 96,
         "timestamp": "2026-03-27T11:15:42.123Z",
-        "source_account": "185501000034567",
+        "source_account": "Multiple",
         "source_ifsc": "IOBA0001855",
-        "total_amount": 350000,
+        "total_amount": 450000,
         "fragmentation_count": 6,
         "time_window_seconds": 180,
-        "description": "COMPLEX MULE LAYERING DETECTED. Rs.3,50,000 moved through 6-layer mule network in coordinated pattern.",
+        "description": "DUAL VICTIM FUNNEL: 2 victims compromised, Rs.4,50,000 funneled through 6-mule cascade network.",
         "trigger_rules": [
-          "MULTI_HOP_LAYERING",
-          "COORDINATED_NETWORK_ACTIVITY",
-          "CROSS_BANK_CASCADE",
-          "VELOCITY_SPIKE_CLUSTER"
+          "MULTI_VICTIM_COORDINATION",
+          "MASTER_MULE_PATTERN",
+          "CROSS_BANK_CASCADE"
         ],
         "outbound_transactions": [
           {
             "utr": "IOBA26087312456I",
-            "amount": 60000,
+            "amount": 120000,
             "beneficiary": "501234000098765",
             "beneficiary_ifsc": "SBIN0005012",
             "timestamp": "2026-03-27T11:15:42.123Z"
           },
           {
             "utr": "IOBA26087312457I",
-            "amount": 55000,
+            "amount": 110000,
             "beneficiary": "403201000054321",
             "beneficiary_ifsc": "PUNB0403201",
             "timestamp": "2026-03-27T11:16:15.456Z"
-          },
-          {
-            "utr": "IOBA26087312458I",
-            "amount": 60000,
-            "beneficiary": "712308000087654",
-            "beneficiary_ifsc": "BARB0VJTHUN",
-            "timestamp": "2026-03-27T11:16:42.789Z"
-          },
-          {
-            "utr": "IOBA26087312459I",
-            "amount": 58000,
-            "beneficiary": "920020000045678",
-            "beneficiary_ifsc": "UTIB0000920",
-            "timestamp": "2026-03-27T11:17:08.123Z"
-          },
-          {
-            "utr": "IOBA26087312460I",
-            "amount": 62000,
-            "beneficiary": "234510000076543",
-            "beneficiary_ifsc": "FDRL0002345",
-            "timestamp": "2026-03-27T11:17:35.456Z"
-          },
-          {
-            "utr": "IOBA26087312461I",
-            "amount": 55000,
-            "beneficiary": "812205000012398",
-            "beneficiary_ifsc": "YESB0008122",
-            "timestamp": "2026-03-27T11:17:58.891Z"
           }
         ],
-        "graph_structure_id": "mule_layering_network"
+        "graph_structure_id": "dual_funnel_network"
       },
       {
-        "id": "ALERT-CMX-2026-01124",
-        "alert_type": "COMPLEX_LAUNDERING_NETWORK",
+        "id": "ALERT-SYN-2026-01124",
+        "alert_type": "SYNDICATE_LAYERING_NETWORK",
         "severity": "CRITICAL",
         "risk_score": 98,
         "timestamp": "2026-03-27T12:22:18.456Z",
-        "source_account": "185501000056789",
-        "source_ifsc": "IOBA0001855",
-        "total_amount": 520000,
-        "fragmentation_count": 13,
-        "time_window_seconds": 240,
-        "description": "SOPHISTICATED LAUNDERING NETWORK DETECTED. Rs.5,20,000 dispersed through 8 mules and 5 legitimate businesses to obscure trail.",
+        "source_account": "Multiple",
+        "source_ifsc": "Multiple",
+        "total_amount": 680000,
+        "fragmentation_count": 14,
+        "time_window_seconds": 300,
+        "description": "SYNDICATE DETECTED: 3 victims, Rs.6,80,000 layered through 7 mules, dispersed to 4 innocent businesses.",
         "trigger_rules": [
-          "COMPLEX_NETWORK_TOPOLOGY",
-          "MERCHANT_LAYERING_PATTERN",
-          "BULK_CASH_STRUCTURING",
-          "MULTI_LEVEL_OBFUSCATION"
+          "SYNDICATE_TOPOLOGY",
+          "MULTI_LEVEL_LAYERING",
+          "INNOCENT_MERCHANT_EXIT"
         ],
         "outbound_transactions": [
           {
             "utr": "IOBA26087398721I",
-            "amount": 40000,
+            "amount": 95000,
             "beneficiary": "712308000034521",
             "beneficiary_ifsc": "BARB0VJTHUN",
             "timestamp": "2026-03-27T12:22:18.456Z"
           },
           {
             "utr": "IOBA26087398722I",
-            "amount": 42000,
+            "amount": 90000,
             "beneficiary": "185503000098765",
             "beneficiary_ifsc": "IOBA0001857",
             "timestamp": "2026-03-27T12:23:05.789Z"
           },
           {
             "utr": "IOBA26087398723I",
-            "amount": 38000,
+            "amount": 85000,
             "beneficiary": "920020000087654",
             "beneficiary_ifsc": "UTIB0000920",
             "timestamp": "2026-03-27T12:23:42.123Z"
           }
         ],
-        "graph_structure_id": "complex_laundering_network"
+        "graph_structure_id": "syndicate_network"
       }
     ]
   },
   "graph_structures": {
     "fragmentation_network": {
-      "description": "Multi-level fund fragmentation through mule cascade",
+      "description": "Single victim fragmentation with innocent merchant exits",
       "nodes": [
         {
           "id": "VICTIM_01",
@@ -371,124 +340,119 @@
             "classification": "CONFIRMED_VICTIM",
             "confidence": 0.99,
             "evidence": [
-              "Filed police complaint within 24 hours",
-              "No prior relationship with beneficiary accounts",
-              "Social engineering attack vector confirmed"
+              "Filed FIR within 24 hours",
+              "Social engineering attack confirmed"
             ]
           }
         },
         {
-          "id": "MULE_PRIMARY_01",
+          "id": "MULE_01",
           "type": "mule",
           "mule_level": 1,
-          "label": "PRIMARY MULE",
+          "label": "MULE A",
           "display_state": "hidden",
           "reveal_order": 2,
-          "account_holder": "Unknown Entity",
+          "account_holder": "Unknown",
           "account_number": "185502000087321",
           "ifsc_code": "IOBA0001856",
-          "branch": "IOB Mylapore, Chennai",
-          "received_amount": 80000,
-          "current_balance": 12450,
+          "branch": "IOB Mylapore",
+          "received_amount": 70000,
           "velocity": 14,
-          "fragmentation_ratio": 4.2,
-          "outward_transfers": 4,
           "ai_reasoning": {
             "classification": "ACTIVE_MULE",
             "confidence": 0.96,
             "is_mule": true,
             "evidence": [
-              "Velocity exceeds threshold: 14 tx/min (limit: 5)",
-              "Fragmentation ratio critically high: 4.2",
-              "Account age: 18 days (recently opened)",
-              "Immediate outward fragmentation within 3 mins"
-            ],
-            "account_age_days": 18
-          }
+              "High velocity: 14 tx/min"
+            ]
+          },
+          "account_age_days": 12
         },
         {
-          "id": "MULE_SECONDARY_01",
+          "id": "MULE_02",
           "type": "mule",
-          "mule_level": 2,
-          "label": "SECONDARY MULE",
+          "mule_level": 1,
+          "label": "MULE B",
           "display_state": "hidden",
           "reveal_order": 3,
-          "account_holder": "Unknown Entity",
+          "account_holder": "Unknown",
           "account_number": "039405001234567",
           "ifsc_code": "HDFC0003940",
-          "branch": "HDFC Velachery, Chennai",
-          "received_amount": 60000,
-          "current_balance": 8320,
-          "velocity": 11,
-          "fragmentation_ratio": 3.8,
-          "outward_transfers": 3,
+          "branch": "HDFC Velachery",
+          "received_amount": 65000,
+          "velocity": 12,
           "ai_reasoning": {
             "classification": "ACTIVE_MULE",
             "confidence": 0.94,
             "is_mule": true,
             "evidence": [
-              "Velocity exceeds threshold: 11 tx/min",
-              "Fragmentation ratio high: 3.8",
-              "Video KYC during suspicious period",
-              "Device fingerprint linked to primary mule"
-            ],
-            "account_age_days": 24
-          }
+              "Velocity: 12 tx/min"
+            ]
+          },
+          "account_age_days": 18
         },
         {
-          "id": "MULE_TERTIARY_01",
+          "id": "MULE_03",
           "type": "mule",
-          "mule_level": 3,
-          "label": "TERTIARY MULE",
+          "mule_level": 1,
+          "label": "MULE C",
           "display_state": "hidden",
           "reveal_order": 4,
-          "account_holder": "Unknown Entity",
+          "account_holder": "Unknown",
           "account_number": "602305001987654",
           "ifsc_code": "ICIC0006023",
-          "branch": "ICICI Anna Nagar, Chennai",
-          "received_amount": 60000,
-          "current_balance": 5890,
-          "velocity": 9,
-          "fragmentation_ratio": 2.8,
-          "outward_transfers": 2,
+          "branch": "ICICI Anna Nagar",
+          "received_amount": 65000,
+          "velocity": 11,
           "ai_reasoning": {
             "classification": "ACTIVE_MULE",
-            "confidence": 0.91,
+            "confidence": 0.93,
             "is_mule": true,
             "evidence": [
-              "Velocity above threshold: 9 tx/min",
-              "Funds transferred to merchant within 4 mins",
-              "Account holder identity unverifiable"
-            ],
-            "account_age_days": 31
-          }
+              "Velocity: 11 tx/min"
+            ]
+          },
+          "account_age_days": 15
         },
         {
           "id": "MERCHANT_01",
           "type": "merchant",
-          "label": "MERCHANT",
+          "label": "ELECTRONICS",
           "display_state": "hidden",
           "reveal_order": 5,
-          "business_name": "Sharma Electronics & Appliances",
-          "account_holder": "Sharma Electronics Pvt Ltd",
+          "business_name": "TechZone Electronics",
+          "account_holder": "TechZone Pvt Ltd",
           "account_number": "916010000045678",
           "ifsc_code": "UTIB0000234",
-          "branch": "Axis Bank T. Nagar, Chennai",
-          "gst_number": "33AABCS1234F1ZK",
-          "mcc_code": "5732",
-          "mcc_description": "Electronics Stores",
-          "business_vintage_years": 12,
-          "current_balance": 3145000,
-          "traced_funds": 50000,
+          "gst_number": "33AABCT1234F1Z1",
+          "traced_funds": 58000,
+          "ai_reasoning": {
+            "classification": "PASSIVE_INNOCENT",
+            "confidence": 0.87,
+            "is_mule": false,
+            "evidence": [
+              "Valid GST merchant"
+            ]
+          }
+        },
+        {
+          "id": "MERCHANT_02",
+          "type": "merchant",
+          "label": "GROCERY",
+          "display_state": "hidden",
+          "reveal_order": 6,
+          "business_name": "FreshMart Supermarket",
+          "account_holder": "FreshMart Retail",
+          "account_number": "185501000089123",
+          "ifsc_code": "IOBA0001855",
+          "gst_number": "33AACFM2345K1Z2",
+          "traced_funds": 55000,
           "ai_reasoning": {
             "classification": "PASSIVE_INNOCENT",
             "confidence": 0.88,
             "is_mule": false,
             "evidence": [
-              "Valid GST registered POS merchant",
-              "Business vintage: 12 years",
-              "No outward fragmentation (ratio: 0.0)",
-              "HIGH COLLATERAL RISK if frozen"
+              "Legitimate business"
             ]
           }
         }
@@ -496,35 +460,43 @@
       "links": [
         {
           "source": "VICTIM_01",
-          "target": "MULE_PRIMARY_01",
-          "value": 80000,
+          "target": "MULE_01",
+          "value": 70000,
           "utr": "IOBA26087289014I",
           "txn_type": "IMPS",
           "reveal_order": 1
         },
         {
           "source": "VICTIM_01",
-          "target": "MULE_SECONDARY_01",
-          "value": 60000,
+          "target": "MULE_02",
+          "value": 65000,
           "utr": "IOBA26087289015I",
           "txn_type": "IMPS",
           "reveal_order": 2
         },
         {
-          "source": "MULE_PRIMARY_01",
-          "target": "MULE_TERTIARY_01",
-          "value": 45000,
-          "utr": "IOBA26087289017I",
+          "source": "VICTIM_01",
+          "target": "MULE_03",
+          "value": 65000,
+          "utr": "IOBA26087289016I",
           "txn_type": "IMPS",
           "reveal_order": 3
         },
         {
-          "source": "MULE_TERTIARY_01",
+          "source": "MULE_01",
           "target": "MERCHANT_01",
-          "value": 50000,
-          "utr": "ICIC26087312847N",
+          "value": 58000,
+          "utr": "IOBA26087289017N",
           "txn_type": "NEFT",
           "reveal_order": 4
+        },
+        {
+          "source": "MULE_02",
+          "target": "MERCHANT_02",
+          "value": 55000,
+          "utr": "HDFC26087289018N",
+          "txn_type": "NEFT",
+          "reveal_order": 5
         }
       ]
     },
@@ -1160,6 +1132,587 @@
           "utr": "ICIC26087401011N",
           "txn_type": "NEFT",
           "reveal_order": 11
+        }
+      ]
+    },
+    "dual_funnel_network": {
+      "description": "Dual victim funnel through master and sub-mules",
+      "nodes": [
+        {
+          "id": "VICTIM_02A",
+          "type": "victim",
+          "label": "VICTIM A",
+          "display_state": "confirmed",
+          "reveal_order": 1,
+          "account_holder": "Priya Venkatesh",
+          "account_number": "185501000034567",
+          "ifsc_code": "IOBA0001855",
+          "balance": 225000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.97,
+            "evidence": [
+              "Unauthorized access confirmed"
+            ]
+          }
+        },
+        {
+          "id": "VICTIM_02B",
+          "type": "victim",
+          "label": "VICTIM B",
+          "display_state": "confirmed",
+          "reveal_order": 2,
+          "account_holder": "Arjun Patel",
+          "account_number": "185501000045678",
+          "ifsc_code": "IOBA0001855",
+          "balance": 275000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.98,
+            "evidence": [
+              "Phishing attack vector traced"
+            ]
+          }
+        },
+        {
+          "id": "MASTER_MULE_01",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "MASTER A",
+          "display_state": "hidden",
+          "reveal_order": 3,
+          "account_holder": "Unknown",
+          "account_number": "501234000098765",
+          "ifsc_code": "SBIN0005012",
+          "received_amount": 250000,
+          "velocity": 19,
+          "ai_reasoning": {
+            "classification": "MASTER_MULE",
+            "confidence": 0.98,
+            "is_mule": true,
+            "evidence": [
+              "Extreme velocity: 19 tx/min"
+            ]
+          },
+          "account_age_days": 9
+        },
+        {
+          "id": "MASTER_MULE_02",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "MASTER B",
+          "display_state": "hidden",
+          "reveal_order": 4,
+          "account_holder": "Unknown",
+          "account_number": "403201000054321",
+          "ifsc_code": "PUNB0403201",
+          "received_amount": 200000,
+          "velocity": 17,
+          "ai_reasoning": {
+            "classification": "MASTER_MULE",
+            "confidence": 0.97,
+            "is_mule": true,
+            "evidence": [
+              "High velocity: 17 tx/min"
+            ]
+          },
+          "account_age_days": 11
+        },
+        {
+          "id": "SUB_MULE_01",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "SUB-1",
+          "display_state": "hidden",
+          "reveal_order": 5,
+          "account_holder": "Unknown",
+          "account_number": "712308000087654",
+          "ifsc_code": "BARB0VJTHUN",
+          "received_amount": 110000,
+          "velocity": 14,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.95,
+            "is_mule": true
+          },
+          "account_age_days": 14
+        },
+        {
+          "id": "SUB_MULE_02",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "SUB-2",
+          "display_state": "hidden",
+          "reveal_order": 6,
+          "account_holder": "Unknown",
+          "account_number": "920020000045678",
+          "ifsc_code": "UTIB0000920",
+          "received_amount": 100000,
+          "velocity": 13,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.94,
+            "is_mule": true
+          },
+          "account_age_days": 16
+        },
+        {
+          "id": "SUB_MULE_03",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "SUB-3",
+          "display_state": "hidden",
+          "reveal_order": 7,
+          "account_holder": "Unknown",
+          "account_number": "234510000076543",
+          "ifsc_code": "FDRL0002345",
+          "received_amount": 95000,
+          "velocity": 12,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.93,
+            "is_mule": true
+          },
+          "account_age_days": 19
+        },
+        {
+          "id": "SUB_MULE_04",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "SUB-4",
+          "display_state": "hidden",
+          "reveal_order": 8,
+          "account_holder": "Unknown",
+          "account_number": "812205000012398",
+          "ifsc_code": "YESB0008122",
+          "received_amount": 90000,
+          "velocity": 11,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.92,
+            "is_mule": true
+          },
+          "account_age_days": 22
+        }
+      ],
+      "links": [
+        {
+          "source": "VICTIM_02A",
+          "target": "MASTER_MULE_01",
+          "value": 120000,
+          "utr": "IOBA26087312456I",
+          "txn_type": "IMPS",
+          "reveal_order": 1
+        },
+        {
+          "source": "VICTIM_02B",
+          "target": "MASTER_MULE_02",
+          "value": 110000,
+          "utr": "IOBA26087312457I",
+          "txn_type": "IMPS",
+          "reveal_order": 2
+        },
+        {
+          "source": "MASTER_MULE_01",
+          "target": "SUB_MULE_01",
+          "value": 58000,
+          "utr": "SBIN26087345001I",
+          "txn_type": "IMPS",
+          "reveal_order": 3
+        },
+        {
+          "source": "MASTER_MULE_01",
+          "target": "SUB_MULE_02",
+          "value": 52000,
+          "utr": "SBIN26087345002I",
+          "txn_type": "IMPS",
+          "reveal_order": 4
+        },
+        {
+          "source": "MASTER_MULE_02",
+          "target": "SUB_MULE_03",
+          "value": 50000,
+          "utr": "PUNB26087345003I",
+          "txn_type": "IMPS",
+          "reveal_order": 5
+        },
+        {
+          "source": "MASTER_MULE_02",
+          "target": "SUB_MULE_04",
+          "value": 48000,
+          "utr": "PUNB26087345004I",
+          "txn_type": "IMPS",
+          "reveal_order": 6
+        }
+      ]
+    },
+    "syndicate_network": {
+      "description": "Syndicate network with multi-level layering to innocent exits",
+      "nodes": [
+        {
+          "id": "VICTIM_03A",
+          "type": "victim",
+          "label": "VICTIM A",
+          "display_state": "confirmed",
+          "reveal_order": 1,
+          "account_holder": "Anita Deshmukh",
+          "account_number": "185501000056789",
+          "ifsc_code": "IOBA0001855",
+          "balance": 415000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.98,
+            "evidence": [
+              "Account compromise verified"
+            ]
+          }
+        },
+        {
+          "id": "VICTIM_03B",
+          "type": "victim",
+          "label": "VICTIM B",
+          "display_state": "confirmed",
+          "reveal_order": 2,
+          "account_holder": "Rajesh Gupta",
+          "account_number": "185501000067890",
+          "ifsc_code": "IOBA0001855",
+          "balance": 380000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.97,
+            "evidence": [
+              "SIM swap fraud detected"
+            ]
+          }
+        },
+        {
+          "id": "VICTIM_03C",
+          "type": "victim",
+          "label": "VICTIM C",
+          "display_state": "confirmed",
+          "reveal_order": 3,
+          "account_holder": "Meena Iyer",
+          "account_number": "185501000078901",
+          "ifsc_code": "IOBA0001855",
+          "balance": 295000,
+          "ai_reasoning": {
+            "classification": "CONFIRMED_VICTIM",
+            "confidence": 0.99,
+            "evidence": [
+              "Malware injection confirmed"
+            ]
+          }
+        },
+        {
+          "id": "L1_MULE_01",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "L1-A",
+          "display_state": "hidden",
+          "reveal_order": 4,
+          "account_holder": "Unknown",
+          "account_number": "712308000034521",
+          "ifsc_code": "BARB0VJTHUN",
+          "received_amount": 95000,
+          "velocity": 16,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.96,
+            "is_mule": true
+          },
+          "account_age_days": 10
+        },
+        {
+          "id": "L1_MULE_02",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "L1-B",
+          "display_state": "hidden",
+          "reveal_order": 5,
+          "account_holder": "Unknown",
+          "account_number": "185503000098765",
+          "ifsc_code": "IOBA0001857",
+          "received_amount": 90000,
+          "velocity": 15,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.95,
+            "is_mule": true
+          },
+          "account_age_days": 12
+        },
+        {
+          "id": "L1_MULE_03",
+          "type": "mule",
+          "mule_level": 1,
+          "label": "L1-C",
+          "display_state": "hidden",
+          "reveal_order": 6,
+          "account_holder": "Unknown",
+          "account_number": "920020000087654",
+          "ifsc_code": "UTIB0000920",
+          "received_amount": 85000,
+          "velocity": 14,
+          "ai_reasoning": {
+            "classification": "ACTIVE_MULE",
+            "confidence": 0.94,
+            "is_mule": true
+          },
+          "account_age_days": 14
+        },
+        {
+          "id": "L2_MULE_01",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "L2-A",
+          "display_state": "hidden",
+          "reveal_order": 7,
+          "account_holder": "Unknown",
+          "account_number": "234510000076543",
+          "ifsc_code": "FDRL0002345",
+          "received_amount": 120000,
+          "velocity": 13,
+          "ai_reasoning": {
+            "classification": "DISTRIBUTOR_MULE",
+            "confidence": 0.93,
+            "is_mule": true
+          },
+          "account_age_days": 18
+        },
+        {
+          "id": "L2_MULE_02",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "L2-B",
+          "display_state": "hidden",
+          "reveal_order": 8,
+          "account_holder": "Unknown",
+          "account_number": "812205000012398",
+          "ifsc_code": "YESB0008122",
+          "received_amount": 115000,
+          "velocity": 12,
+          "ai_reasoning": {
+            "classification": "DISTRIBUTOR_MULE",
+            "confidence": 0.92,
+            "is_mule": true
+          },
+          "account_age_days": 20
+        },
+        {
+          "id": "L2_MULE_03",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "L2-C",
+          "display_state": "hidden",
+          "reveal_order": 9,
+          "account_holder": "Unknown",
+          "account_number": "501234000087321",
+          "ifsc_code": "SBIN0005012",
+          "received_amount": 108000,
+          "velocity": 11,
+          "ai_reasoning": {
+            "classification": "DISTRIBUTOR_MULE",
+            "confidence": 0.91,
+            "is_mule": true
+          },
+          "account_age_days": 22
+        },
+        {
+          "id": "L2_MULE_04",
+          "type": "mule",
+          "mule_level": 2,
+          "label": "L2-D",
+          "display_state": "hidden",
+          "reveal_order": 10,
+          "account_holder": "Unknown",
+          "account_number": "403201000054321",
+          "ifsc_code": "PUNB0403201",
+          "received_amount": 102000,
+          "velocity": 10,
+          "ai_reasoning": {
+            "classification": "DISTRIBUTOR_MULE",
+            "confidence": 0.9,
+            "is_mule": true
+          },
+          "account_age_days": 25
+        },
+        {
+          "id": "MERCHANT_ELEC",
+          "type": "merchant",
+          "label": "ELECTRONICS",
+          "display_state": "hidden",
+          "reveal_order": 11,
+          "business_name": "MegaTech Store",
+          "account_holder": "MegaTech Pvt Ltd",
+          "account_number": "916010000045678",
+          "ifsc_code": "UTIB0000234",
+          "gst_number": "29AABMT1234F1Z1",
+          "traced_funds": 95000,
+          "ai_reasoning": {
+            "classification": "PASSIVE_INNOCENT",
+            "confidence": 0.86,
+            "is_mule": false
+          }
+        },
+        {
+          "id": "MERCHANT_PHARM",
+          "type": "merchant",
+          "label": "PHARMACY",
+          "display_state": "hidden",
+          "reveal_order": 12,
+          "business_name": "HealthPlus Pharmacy",
+          "account_holder": "HealthPlus Medical",
+          "account_number": "920020000012345",
+          "ifsc_code": "UTIB0000920",
+          "gst_number": "29AAHPM2345P1Z2",
+          "traced_funds": 90000,
+          "ai_reasoning": {
+            "classification": "PASSIVE_INNOCENT",
+            "confidence": 0.88,
+            "is_mule": false
+          }
+        },
+        {
+          "id": "MERCHANT_REST",
+          "type": "merchant",
+          "label": "RESTAURANT",
+          "display_state": "hidden",
+          "reveal_order": 13,
+          "business_name": "Spice Paradise",
+          "account_holder": "Spice Paradise Ltd",
+          "account_number": "712308000098765",
+          "ifsc_code": "BARB0VJTHUN",
+          "gst_number": "29AASPR3456M1Z3",
+          "traced_funds": 85000,
+          "ai_reasoning": {
+            "classification": "PASSIVE_INNOCENT",
+            "confidence": 0.87,
+            "is_mule": false
+          }
+        },
+        {
+          "id": "MERCHANT_CLOTH",
+          "type": "merchant",
+          "label": "CLOTHING",
+          "display_state": "hidden",
+          "reveal_order": 14,
+          "business_name": "Fashion Hub",
+          "account_holder": "Fashion Hub Retail",
+          "account_number": "234510000087654",
+          "ifsc_code": "FDRL0002345",
+          "gst_number": "29AAFHR4567Q1Z4",
+          "traced_funds": 80000,
+          "ai_reasoning": {
+            "classification": "PASSIVE_INNOCENT",
+            "confidence": 0.85,
+            "is_mule": false
+          }
+        }
+      ],
+      "links": [
+        {
+          "source": "VICTIM_03A",
+          "target": "L1_MULE_01",
+          "value": 95000,
+          "utr": "IOBA26087398721I",
+          "txn_type": "IMPS",
+          "reveal_order": 1
+        },
+        {
+          "source": "VICTIM_03B",
+          "target": "L1_MULE_02",
+          "value": 90000,
+          "utr": "IOBA26087398722I",
+          "txn_type": "IMPS",
+          "reveal_order": 2
+        },
+        {
+          "source": "VICTIM_03C",
+          "target": "L1_MULE_03",
+          "value": 85000,
+          "utr": "IOBA26087398723I",
+          "txn_type": "IMPS",
+          "reveal_order": 3
+        },
+        {
+          "source": "L1_MULE_01",
+          "target": "L2_MULE_01",
+          "value": 42000,
+          "utr": "BARB26087401001I",
+          "txn_type": "IMPS",
+          "reveal_order": 4
+        },
+        {
+          "source": "L1_MULE_01",
+          "target": "L2_MULE_02",
+          "value": 40000,
+          "utr": "BARB26087401002I",
+          "txn_type": "IMPS",
+          "reveal_order": 5
+        },
+        {
+          "source": "L1_MULE_02",
+          "target": "L2_MULE_02",
+          "value": 38000,
+          "utr": "IOBA26087401003I",
+          "txn_type": "IMPS",
+          "reveal_order": 6
+        },
+        {
+          "source": "L1_MULE_02",
+          "target": "L2_MULE_03",
+          "value": 36000,
+          "utr": "IOBA26087401004I",
+          "txn_type": "IMPS",
+          "reveal_order": 7
+        },
+        {
+          "source": "L1_MULE_03",
+          "target": "L2_MULE_03",
+          "value": 35000,
+          "utr": "UTIB26087401005I",
+          "txn_type": "IMPS",
+          "reveal_order": 8
+        },
+        {
+          "source": "L1_MULE_03",
+          "target": "L2_MULE_04",
+          "value": 34000,
+          "utr": "UTIB26087401006I",
+          "txn_type": "IMPS",
+          "reveal_order": 9
+        },
+        {
+          "source": "L2_MULE_01",
+          "target": "MERCHANT_ELEC",
+          "value": 48000,
+          "utr": "FDRL26087402001N",
+          "txn_type": "NEFT",
+          "reveal_order": 10
+        },
+        {
+          "source": "L2_MULE_02",
+          "target": "MERCHANT_PHARM",
+          "value": 45000,
+          "utr": "YESB26087402002N",
+          "txn_type": "NEFT",
+          "reveal_order": 11
+        },
+        {
+          "source": "L2_MULE_03",
+          "target": "MERCHANT_REST",
+          "value": 43000,
+          "utr": "SBIN26087402003N",
+          "txn_type": "NEFT",
+          "reveal_order": 12
+        },
+        {
+          "source": "L2_MULE_04",
+          "target": "MERCHANT_CLOTH",
+          "value": 40000,
+          "utr": "PUNB26087402004N",
+          "txn_type": "NEFT",
+          "reveal_order": 13
         }
       ]
     }

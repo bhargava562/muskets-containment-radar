@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Zap, ArrowRight, ChevronDown, ChevronUp, Crosshair, Clock, Shield, CheckCircle2 } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
 
@@ -21,7 +21,7 @@ const CriticalAlert = ({ alert }) => {
   return (
     <motion.div
       layout
-      className={`rounded-2xl overflow-hidden ${!isCaseClosed ? 'animate-pulse-glow' : ''}`}
+      className={`w-full flex-shrink-0 rounded-2xl overflow-hidden ${!isCaseClosed ? 'animate-pulse-glow' : ''}`}
     >
       {/* Case Closed Banner */}
       {isCaseClosed && (

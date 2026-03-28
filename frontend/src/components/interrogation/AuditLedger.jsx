@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import {
   FileText, ExternalLink, RefreshCw, Lock, CheckCircle, Copy,
   Shield, Database, Server, Clock, Hash, Check, Loader2

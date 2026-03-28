@@ -275,7 +275,7 @@ const lightenColor = (hex, percent) => {
 }
 
 // Get node area for click detection
-export const getNodeArea = (node) => {
+export const getNodeArea = () => {
   return 18 // Larger area for easier clicking
 }
 

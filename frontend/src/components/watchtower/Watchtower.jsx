@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { Radio, Activity, ShieldCheck, Target, TrendingUp } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
 import AlertCard from './AlertCard'
@@ -74,7 +74,7 @@ const Watchtower = () => {
       </div>
 
       {/* Transaction Feed */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4">
         <AnimatePresence mode="popLayout">
           {/* Critical Alert - Shown when threat detected */}
           {threatAlert && (
@@ -98,7 +98,7 @@ const Watchtower = () => {
           </div>
 
           {/* Normal Transactions */}
-          <div className="space-y-3">
+          <div className="flex flex-col space-y-3 w-full">
             {transactions.map((txn, index) => (
               <motion.div
                 key={txn.id}

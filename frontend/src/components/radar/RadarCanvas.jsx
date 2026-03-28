@@ -1,6 +1,6 @@
 import { useRef, useCallback, useMemo, useEffect, useState } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { useApp, APP_STATES } from '../../context/AppContext'
 import { drawNode, getLinkColor, getLinkWidth, updatePulsePhase } from '../../utils/nodeRenderer'
 import RadarGrid from './RadarGrid'
@@ -30,17 +30,17 @@ const RadarCanvas = () => {
 
   // Animation loop for pulsing/analyzing effects - only update pulse phase
   useEffect(() => {
-    if (showGraph && activeAnalyzingNode) {
-      const intervalId = setInterval(() => {
-        updatePulsePhase()
-        // Trigger a lightweight repaint without re-simulating physics
-        if (graphRef.current) {
-          graphRef.current.refresh()
-        }
-      }, 50) // ~20fps for smooth animation
+    if (!showGraph || !activeAnalyzingNode) return
+    
+    const intervalId = setInterval(() => {
+      updatePulsePhase()
+      // Trigger a lightweight repaint without re-simulating physics
+      if (graphRef.current) {
+        graphRef.current.refresh()
+      }
+    }, 50) // ~20fps for smooth animation
 
-      return () => clearInterval(intervalId)
-    }
+    return () => clearInterval(intervalId)
   }, [showGraph, activeAnalyzingNode])
 
   // Zoom to fit when graph appears or new nodes are added
@@ -51,6 +51,13 @@ const RadarCanvas = () => {
       }, 300)
     }
   }, [showGraph, graphData.nodes.length])
+
+  // Re-heat simulation when graph data changes
+  useEffect(() => {
+    if (showGraph && graphRef.current && graphData.nodes.length > 0) {
+      graphRef.current.d3ReheatSimulation()
+    }
+  }, [graphData])
 
   // Custom node renderer
   const nodeCanvasObject = useCallback((node, ctx, globalScale) => {

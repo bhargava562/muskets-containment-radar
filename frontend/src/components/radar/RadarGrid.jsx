@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { Radar } from 'lucide-react'
 
 const RadarGrid = () => {

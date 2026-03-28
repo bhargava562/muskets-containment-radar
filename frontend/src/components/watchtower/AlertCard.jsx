@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { CheckCircle, CreditCard, Smartphone, Building } from 'lucide-react'
 
 const formatCurrency = (amount) => {
@@ -9,12 +10,24 @@ const formatCurrency = (amount) => {
 }
 
 const AlertCard = ({ transaction }) => {
-  const timeAgo = (timestamp) => {
-    const seconds = Math.floor((Date.now() - new Date(timestamp)) / 1000)
-    if (seconds < 60) return `${seconds}s ago`
-    const minutes = Math.floor(seconds / 60)
-    return `${minutes}m ago`
-  }
+  const [timeAgo, setTimeAgo] = useState('')
+
+  useEffect(() => {
+    const updateTime = () => {
+      const seconds = Math.floor((Date.now() - new Date(transaction.timestamp)) / 1000)
+      if (seconds < 60) {
+        setTimeAgo(`${seconds}s ago`)
+      } else {
+        const minutes = Math.floor(seconds / 60)
+        setTimeAgo(`${minutes}m ago`)
+      }
+    }
+    
+    updateTime()
+    const interval = setInterval(updateTime, 10000) // Update every 10 seconds
+    
+    return () => clearInterval(interval)
+  }, [transaction.timestamp])
 
   // Get transaction type icon
   const getTxnIcon = () => {
@@ -39,7 +52,7 @@ const AlertCard = ({ transaction }) => {
   }
 
   return (
-    <div className="glass-panel-dark rounded-xl p-4 border-l-2 border-emerald-500/40 hover:border-emerald-400/70 transition-all hover:bg-slate-800/30">
+    <div className="w-full flex-shrink-0 glass-panel-dark rounded-xl p-4 border-l-2 border-emerald-500/40 hover:border-emerald-400/70 transition-all hover:bg-slate-800/30">
       {/* Header Row */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -52,7 +65,7 @@ const AlertCard = ({ transaction }) => {
             <span className="text-xs font-mono text-emerald-400/80">{transaction.txnType}</span>
           </div>
         </div>
-        <span className="text-xs text-slate-500 font-mono">{timeAgo(transaction.timestamp)}</span>
+        <span className="text-xs text-slate-500 font-mono">{timeAgo}</span>
       </div>
 
       {/* Main Content */}

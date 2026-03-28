@@ -1,10 +1,9 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { Layers, Clock, GitBranch } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
 const RadarHUD = () => {
-  const { graphData, frozenNodes, appState } = useApp()
+  const { graphData, frozenNodes } = useApp()
 
   const nodeCount = graphData?.nodes?.length || 0
   const frozenCount = frozenNodes.length

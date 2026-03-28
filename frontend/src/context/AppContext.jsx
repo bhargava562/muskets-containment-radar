@@ -73,27 +73,27 @@ export function AppProvider({ children }) {
   const [currentRevealStep, setCurrentRevealStep] = useState(0)
   const [activeAnalyzingNode, setActiveAnalyzingNode] = useState(null)
   const [revealedLinks, setRevealedLinks] = useState([])
-  const [maxRevealOrder, setMaxRevealOrder] = useState(5)
 
   // Transaction streaming state
-  const [transactionIndex, setTransactionIndex] = useState(0)
   const [criticalAlertQueued, setCriticalAlertQueued] = useState(false)
   const [alertTypeIndex, setAlertTypeIndex] = useState(0)
   const transactionStreamRef = useRef(null)
   const animationTimeoutRef = useRef(null)
+  const runVisualizerStepRef = useRef(null)
 
   const normalTxnPool = useRef(getNormalTransactions())
+  const transactionIndexRef = useRef(0)
 
   // Initialize with first transaction
   useEffect(() => {
-    if (transactions.length === 0) {
+    if (transactions.length === 0 && normalTxnPool.current.length > 0) {
       const firstTxn = normalTxnPool.current[0]
       if (firstTxn) {
         setTransactions([{ ...firstTxn, timestamp: new Date().toISOString() }])
-        setTransactionIndex(1)
+        transactionIndexRef.current = 1
       }
     }
-  }, [])
+  }, [transactions.length])
 
   // Transaction streaming every 10 seconds
   useEffect(() => {
@@ -105,9 +105,9 @@ export function AppProvider({ children }) {
     }
 
     transactionStreamRef.current = setInterval(() => {
-      setTransactionIndex(prevIndex => {
-        const pool = normalTxnPool.current
-        const nextIndex = prevIndex % pool.length
+      const prevIndex = transactionIndexRef.current
+      const pool = normalTxnPool.current
+      const nextIndex = prevIndex % pool.length
 
         // Transaction sequence: 2 good -> 1st critical -> 2 good -> 2nd critical -> 3 good -> 3rd critical
         // Index:                 0,1    -> 2              -> 3,4    -> 5              -> 6,7,8    -> 9
@@ -154,17 +154,16 @@ export function AppProvider({ children }) {
           }, 2000)
         }
 
-        // Add next safe transaction
-        const nextTxn = {
-          ...pool[nextIndex],
-          id: `TXN-IOB-${Date.now()}`,
-          timestamp: new Date().toISOString()
-        }
+      // Add next safe transaction
+      const nextTxn = {
+        ...pool[nextIndex],
+        id: `TXN-IOB-${Date.now()}`,
+        timestamp: new Date().toISOString()
+      }
 
-        setTransactions(prev => [nextTxn, ...prev.slice(0, 7)])
+      setTransactions(prev => [nextTxn, ...prev.slice(0, 7)])
 
-        return prevIndex + 1
-      })
+      transactionIndexRef.current = prevIndex + 1
     }, 6000) // Changed from 10000 to 6000 (6 seconds)
 
     return () => {
@@ -172,7 +171,7 @@ export function AppProvider({ children }) {
         clearInterval(transactionStreamRef.current)
       }
     }
-  }, [appState, criticalAlertQueued])
+  }, [appState, criticalAlertQueued, alertTypeIndex])
 
   // Auto-transition from CONTAINED to AUDIT_LOGGED after 2 seconds
   useEffect(() => {
@@ -234,7 +233,9 @@ export function AppProvider({ children }) {
         // Continue to next step after delay
         animationTimeoutRef.current = setTimeout(() => {
           setCurrentRevealStep(step + 1)
-          runVisualizerStep(step + 1, nodes, links, maxOrder)
+          if (runVisualizerStepRef.current) {
+            runVisualizerStepRef.current(step + 1, nodes, links, maxOrder)
+          }
         }, 800)
       }, 600)
     } else if (step === 1) {
@@ -243,10 +244,17 @@ export function AppProvider({ children }) {
       setRevealedLinks(initialLinks)
       animationTimeoutRef.current = setTimeout(() => {
         setCurrentRevealStep(2)
-        runVisualizerStep(2, nodes, links, maxOrder)
+        if (runVisualizerStepRef.current) {
+          runVisualizerStepRef.current(2, nodes, links, maxOrder)
+        }
       }, 800)
     }
   }, [])
+
+  // Store the function in ref using useEffect
+  useEffect(() => {
+    runVisualizerStepRef.current = runVisualizerStep
+  }, [runVisualizerStep])
 
   const initializeTrace = useCallback(() => {
     if (!threatAlert) return
@@ -263,7 +271,6 @@ export function AppProvider({ children }) {
     setGraphLinks(links)
     setRevealedLinks([])
     setCurrentRevealStep(1)
-    setMaxRevealOrder(maxOrder)
     setShowGraph(true)
     setAppState(APP_STATES.TRACING)
 
@@ -292,10 +299,8 @@ export function AppProvider({ children }) {
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current)
     }
-    if (transactionStreamRef.current) {
-      clearInterval(transactionStreamRef.current)
-    }
 
+    // Return to monitoring state
     setAppState(APP_STATES.MONITORING)
     setSelectedNode(null)
     setFrozenNodes([])
@@ -308,18 +313,10 @@ export function AppProvider({ children }) {
     setCurrentRevealStep(0)
     setActiveAnalyzingNode(null)
     setRevealedLinks([])
-    setMaxRevealOrder(5)
     setCriticalAlertQueued(false)
-    setTransactionIndex(0)
-    setAlertTypeIndex(0)
     setCaseMetadata(iobData.case_metadata)
 
-    // Reset transactions to initial state
-    const firstTxn = normalTxnPool.current[0]
-    if (firstTxn) {
-      setTransactions([{ ...firstTxn, timestamp: new Date().toISOString() }])
-      setTransactionIndex(1)
-    }
+    // DO NOT reset alertTypeIndex or transactionIndexRef - let sequence continue
   }, [])
 
   const closePanel = useCallback(() => {
