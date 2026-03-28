@@ -350,6 +350,30 @@ export function AppProvider({ children }) {
     // DO NOT reset alertTypeIndex or transactionIndexRef - let sequence continue
   }, [])
 
+  const revertContainment = useCallback(() => {
+    // Investigator has identified a false positive - revert all containment actions
+    // This is the FAIL-SAFE: instantly lifts all liens and resumes investigation
+
+    // Clear frozen nodes (lifts liens)
+    setFrozenNodes([])
+
+    // Clear audit hash (investigation is back in progress, not finalized)
+    setAuditHash(null)
+
+    // Clear contained node focus
+    setContainedNode(null)
+
+    // Revert to INVESTIGATING state
+    // This auto-triggers RadarCanvas to resume money flow particles and revert node colors
+    setAppState(APP_STATES.INVESTIGATING)
+
+    // Clear forensic playback if active
+    setIsForensicPlaybackActive(false)
+    setPlaybackActiveNodeId(null)
+
+    console.log('[MUSKETS] Investigator override activated - containment reverted to investigation mode')
+  }, [])
+
   const closePanel = useCallback(() => {
     setSelectedNode(null)
   }, [])
@@ -399,6 +423,7 @@ export function AppProvider({ children }) {
     freezeNode,
     deployNetworkContainment,
     resetInvestigation,
+    revertContainment,
     closePanel,
     setSelectedNode,
     setIsForensicPlaybackActive,

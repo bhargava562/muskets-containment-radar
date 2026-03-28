@@ -358,13 +358,21 @@
           "branch": "IOB Mylapore",
           "received_amount": 70000,
           "velocity": 14,
+          "fragmentation_ratio": 4.2,
           "ai_reasoning": {
             "classification": "ACTIVE_MULE",
             "confidence": 0.96,
             "is_mule": true,
             "evidence": [
               "High velocity: 14 tx/min"
-            ]
+            ],
+            "primary_evidence": {
+              "incoming": "1 IN (NEFT) - ₹70,000 at 2026-03-27 19:50:12 IST from VICTIM_01",
+              "outgoing": "4 OUT (IMPS) - ₹17,500 each at 19:50:45, 19:50:52, 19:51:08, 19:51:15 IST",
+              "dwell_time": "33 seconds",
+              "ip_telemetry": "Login IP: 103.82.192.x (VPN - Geotagged Outside Service Area)",
+              "device_fingerprint": "DEV-X7Y2K (Device mismatch: Account profile shows iOS, login from Android)"
+            }
           },
           "account_age_days": 12
         },
@@ -381,13 +389,21 @@
           "branch": "HDFC Velachery",
           "received_amount": 65000,
           "velocity": 12,
+          "fragmentation_ratio": 3.8,
           "ai_reasoning": {
             "classification": "ACTIVE_MULE",
             "confidence": 0.94,
             "is_mule": true,
             "evidence": [
               "Velocity: 12 tx/min"
-            ]
+            ],
+            "primary_evidence": {
+              "incoming": "1 IN (NEFT) - ₹65,000 at 2026-03-27 19:50:30 IST from MULE_01",
+              "outgoing": "3 OUT (IMPS) - ₹21,667 each at 19:50:58, 19:51:12, 19:51:28 IST",
+              "dwell_time": "28 seconds",
+              "ip_telemetry": "Login IP: 45.33.104.x (Datacenter IP - Residential Profile Mismatch)",
+              "device_fingerprint": "DEV-A9K3L (TOR Browser Detected - Anonymization Attempt)"
+            }
           },
           "account_age_days": 18
         },
@@ -404,13 +420,21 @@
           "branch": "ICICI Anna Nagar",
           "received_amount": 65000,
           "velocity": 11,
+          "fragmentation_ratio": 3.5,
           "ai_reasoning": {
             "classification": "ACTIVE_MULE",
             "confidence": 0.93,
             "is_mule": true,
             "evidence": [
               "Velocity: 11 tx/min"
-            ]
+            ],
+            "primary_evidence": {
+              "incoming": "1 IN (NEFT) - ₹65,000 at 2026-03-27 19:50:45 IST from MULE_01",
+              "outgoing": "3 OUT (IMPS) - ₹21,667 each at 19:51:05, 19:51:22, 19:51:38 IST",
+              "dwell_time": "20 seconds",
+              "ip_telemetry": "Login IP: 185.220.x.x (Onion Routing - TOR Network)",
+              "device_fingerprint": "DEV-M4N6P (Spoofed IMEI - Device ID mismatch with KYC enrolment)"
+            }
           },
           "account_age_days": 15
         },

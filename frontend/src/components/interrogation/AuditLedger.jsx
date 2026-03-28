@@ -3,7 +3,7 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText, ExternalLink, RefreshCw, Lock, CheckCircle, Copy,
-  Shield, Database, Server, Clock, Hash, Check, Loader2, Download
+  Shield, Database, Server, Clock, Hash, Check, Loader2, Download, AlertCircle
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { exportSARReport } from '../../utils/pdfGenerator'
@@ -17,7 +17,7 @@ const formatCurrency = (amount) => {
 }
 
 const AuditLedger = () => {
-  const { auditHash, resetInvestigation, containedNode, caseMetadata, graphData } = useApp()
+  const { auditHash, resetInvestigation, revertContainment, containedNode, caseMetadata, graphData } = useApp()
   const [copied, setCopied] = useState(false)
   const [sarExporting, setSarExporting] = useState(false)
   const [dpipPushing, setDpipPushing] = useState(false)
@@ -290,6 +290,30 @@ const AuditLedger = () => {
             </React.Fragment>
           )}
         </motion.button>
+      </motion.div>
+
+      {/* Investigator Override - FAIL-SAFE */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.75 }}
+        className="mt-4 pt-4 border-t border-red-500/30"
+      >
+        <motion.button
+          onClick={revertContainment}
+          className="w-full py-2.5 px-3 rounded-lg border border-red-500/50 text-red-400
+                     hover:bg-red-500/10 hover:border-red-500/70 transition-all
+                     flex items-center justify-center gap-1.5 font-mono text-[10px] font-semibold
+                     hover:text-red-300"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+        >
+          <AlertCircle className="w-3.5 h-3.5" />
+          <span>⚠ INVESTIGATOR OVERRIDE: LIFT ALL LIENS</span>
+        </motion.button>
+        <p className="text-[8px] text-red-400/60 mt-1.5 text-center font-mono">
+          False positive detected? Click to revert containment and resume investigation
+        </p>
       </motion.div>
 
       {/* Reset Button */}
