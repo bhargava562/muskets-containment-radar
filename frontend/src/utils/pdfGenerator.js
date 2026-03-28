@@ -193,7 +193,7 @@ export const exportSARReport = (caseData, auditHash) => {
   currentY += summaryLines.length * 5 + 8
 
   // ============================================
-  // 3. PRIMARY EVIDENCE LEDGER (Single autoTable)
+  // 3. PRIMARY EVIDENCE LEDGER (Native jsPDF Dossier Blocks)
   // ============================================
 
   currentY += 5
@@ -210,18 +210,33 @@ export const exportSARReport = (caseData, auditHash) => {
   doc.text('Raw transaction facts from Core Banking Ledger (Section 63 BSA - Primary Evidence)', leftMargin, currentY)
   currentY += 8
 
-  // Build Primary Evidence body array with styled header + evidence rows
-  const primaryEvidenceBody = []
-
+  // Loop through each node to create native Forensic Log Blocks
   nodes.forEach((node) => {
+    // Pagination check: ensure block fits on page
+    if (currentY > pageHeight - 50) {
+      doc.addPage()
+      currentY = 20
+    }
+
     // Determine header color based on node type
     let headerColor = [30, 41, 59] // Default Slate
     if (node.type === 'mule') headerColor = [185, 28, 28] // Red for active threats
     if (node.type === 'merchant') headerColor = [4, 120, 87] // Green for merchants
     if (node.type === 'victim') headerColor = [30, 58, 138] // Blue for victims
 
-    // Format entity header
+    // Format the entity header
     const entityTitle = `[ ${node.type.toUpperCase()} ] - ${maskPII(node.id)}`
+
+    // Draw Header Rectangle (Title Bar)
+    doc.setFillColor(...headerColor)
+    doc.rect(leftMargin, currentY, contentWidth, 8, 'F')
+
+    // Write Header Text
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(255, 255, 255)
+    doc.text(entityTitle, leftMargin + 4, currentY + 5.5)
+    currentY += 8
 
     // Extract primary evidence data
     const primaryEvidence = node.ai_reasoning?.primary_evidence || {}
@@ -231,74 +246,37 @@ export const exportSARReport = (caseData, auditHash) => {
     const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
     const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
-    // Construct evidence array (NATIVE ARRAY, NOT STRING WITH \n)
-    const evidenceArray = [
-      `● INCOMING: ${incomingLine}`,
-      `● OUTGOING: ${outgoingLine}`,
-      `● DWELL TIME: ${dwellTimeLine}`,
-      `● IP TELEMETRY: ${ipTelemetryLine}`,
-      `● DEVICE FP: ${deviceFpLine}`
-    ]
+    // Construct evidence text with bullet points
+    const evidenceText = `● INCOMING: ${incomingLine}\n● OUTGOING: ${outgoingLine}\n● DWELL TIME: ${dwellTimeLine}\n● IP TELEMETRY: ${ipTelemetryLine}\n● DEVICE FP: ${deviceFpLine}`
 
-    // Push header row (styled as decorative title bar)
-    primaryEvidenceBody.push([
-      {
-        content: entityTitle,
-        styles: {
-          fillColor: headerColor,
-          textColor: [255, 255, 255],
-          fontStyle: 'bold',
-          fontSize: 10,
-          cellPadding: 4,
-          halign: 'left',
-          valign: 'middle'
-        }
-      }
-    ])
+    // Wrap text using native jsPDF algorithm (guarantees no stretching)
+    doc.setFontSize(9)
+    doc.setFont('courier', 'normal')
+    doc.setTextColor(30, 41, 59)
 
-    // Push evidence row (pass ARRAY directly)
-    primaryEvidenceBody.push([
-      {
-        content: evidenceArray,
-        styles: {
-          textColor: [30, 41, 59],
-          font: 'courier',
-          fontSize: 9,
-          cellPadding: 6,
-          valign: 'top'
-        }
-      }
-    ])
+    const splitText = doc.splitTextToSize(evidenceText, contentWidth - 8)
+    const boxHeight = splitText.length * 4.5 + 6 // 4.5mm per line + padding
+
+    // Draw Body Box
+    doc.setDrawColor(200, 200, 200)
+    doc.setFillColor(252, 252, 252)
+    doc.rect(leftMargin, currentY, contentWidth, boxHeight, 'FD')
+
+    // Write Body Text
+    doc.text(splitText, leftMargin + 4, currentY + 6)
+
+    // Track Y position after this block
+    currentY += boxHeight + 8
   })
 
-  // Single autoTable call for all Primary Evidence (native pagination)
-  autoTable(doc, {
-    startY: currentY,
-    body: primaryEvidenceBody,
-    theme: 'plain',
-    tableWidth: 182,
-    styles: {
-      overflow: 'linebreak'
-    },
-    columnStyles: {
-      0: { cellWidth: 182 }
-    },
-    margin: { left: 14, right: 14 },
-    didDrawPage: (data) => {
-      const pageCount = doc.internal.getNumberOfPages()
-      doc.setFontSize(8)
-      doc.setTextColor(148, 163, 184)
-      doc.text(
-        `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
-        pageWidth / 2,
-        pageHeight - 10,
-        { align: 'center' }
-      )
-    }
-  })
+  // Add spacing before Derived Evidence Matrix
+  currentY += 5
 
-  // Track Y position exactly once after the entire table
-  currentY = doc.lastAutoTable?.finalY + 15 || currentY + 50
+  // Check if we need a new page
+  if (currentY > pageHeight - 120) {
+    doc.addPage()
+    currentY = 20
+  }
 
   // ============================================
   // 4. DERIVED EVIDENCE MATRIX (AI Scores & Actions)
