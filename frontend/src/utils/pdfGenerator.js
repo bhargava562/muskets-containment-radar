@@ -231,8 +231,14 @@ export const exportSARReport = (caseData, auditHash) => {
     const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
     const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
-    // Construct evidence text with bullet points
-    const evidenceText = `● INCOMING: ${incomingLine}\n● OUTGOING: ${outgoingLine}\n● DWELL TIME: ${dwellTimeLine}\n● IP TELEMETRY: ${ipTelemetryLine}\n● DEVICE FP: ${deviceFpLine}`
+    // Construct evidence array (NATIVE ARRAY, NOT STRING WITH \n)
+    const evidenceArray = [
+      `● INCOMING: ${incomingLine}`,
+      `● OUTGOING: ${outgoingLine}`,
+      `● DWELL TIME: ${dwellTimeLine}`,
+      `● IP TELEMETRY: ${ipTelemetryLine}`,
+      `● DEVICE FP: ${deviceFpLine}`
+    ]
 
     // Push header row (styled as decorative title bar)
     primaryEvidenceBody.push([
@@ -250,17 +256,16 @@ export const exportSARReport = (caseData, auditHash) => {
       }
     ])
 
-    // Push evidence row
+    // Push evidence row (pass ARRAY directly)
     primaryEvidenceBody.push([
       {
-        content: evidenceText,
+        content: evidenceArray,
         styles: {
           textColor: [30, 41, 59],
           font: 'courier',
           fontSize: 9,
           cellPadding: 6,
-          valign: 'top',
-          overflow: 'linebreak'
+          valign: 'top'
         }
       }
     ])
@@ -271,9 +276,9 @@ export const exportSARReport = (caseData, auditHash) => {
     startY: currentY,
     body: primaryEvidenceBody,
     theme: 'plain',
+    tableWidth: 182,
     styles: {
-      overflow: 'linebreak',
-      cellWidth: 'wrap'
+      overflow: 'linebreak'
     },
     columnStyles: {
       0: { cellWidth: 182 }
