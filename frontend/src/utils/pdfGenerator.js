@@ -222,16 +222,17 @@ export const exportSARReport = (caseData, auditHash) => {
     const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
     const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
-    // Construct ledger text using Array.join('\n') to eliminate hidden whitespace
+    // Pass ledger facts as Array directly to jspdf-autotable (no .join)
+    // The library natively renders arrays as perfect distinct lines
     const ledgerFacts = [
       `INCOMING: ${incomingLine}`,
       `OUTGOING: ${outgoingLine}`,
       `DWELL TIME: ${dwellTimeLine}`,
       `IP TELEMETRY: ${ipTelemetryLine}`,
       `DEVICE FP: ${deviceFpLine}`
-    ].join('\n')
+    ]
 
-    return [maskPII(mule.id) + ' (Active)',  ledgerFacts]
+    return [maskPII(mule.id) + ' (Active)', ledgerFacts]
   })
 
   // Add Primary Evidence as autoTable
@@ -240,39 +241,40 @@ export const exportSARReport = (caseData, auditHash) => {
     head: [['Masked Entity ID', 'Raw Ledger Facts (Primary Evidence)']],
     body: primaryEvidenceData,
     theme: 'grid',
+    tableWidth: 182,
     styles: {
-      fontSize: 8,
-      cellPadding: 6,
+      fontSize: 8.5,
+      cellPadding: 4,
       valign: 'top',
       overflow: 'linebreak',
       lineColor: [200, 200, 200],
       lineWidth: 0.1
     },
     headStyles: {
-      fillColor: [30, 41, 59], // Slate-800
+      fillColor: [30, 41, 59],
       textColor: [255, 255, 255],
       fontSize: 9,
       fontStyle: 'bold',
       halign: 'left'
     },
     bodyStyles: {
-      fontSize: 8,
-      textColor: [30, 58, 138], // Blue-900
+      fontSize: 8.5,
+      textColor: [30, 58, 138],
       fontStyle: 'normal',
       font: 'courier'
     },
     alternateRowStyles: {
-      fillColor: [219, 234, 254] // Blue-100
+      fillColor: [219, 234, 254]
     },
     columnStyles: {
-      0: { cellWidth: 40, fontStyle: 'bold' },  // Entity ID (fixed width)
-      1: { cellWidth: 'auto' }  // Ledger Facts (uses all remaining page width)
+      0: { cellWidth: 40, fontStyle: 'bold' },
+      1: { cellWidth: 142 }
     },
-    margin: { left: leftMargin, right: leftMargin },
+    margin: { left: 14, right: 14 },
     didDrawPage: (data) => {
       const pageCount = doc.internal.getNumberOfPages()
       doc.setFontSize(8)
-      doc.setTextColor(148, 163, 184) // Slate-400
+      doc.setTextColor(148, 163, 184)
       doc.text(
         `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
         pageWidth / 2,
@@ -321,38 +323,39 @@ export const exportSARReport = (caseData, auditHash) => {
     head: [['Masked Entity ID', 'Type', 'AI Evidence (PVI / FR)', 'Action Taken']],
     body: tableData,
     theme: 'grid',
+    tableWidth: 182,
     styles: {
-      fontSize: 7,
-      cellPadding: 5,
+      fontSize: 7.5,
+      cellPadding: 4,
       valign: 'middle',
       overflow: 'linebreak'
     },
     headStyles: {
-      fillColor: [30, 41, 59], // Slate-800
+      fillColor: [30, 41, 59],
       textColor: [255, 255, 255],
       fontSize: 8,
       fontStyle: 'bold',
       halign: 'left',
-      cellPadding: 5
+      cellPadding: 4
     },
     bodyStyles: {
-      textColor: [51, 65, 85], // Slate-700
+      textColor: [51, 65, 85],
       font: 'helvetica'
     },
     alternateRowStyles: {
-      fillColor: [248, 250, 252] // Slate-50
+      fillColor: [248, 250, 252]
     },
     columnStyles: {
       0: { cellWidth: 40, fontStyle: 'bold', font: 'courier' },
       1: { cellWidth: 25, halign: 'center' },
-      2: { cellWidth: 55 },
-      3: { cellWidth: 55 }
+      2: { cellWidth: 58 },
+      3: { cellWidth: 59 }
     },
-    margin: { left: leftMargin, right: leftMargin },
+    margin: { left: 14, right: 14 },
     didDrawPage: (data) => {
       const pageCount = doc.internal.getNumberOfPages()
       doc.setFontSize(8)
-      doc.setTextColor(148, 163, 184) // Slate-400
+      doc.setTextColor(148, 163, 184)
       doc.text(
         `Page ${doc.internal.getCurrentPageInfo().pageNumber} of ${pageCount}`,
         pageWidth / 2,
