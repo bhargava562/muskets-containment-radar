@@ -3,9 +3,10 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   FileText, ExternalLink, RefreshCw, Lock, CheckCircle, Copy,
-  Shield, Database, Server, Clock, Hash, Check, Loader2
+  Shield, Database, Server, Clock, Hash, Check, Loader2, Download
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
+import { exportSARReport } from '../../utils/pdfGenerator'
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-IN', {
@@ -16,7 +17,7 @@ const formatCurrency = (amount) => {
 }
 
 const AuditLedger = () => {
-  const { auditHash, resetInvestigation, containedNode, caseMetadata } = useApp()
+  const { auditHash, resetInvestigation, containedNode, caseMetadata, graphData } = useApp()
   const [copied, setCopied] = useState(false)
   const [sarExporting, setSarExporting] = useState(false)
   const [dpipPushing, setDpipPushing] = useState(false)
@@ -33,10 +34,29 @@ const AuditLedger = () => {
 
   const handleExportSAR = () => {
     setSarExporting(true)
+    
+    // Simulate processing delay for professional UX
     setTimeout(() => {
-      setSarExporting(false)
-      setSarExported(true)
-    }, 1500)
+      try {
+        // Prepare case data for PDF export
+        const caseData = {
+          case_id: caseMetadata?.case_id || 'FRA-2026-IOB-00847',
+          investigation_type: caseMetadata?.investigation_type || 'RAPID_FUND_FRAGMENTATION',
+          total_suspected_amount: caseMetadata?.total_suspected_amount || 200000,
+          graphData: graphData || { nodes: [], links: [] }
+        }
+
+        // Generate PDF
+        exportSARReport(caseData, auditHash)
+        
+        setSarExporting(false)
+        setSarExported(true)
+      } catch (error) {
+        console.error('[MUSKETS] PDF Export Error:', error)
+        setSarExporting(false)
+        alert('PDF export failed. Please check console for details.')
+      }
+    }, 1000)
   }
 
   const handlePushDPIP = () => {
@@ -215,8 +235,10 @@ const AuditLedger = () => {
           disabled={sarExporting || sarExported}
           className={`w-full py-2.5 px-3 rounded-lg border transition-all flex items-center justify-center gap-2
             ${sarExported
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-              : 'glass-panel border-slate-600/50 text-slate-300 hover:border-emerald-500/50 hover:text-emerald-400'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 cursor-default'
+              : sarExporting
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-wait'
+              : 'glass-panel border-slate-600/50 text-slate-300 hover:border-emerald-500/50 hover:text-emerald-400 cursor-pointer'
             }`}
           whileHover={!sarExporting && !sarExported ? { scale: 1.01 } : {}}
           whileTap={!sarExporting && !sarExported ? { scale: 0.99 } : {}}
@@ -224,17 +246,18 @@ const AuditLedger = () => {
           {sarExporting ? (
             <React.Fragment key="sar-exporting">
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span className="font-semibold text-[10px]">GENERATING SAR...</span>
+              <span className="font-semibold text-[10px]">GENERATING PDF...</span>
             </React.Fragment>
           ) : sarExported ? (
             <React.Fragment key="sar-exported">
               <CheckCircle className="w-3.5 h-3.5" />
               <span className="font-semibold text-[10px]">SAR EXPORTED</span>
+              <Download className="w-3 h-3 ml-1" />
             </React.Fragment>
           ) : (
             <React.Fragment key="sar-default">
               <FileText className="w-3.5 h-3.5" />
-              <span className="font-semibold text-[10px]">EXPORT SAR REPORT</span>
+              <span className="font-semibold text-[10px]">EXPORT REGULATORY SAR REPORT</span>
             </React.Fragment>
           )}
         </motion.button>
