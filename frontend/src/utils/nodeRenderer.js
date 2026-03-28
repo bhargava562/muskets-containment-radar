@@ -56,8 +56,8 @@ export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = 
     colors = COLORS[node.type] || COLORS.victim
   }
 
-  const nodeSize = 12 // Increased from 8 to fit text inside
-  const fontSize = Math.max(6 / globalScale, 4) // Reduced font size
+  const nodeSize = 9 // Reduced for better graph centering and balance
+  const fontSize = Math.max(5 / globalScale, 3) // Adjusted for smaller nodes
 
   ctx.save()
 
@@ -82,7 +82,7 @@ export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = 
     drawHexagon(ctx, node.x, node.y, nodeSize)
   } else if (node.type === 'merchant') {
     // Rounded square for merchant
-    drawRoundedSquare(ctx, node.x, node.y, nodeSize * 2, 5)
+    drawRoundedSquare(ctx, node.x, node.y, nodeSize * 1.5, 5)
   } else {
     // Default circle
     ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI)
@@ -106,7 +106,7 @@ export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = 
   // Selection ring
   if (isSelected && !isFrozen) {
     ctx.beginPath()
-    ctx.arc(node.x, node.y, nodeSize + 4, 0, 2 * Math.PI)
+    ctx.arc(node.x, node.y, nodeSize + 3, 0, 2 * Math.PI)
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
     ctx.lineWidth = 2
     ctx.setLineDash([4, 4])
@@ -244,7 +244,7 @@ const drawFrostEffect = (ctx, x, y, size) => {
 const drawAnalyzingSpinner = (ctx, x, y, size) => {
   ctx.save()
 
-  const spinnerRadius = size + 6
+  const spinnerRadius = size + 4
   const arcLength = 0.6
 
   ctx.strokeStyle = '#fbbf24'

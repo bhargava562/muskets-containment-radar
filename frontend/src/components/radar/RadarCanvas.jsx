@@ -1,6 +1,6 @@
 import { useRef, useCallback, useMemo, useEffect, useState } from 'react'
 import ForceGraph2D from 'react-force-graph-2d'
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useApp, APP_STATES } from '../../context/AppContext'
 import { drawNode, getLinkColor, getLinkWidth, updatePulsePhase } from '../../utils/nodeRenderer'
 import RadarGrid from './RadarGrid'
@@ -151,14 +151,18 @@ const RadarCanvas = () => {
               onNodeClick={handleNodeClick}
               linkColor={linkColor}
               linkWidth={(link) => getLinkWidth(link)}
-              linkDistance={120}
+              linkDistance={80}
               linkDirectionalParticles={showParticles ? 4 : 0}
               linkDirectionalParticleWidth={2.5}
               linkDirectionalParticleSpeed={0.006}
               linkDirectionalParticleColor={() => 'rgba(239, 68, 68, 0.9)'}
-              d3AlphaDecay={0.02}
-              d3VelocityDecay={0.35}
-              cooldownTicks={150}
+              d3AlphaDecay={0.08}
+              d3VelocityDecay={0.4}
+              cooldownTicks={200}
+              d3Force="charge"
+              d3ForceConfig={{
+                charge: { strength: -300, distanceMax: 300 }
+              }}
               enableNodeDrag={true}
               enableZoomInteraction={true}
               enablePanInteraction={true}

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { Building2, Shield, Snowflake, CheckCircle, Calculator, Cpu, AlertCircle, Store, BadgeCheck } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 

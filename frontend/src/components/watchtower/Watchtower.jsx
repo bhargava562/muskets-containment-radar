@@ -1,4 +1,4 @@
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Radio, Activity, ShieldCheck, Target, TrendingUp } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
 import AlertCard from './AlertCard'
@@ -101,7 +101,7 @@ const Watchtower = () => {
           <div className="flex flex-col space-y-3 w-full">
             {transactions.map((txn, index) => (
               <motion.div
-                key={txn.id}
+                key={`${txn.id}-${index}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}

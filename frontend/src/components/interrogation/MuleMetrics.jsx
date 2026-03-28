@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { AlertTriangle, Shield, Snowflake, CheckCircle, Cpu, Fingerprint, Clock, TrendingUp } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { X, User, AlertTriangle, Building2, ShieldAlert, ShieldCheck, UserCheck } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
 import MuleMetrics from './MuleMetrics'

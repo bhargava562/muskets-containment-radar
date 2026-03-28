@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, Zap, ArrowRight, ChevronDown, ChevronUp, Crosshair, Clock, Shield, CheckCircle2 } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
 

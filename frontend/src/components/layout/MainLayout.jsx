@@ -1,4 +1,4 @@
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useApp, APP_STATES } from '../../context/AppContext'
 import Watchtower from '../watchtower/Watchtower'
 import RadarCanvas from '../radar/RadarCanvas'
