@@ -57,11 +57,7 @@ const maskPII = (identifier) => {
  * Format currency for display
  */
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0
-  }).format(amount)
+  return `INR ${amount.toLocaleString('en-IN')}`
 }
 
 /**
@@ -238,16 +234,16 @@ export const exportSARReport = (caseData, auditHash) => {
     doc.text(entityTitle, leftMargin + 4, currentY + 5.5)
     currentY += 8
 
-    // Extract primary evidence data
+    // Extract primary evidence data (ASCII only - no Unicode symbols)
     const primaryEvidence = node.ai_reasoning?.primary_evidence || {}
-    const incomingLine = primaryEvidence.incoming || `1 transfer of ₹${(node.received_amount || 0).toLocaleString('en-IN')} (NEFT) at 19:50:12 IST`
-    const outgoingLine = primaryEvidence.outgoing || `4 transfers of ₹${Math.floor((node.received_amount || 0) / 4).toLocaleString('en-IN')} (IMPS) within 33 seconds`
+    const incomingLine = primaryEvidence.incoming || `1 transfer of INR ${(node.received_amount || 0).toLocaleString('en-IN')} (NEFT) at 19:50:12 IST`
+    const outgoingLine = primaryEvidence.outgoing || `4 transfers of INR ${Math.floor((node.received_amount || 0) / 4).toLocaleString('en-IN')} (IMPS) within 33 seconds`
     const dwellTimeLine = primaryEvidence.dwell_time || '33 seconds'
     const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
     const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
-    // Construct evidence text with bullet points
-    const evidenceText = `● INCOMING: ${incomingLine}\n● OUTGOING: ${outgoingLine}\n● DWELL TIME: ${dwellTimeLine}\n● IP TELEMETRY: ${ipTelemetryLine}\n● DEVICE FP: ${deviceFpLine}`
+    // Construct evidence text using ASCII dashes (no Unicode bullets)
+    const evidenceText = `- INCOMING: ${incomingLine}\n- OUTGOING: ${outgoingLine}\n- DWELL TIME: ${dwellTimeLine}\n- IP TELEMETRY: ${ipTelemetryLine}\n- DEVICE FP: ${deviceFpLine}`
 
     // Wrap text using native jsPDF algorithm (guarantees no stretching)
     doc.setFontSize(9)
