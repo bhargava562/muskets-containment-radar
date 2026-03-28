@@ -222,23 +222,16 @@ export const exportSARReport = (caseData, auditHash) => {
     const ipTelemetryLine = primaryEvidence.ip_telemetry || 'VPN 103.82.192.x (Outside Service Area)'
     const deviceFpLine = primaryEvidence.device_fingerprint || 'Device mismatch: iOS profile, Android login'
 
-    // Construct ledger text with explicit newlines for clean table display
-    const ledgerText = `INCOMING:
-${incomingLine}
+    // Construct ledger text using Array.join('\n') to eliminate hidden whitespace
+    const ledgerFacts = [
+      `INCOMING: ${incomingLine}`,
+      `OUTGOING: ${outgoingLine}`,
+      `DWELL TIME: ${dwellTimeLine}`,
+      `IP TELEMETRY: ${ipTelemetryLine}`,
+      `DEVICE FP: ${deviceFpLine}`
+    ].join('\n')
 
-OUTGOING:
-${outgoingLine}
-
-DWELL TIME:
-${dwellTimeLine}
-
-IP TELEMETRY:
-${ipTelemetryLine}
-
-DEVICE FP:
-${deviceFpLine}`
-
-    return [maskPII(mule.id) + ' (Active)',  ledgerText]
+    return [maskPII(mule.id) + ' (Active)',  ledgerFacts]
   })
 
   // Add Primary Evidence as autoTable
@@ -272,8 +265,8 @@ ${deviceFpLine}`
       fillColor: [219, 234, 254] // Blue-100
     },
     columnStyles: {
-      0: { cellWidth: 50, fontStyle: 'bold' },  // Entity ID (wider for readability)
-      1: { cellWidth: 130 }  // Ledger Facts (forces proper wrapping)
+      0: { cellWidth: 40, fontStyle: 'bold' },  // Entity ID (fixed width)
+      1: { cellWidth: 'auto' }  // Ledger Facts (uses all remaining page width)
     },
     margin: { left: leftMargin, right: leftMargin },
     didDrawPage: (data) => {
