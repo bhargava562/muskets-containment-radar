@@ -80,7 +80,7 @@ const CriticalAlert = ({ alert }) => {
           </div>
         </div>
 
-        {/* Amount Display */}
+        {/* Ingress Amount Display - Initial Spark Only */}
         <div className={`flex items-center gap-3 p-3 rounded-lg border ${
           isCaseClosed
             ? 'bg-emerald-950/30 border-emerald-500/20'
@@ -96,7 +96,7 @@ const CriticalAlert = ({ alert }) => {
               {formatCurrency(alert.totalAmount)}
             </p>
             <p className="text-xs text-slate-400 mt-0.5">
-              {isCaseClosed ? 'Recovered and audited' : `Fragmented across ${alert.fragmentationCount} accounts`}
+              {isCaseClosed ? 'Recovered and audited' : 'Anomalous inbound amount - Initialize trace to map destination'}
             </p>
           </div>
         </div>
@@ -115,20 +115,28 @@ const CriticalAlert = ({ alert }) => {
             <div className={`glass-panel-dark p-5 rounded-b-2xl border border-t-0 space-y-4 ${
               isCaseClosed ? 'border-emerald-500/20' : 'border-red-500/20'
             }`}>
-              {/* Alert Description - Highlighted */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-red-950/40 to-amber-950/20 border border-red-500/20">
-                <p className="text-sm text-slate-200 leading-relaxed">
-                  {alert.description || (
-                    <Fragment key="alert-desc">
-                      <span className="text-red-400 font-semibold">ANOMALY DETECTED.</span>{' '}
-                      <span className="text-amber-400 font-bold">{formatCurrency(alert.totalAmount)}</span>{' '}
-                      fragmented into{' '}
-                      <span className="text-red-400 font-semibold">{alert.fragmentationCount} accounts</span>{' '}
-                      within{' '}
-                      <span className="text-amber-400 font-semibold">{alert.timeWindowSeconds}s</span>.
-                    </Fragment>
-                  )}
-                </p>
+              {/* Alert Details - Initial Spark Only */}
+              <div className="space-y-3 mt-4 text-xs font-mono">
+                <div className="flex justify-between items-center border-b border-red-500/20 pb-1">
+                  <span className="text-slate-400">Primary Trigger:</span>
+                  <span className="text-red-400 font-bold">Anomalous High-Value Ingress</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-red-500/20 pb-1">
+                  <span className="text-slate-400">Suspect Entity:</span>
+                  <span className="text-white">MULE_**** (Tier-1 Receiver)</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-red-500/20 pb-1">
+                  <span className="text-slate-400">Ingress Amount:</span>
+                  <span className="text-white">{formatCurrency(alert.totalAmount)} (NEFT)</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-red-500/20 pb-1">
+                  <span className="text-slate-400">Device Telemetry:</span>
+                  <span className="text-amber-400">IMEI Spoofing / VPN IP</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Current Status:</span>
+                  <span className="text-red-400 animate-pulse">Immediate Outflow Attempted</span>
+                </div>
               </div>
 
               {/* Time Window Indicator */}
@@ -158,10 +166,10 @@ const CriticalAlert = ({ alert }) => {
                 </div>
               )}
 
-              {/* Outbound Transactions */}
-              {alert.outboundTransactions && (
+              {/* Outbound Transactions - Only after trace initiated */}
+              {appState !== APP_STATES.THREAT_DETECTED && alert.outboundTransactions && (
                 <div className="space-y-2">
-                  <span className="text-xs text-slate-500 font-mono">OUTBOUND SPLITS:</span>
+                  <span className="text-xs text-slate-500 font-mono">TRACED OUTBOUND SPLITS:</span>
                   <div className="space-y-2">
                     {(alert.outboundTransactions || []).map((txn, idx) => (
                       <div key={`outbound-txn-${alert.id}-${idx}-${txn?.beneficiary || 'unknown'}`} className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/40">
