@@ -8,7 +8,14 @@
 > **Stop the stolen money. Without stopping the innocent customer.**
 
 <br/>
+## 🚀 Project Status & Live Demo
 
+[![Progress: 60%](https://img.shields.io/badge/Progress-60%25-orange?style=for-the-badge)](#)
+[![Phase](https://img.shields.io/badge/Phase-UI_Complete_%7C_Implementation_Planned-blue?style=for-the-badge)](#)
+[![Live Prototype](https://img.shields.io/badge/Live_Demo-Vercel_Deployed-success?style=for-the-badge&logo=vercel)](https://muskets-containment-radar.vercel.app/)
+
+**Current Milestone:** The core front-end architecture, real-time graph visualization engine, and the investigator triage state machine are fully developed and deployed. The next phase focuses on integrating the backend pipeline and calibrating the empirical data thresholds.
+<br />
 [![React](https://img.shields.io/badge/React-18.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
