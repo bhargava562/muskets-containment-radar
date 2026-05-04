@@ -8,6 +8,7 @@
 > **Stop the stolen money. Without stopping the innocent customer.**
 
 <br/>
+
 ## 🚀 Project Status & Live Demo
 
 [![Progress: 60%](https://img.shields.io/badge/Progress-60%25-orange?style=for-the-badge)](#)
@@ -15,6 +16,8 @@
 [![Live Prototype](https://img.shields.io/badge/Live_Demo-Vercel_Deployed-success?style=for-the-badge&logo=vercel)](https://muskets-containment-radar.vercel.app/)
 
 **Current Milestone:** The core front-end architecture, real-time graph visualization engine, and the investigator triage state machine are fully developed and deployed. The next phase focuses on integrating the backend pipeline and calibrating the empirical data thresholds.
+
+<br />
 <br />
 [![React](https://img.shields.io/badge/React-18.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -23,6 +26,17 @@
 [![Status](https://img.shields.io/badge/Status-Hackathon_Prototype-blueviolet?style=for-the-badge)](https://github.com/)
 
 <br/>
+
+> ### 🧭 Quick Start: How to Evaluate the Prototype
+> 1. **Launch the Interface:** Navigate to [muskets-containment-radar.vercel.app](https://muskets-containment-radar.vercel.app/).
+> 2. **Monitor the Stream:** Observe the real-time transaction ingestion feed on the left-hand panel.
+> 3. **Catch the Threat:** Wait for the system to detect a Z-score anomaly and trigger a **CRITICAL** threat alert.
+> 4. **Trace the Network:** Click the **"INITIATE LINEAGE TRACE"** button on the alert card to extract the BFS graph onto the central radar canvas.
+> 5. **Analyze the Evidence:** Click on any rendered node to view its specific risk metrics (Fragmentation Ratio, PVI, Dwell Time) in the right-hand interrogation panel.
+> 6. **Contain & Audit:** Follow the guided action buttons at the bottom of the screen to **"DEPLOY PROPORTIONAL LIEN"** (freezing the network) and **"EXPORT REGULATORY SAR REPORT"** (generating the Section 63 compliance PDF).
+
+<br />
+
 
 **From Isolated Transactions to Network Intelligence**
 
