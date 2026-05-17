@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Shield, TrendingDown, AlertCircle, CheckCircle, Upload, Send, User, FileText, AlertTriangle, Info } from 'lucide-react'
+import { useApp, APP_STATES } from '../../context/AppContext'
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-IN', {
@@ -11,6 +12,7 @@ const formatCurrency = (amount) => {
 }
 
 const BranchWorkspace = () => {
+  const { appState, frozenNodes, graphData, caseMetadata } = useApp()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [uploadedDocs, setUploadedDocs] = useState([])
@@ -23,12 +25,13 @@ const BranchWorkspace = () => {
       id: 'CUST-001',
       name: 'Ramesh Kumar Sharma',
       accountNumber: '185501000012847',
-      status: 'RESTRICTED',
-      riskLevel: 'MEDIUM',
-      restrictedAmount: 135000,
-      availableBalance: 45000,
-      totalBalance: 180000,
-      reason: 'Temporary restriction applied due to suspicious high-velocity UPI activity detected by fraud monitoring system.',
+      accountId: 'VICTIM_01',
+      status: 'ACTIVE',
+      riskLevel: 'LOW',
+      restrictedAmount: 0,
+      availableBalance: 347000,
+      totalBalance: 347000,
+      reason: null,
       essentialServicesActive: true,
       lastTransaction: '2026-03-27T10:45:32Z',
       kycStatus: 'VERIFIED',
@@ -36,13 +39,14 @@ const BranchWorkspace = () => {
     },
     {
       id: 'CUST-002',
-      name: 'Priya Venkatesh',
-      accountNumber: '185501000034567',
+      name: 'TechZone Electronics',
+      accountNumber: '916010000045678',
+      accountId: 'MERCHANT_01',
       status: 'ACTIVE',
       riskLevel: 'LOW',
       restrictedAmount: 0,
-      availableBalance: 225000,
-      totalBalance: 225000,
+      availableBalance: 2100000,
+      totalBalance: 2100000,
       reason: null,
       essentialServicesActive: true,
       lastTransaction: '2026-03-27T09:15:10Z',
@@ -50,6 +54,31 @@ const BranchWorkspace = () => {
       accountAge: '6 years 8 months'
     }
   ]
+
+  // Update customer status based on frozen nodes
+  useEffect(() => {
+    if (selectedCustomer && frozenNodes.length > 0) {
+      const isFrozen = frozenNodes.includes(selectedCustomer.accountId)
+      
+      if (isFrozen) {
+        // Find the node data to get traced/restricted amount
+        const nodeData = graphData?.nodes?.find(n => n.id === selectedCustomer.accountId)
+        const restrictedAmount = nodeData?.traced_funds || nodeData?.received_amount || 135000
+        const totalBalance = selectedCustomer.totalBalance
+        
+        setSelectedCustomer(prev => ({
+          ...prev,
+          status: 'RESTRICTED',
+          riskLevel: nodeData?.type === 'mule' ? 'HIGH' : 'MEDIUM',
+          restrictedAmount: restrictedAmount,
+          availableBalance: Math.max(0, totalBalance - restrictedAmount),
+          reason: nodeData?.type === 'mule' 
+            ? 'Temporary restriction applied due to suspicious high-velocity transaction activity detected by fraud monitoring system. Account may be compromised.'
+            : 'Temporary restriction applied due to receipt of traced stolen funds. This is a precautionary measure while investigation is ongoing. Essential services remain active.'
+        }))
+      }
+    }
+  }, [frozenNodes, graphData, selectedCustomer?.accountId])
 
   const handleSearch = () => {
     const customer = mockCustomers.find(c => 

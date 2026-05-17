@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FileText, Briefcase, Download, Clock, TrendingDown, Shield, CheckCircle2, AlertTriangle, Scale, Eye, FileCheck } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
+import WorkflowStatusIndicator from '../common/WorkflowStatusIndicator'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 
@@ -32,22 +33,29 @@ const ComplianceWorkspace = () => {
         n.type === 'merchant' && frozenNodes.includes(n.id)
       ) || []
 
-      if (frozenMules.length > 0 || frozenMerchants.length > 0) {
+      if ((frozenMules.length > 0 || frozenMerchants.length > 0) && caseMetadata?.case_id) {
+        const totalAmount = [...frozenMules, ...frozenMerchants].reduce((sum, node) => 
+          sum + (node.received_amount || node.traced_funds || 0), 0
+        )
+
         const newCase = {
-          id: caseMetadata?.case_id || `CASE-${Date.now()}`,
+          id: caseMetadata.case_id,
           status: appState === APP_STATES.AUDIT_LOGGED ? 'Awaiting Legal Review' : 'Containment Active',
           timestamp: new Date().toISOString(),
           frozenAccounts: frozenNodes.length,
-          totalAmount: [...frozenMules, ...frozenMerchants].reduce((sum, node) => 
-            sum + (node.received_amount || node.traced_funds || 0), 0
-          ),
+          totalAmount: totalAmount,
           auditHash: auditHash,
-          priority: 'HIGH'
+          priority: totalAmount > 100000 ? 'HIGH' : 'MEDIUM'
         }
 
         setCasesAwaitingReview(prev => {
+          // Check if case already exists
           const exists = prev.find(c => c.id === newCase.id)
-          if (exists) return prev
+          if (exists) {
+            // Update existing case
+            return prev.map(c => c.id === newCase.id ? newCase : c)
+          }
+          // Add new case
           return [newCase, ...prev]
         })
       }
@@ -105,33 +113,38 @@ const ComplianceWorkspace = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="absolute top-4 left-4 z-40 glass-panel-dark rounded-xl px-4 py-3 border border-slate-800/50 backdrop-blur-sm"
+        className="absolute top-4 left-4 z-40 flex items-center gap-3"
       >
-        <div className="flex items-center gap-2 mb-2">
-          <Scale className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-bold text-slate-300 tracking-wide">LEGAL EFFICIENCY</span>
-        </div>
-        <div className="flex items-center gap-6">
-          {/* Audit Packet Generation Time */}
-          <div className="flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-500 font-mono">Audit Packet Gen:</span>
-              <span className="text-xs text-slate-400 line-through font-mono">2 hrs</span>
-              <TrendingDown className="w-3 h-3 text-emerald-400" />
-              <span className="text-sm font-bold text-emerald-400 font-mono">30 sec</span>
-            </div>
+        <div className="glass-panel-dark rounded-xl px-4 py-3 border border-slate-800/50 backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <Scale className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold text-slate-300 tracking-wide">LEGAL EFFICIENCY</span>
           </div>
+          <div className="flex items-center gap-6">
+            {/* Audit Packet Generation Time */}
+            <div className="flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-slate-500 font-mono">Audit Packet Gen:</span>
+                <span className="text-xs text-slate-400 line-through font-mono">2 hrs</span>
+                <TrendingDown className="w-3 h-3 text-emerald-400" />
+                <span className="text-sm font-bold text-emerald-400 font-mono">30 sec</span>
+              </div>
+            </div>
 
-          {/* Cases Pending Review */}
-          <div className="flex items-center gap-2">
-            <FileCheck className="w-3.5 h-3.5 text-cyan-400" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-500 font-mono">Pending Review:</span>
-              <span className="text-sm font-bold text-cyan-400 font-mono">{casesAwaitingReview.length}</span>
+            {/* Cases Pending Review */}
+            <div className="flex items-center gap-2">
+              <FileCheck className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-slate-500 font-mono">Pending Review:</span>
+                <span className="text-sm font-bold text-cyan-400 font-mono">{casesAwaitingReview.length}</span>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Workflow Status Indicator */}
+        <WorkflowStatusIndicator appState={appState} caseId={caseMetadata?.case_id} />
       </motion.div>
 
       {/* Main Content Grid */}

@@ -5,7 +5,7 @@ import { Shield } from 'lucide-react'
 const LoginPage = ({ onLogin }) => {
   const [employeeId, setEmployeeId] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('Fraud Investigator')
+  const [role, setRole] = useState('AML Compliance Officer')
 
   const handleLogin = () => {
     onLogin(employeeId, role)
@@ -58,8 +58,8 @@ const LoginPage = ({ onLogin }) => {
               onChange={(event) => setRole(event.target.value)}
               className="mt-2 w-full rounded-lg bg-slate-900/70 border border-slate-800 text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/60"
             >
-              <option>Fraud Investigator</option>
               <option>AML Compliance Officer</option>
+              <option>Legal & Principal Officer</option>
               <option>Branch Manager</option>
             </select>
           </div>
