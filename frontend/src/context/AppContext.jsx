@@ -19,6 +19,30 @@ export const NODE_DISPLAY_STATES = {
   CONFIRMED: 'confirmed'
 }
 
+const getRandomAlertTriggerCount = () => Math.floor(Math.random() * 3) + 2
+
+const getNodeSubtype = (node) => {
+  if (node.type !== 'mule') {
+    return node.type
+  }
+
+  const ipTelemetry = node.ai_reasoning?.primary_evidence?.ip_telemetry || ''
+  const deviceFingerprint = node.ai_reasoning?.primary_evidence?.device_fingerprint || ''
+  const ipMatch = ipTelemetry.toUpperCase().includes('VPN') || ipTelemetry.toUpperCase().includes('TOR')
+  const deviceMatch = deviceFingerprint.toLowerCase().includes('mismatch') || deviceFingerprint.toLowerCase().includes('spoofed')
+
+  if (ipMatch && deviceMatch) {
+    return 'COMPROMISED'
+  }
+
+  const accountAge = node.account_age_days || node.ai_reasoning?.account_age_days || 0
+  if ((node.velocity || 0) > 15 && accountAge < 12) {
+    return 'EXIT_POINT'
+  }
+
+  return 'ACTIVE'
+}
+
 // Get graph structure by ID
 const getGraphStructure = (structureId) => {
   const structure = iobData.graph_structures[structureId]
@@ -28,6 +52,7 @@ const getGraphStructure = (structureId) => {
 
   const graphNodes = structure.nodes.map(node => ({
     ...node,
+    nodeSubtype: getNodeSubtype(node),
     displayState: node.reveal_order === 1 ? NODE_DISPLAY_STATES.CONFIRMED : NODE_DISPLAY_STATES.HIDDEN
   }))
 
@@ -61,6 +86,7 @@ const getNormalTransactions = () => {
     timestamp: txn.timestamp,
     status: txn.status,
     location: txn.location,
+    deviceFingerprint: txn.device_fingerprint,
     aiAnalysis: txn.ai_analysis,
     isCritical: false
   }))
@@ -97,6 +123,8 @@ export function AppProvider({ children }) {
 
   const normalTxnPool = useRef(getNormalTransactions())
   const transactionIndexRef = useRef(0)
+  const alertTriggerCount = useRef(getRandomAlertTriggerCount())
+  const transactionsSinceAlertRef = useRef(0)
 
   // Initialize with first transaction
   useEffect(() => {
@@ -123,56 +151,61 @@ export function AppProvider({ children }) {
     transactionStreamRef.current = setInterval(() => {
       const prevIndex = transactionIndexRef.current
       const pool = normalTxnPool.current
-      const nextIndex = prevIndex % pool.length
+      const normalFeedLength = iobData.transactions.normal_feed.length
+      const nextIndex = prevIndex % normalFeedLength
 
-        // Transaction sequence: 2 good -> 1st critical -> 2 good -> 2nd critical -> 3 good -> 3rd critical
-        // Index:                 0,1    -> 2              -> 3,4    -> 5              -> 6,7,8    -> 9
-        const shouldShowCritical =
-          (prevIndex === 2 && alertTypeIndex === 0) ||  // After 2 transactions, show 1st critical
-          (prevIndex === 5 && alertTypeIndex === 1) ||  // After 2 more (total 5), show 2nd critical
-          (prevIndex === 9 && alertTypeIndex === 2)      // After 3 more (total 9), show 3rd critical
+      transactionsSinceAlertRef.current += 1
 
-        if (shouldShowCritical && !criticalAlertQueued) {
-          setCriticalAlertQueued(true)
-          // Trigger threat detection after a short delay
-          setTimeout(() => {
-            // Cycle through different alert types
-            const alerts = iobData.transactions.critical_alerts
-            const alertIndex = alertTypeIndex % alerts.length
-            const alertData = alerts[alertIndex]
+      const shouldShowCritical =
+        transactionsSinceAlertRef.current >= alertTriggerCount.current && !criticalAlertQueued
 
-            const alert = {
-              id: alertData.id,
-              alertType: alertData.alert_type,
-              severity: alertData.severity,
-              riskScore: alertData.risk_score,
-              timestamp: new Date().toISOString(),
-              sourceAccount: alertData.source_account,
-              totalAmount: alertData.total_amount,
-              fragmentationCount: alertData.fragmentation_count,
-              timeWindowSeconds: alertData.time_window_seconds,
-              description: alertData.description,
-              triggerRules: alertData.trigger_rules,
-              outboundTransactions: alertData.outbound_transactions,
-              graphStructureId: alertData.graph_structure_id
-            }
+      if (shouldShowCritical) {
+        setCriticalAlertQueued(true)
+        transactionsSinceAlertRef.current = 0
 
-            setThreatAlert(alert)
-            setAppState(APP_STATES.THREAT_DETECTED)
-            setAlertTypeIndex(prev => prev + 1)
+        // Trigger threat detection after a short delay
+        setTimeout(() => {
+          // Cycle through different alert types
+          const alerts = iobData.transactions.critical_alerts
+          const alertIndex = alertTypeIndex % alerts.length
+          const alertData = alerts[alertIndex]
+          const graphStructureKeys = Object.keys(iobData.graph_structures)
+          const selectedGraphStructureId = alertData.graph_structure_id ||
+            graphStructureKeys[Math.floor(Math.random() * graphStructureKeys.length)]
 
-            // Update case metadata based on alert type
-            setCaseMetadata(prev => ({
-              ...prev,
-              investigation_type: alert.alertType,
-              total_suspected_amount: alert.totalAmount
-            }))
-          }, 2000)
-        }
+          const alert = {
+            id: alertData.id,
+            alertType: alertData.alert_type,
+            severity: alertData.severity,
+            riskScore: alertData.risk_score,
+            timestamp: new Date().toISOString(),
+            sourceAccount: alertData.source_account,
+            totalAmount: alertData.total_amount,
+            fragmentationCount: alertData.fragmentation_count,
+            timeWindowSeconds: alertData.time_window_seconds,
+            description: alertData.description,
+            triggerRules: alertData.trigger_rules,
+            outboundTransactions: alertData.outbound_transactions,
+            graphStructureId: selectedGraphStructureId
+          }
+
+          setThreatAlert(alert)
+          setAppState(APP_STATES.THREAT_DETECTED)
+          setAlertTypeIndex(prev => prev + 1)
+
+          // Update case metadata based on alert type
+          setCaseMetadata(prev => ({
+            ...prev,
+            investigation_type: alert.alertType,
+            total_suspected_amount: alert.totalAmount
+          }))
+        }, 2000)
+      }
 
       // Add next safe transaction
       const nextTxn = {
         ...pool[nextIndex],
+        amount: Math.round(pool[nextIndex].amount * (0.85 + Math.random() * 0.3)),
         id: `TXN-IOB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date().toISOString()
       }
@@ -346,6 +379,8 @@ export function AppProvider({ children }) {
     setRevealedLinks([])
     setCriticalAlertQueued(false)
     setCaseMetadata(iobData.case_metadata)
+    alertTriggerCount.current = getRandomAlertTriggerCount()
+    transactionsSinceAlertRef.current = 0
 
     // DO NOT reset alertTypeIndex or transactionIndexRef - let sequence continue
   }, [])

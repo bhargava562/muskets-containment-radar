@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Building2, Shield, Snowflake, CheckCircle, Calculator, Cpu, AlertCircle, Store, BadgeCheck } from 'lucide-react'
+import { Shield, Snowflake, CheckCircle, Calculator, Cpu, AlertCircle, Store, BadgeCheck } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
 const formatCurrency = (amount) => {
@@ -8,6 +8,17 @@ const formatCurrency = (amount) => {
     currency: 'INR',
     maximumFractionDigits: 0
   }).format(amount)
+}
+
+const generateMerchantXAIText = (node) => {
+  const tracedFunds = node.traced_funds || 0
+  const balance = node.current_balance || 0
+  const pct = balance > 0 ? ((tracedFunds / balance) * 100).toFixed(1) : 0
+  const lines = []
+  lines.push(`This merchant received ₹${tracedFunds.toLocaleString('en-IN')} that has been traced back to the fraud victim's account through the mule network. The merchant did not initiate or request this transfer - the funds arrived through the criminal's money movement chain.`)
+  lines.push(`The merchant's account has a total balance of ₹${balance.toLocaleString('en-IN')}. The traced stolen amount represents only ${pct}% of their total funds. A full freeze would incorrectly punish a legitimate business for receiving funds they had no knowledge were stolen.`)
+  lines.push(`AI classification is PASSIVE INNOCENT with ${((node.ai_reasoning?.confidence || 0.87) * 100).toFixed(0)}% confidence. GST registration is valid, business category is consistent with MCC code, and no outbound fragmentation pattern was detected.`)
+  return lines
 }
 
 const MerchantMetrics = ({ node, isContained = false }) => {
@@ -44,27 +55,11 @@ const MerchantMetrics = ({ node, isContained = false }) => {
             <span className="text-[8px] text-slate-500 block mb-0.5">BUSINESS NAME</span>
             <span className="text-[10px] font-semibold text-slate-200 truncate block">{node.business_name || node.account_holder}</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="p-2 rounded-md bg-slate-800/50 min-w-0">
-              <span className="text-[8px] text-slate-500 block mb-0.5">ACCOUNT</span>
-              <span className="text-[9px] font-mono text-slate-300 truncate block">{node.account_number}</span>
-            </div>
-            <div className="p-2 rounded-md bg-slate-800/50 min-w-0">
-              <span className="text-[8px] text-slate-500 block mb-0.5">IFSC</span>
-              <span className="text-[9px] font-mono text-slate-300 truncate block">{node.ifsc_code}</span>
-            </div>
-          </div>
           {node.gst_number && (
             <div className="flex items-center gap-1.5 p-2 rounded-md bg-emerald-950/20 border border-emerald-500/20">
               <BadgeCheck className="w-3 h-3 text-emerald-400 flex-shrink-0" />
               <span className="text-[8px] text-slate-400">GST:</span>
               <span className="text-[9px] font-mono text-emerald-400 truncate">{node.gst_number}</span>
-            </div>
-          )}
-          {node.business_vintage_years && (
-            <div className="flex items-center justify-between p-2 rounded-md bg-slate-800/50">
-              <span className="text-[8px] text-slate-500">BUSINESS VINTAGE</span>
-              <span className="text-[10px] font-semibold text-emerald-400">{node.business_vintage_years} years</span>
             </div>
           )}
         </div>
@@ -78,20 +73,14 @@ const MerchantMetrics = ({ node, isContained = false }) => {
         </div>
 
         <div className="space-y-1.5">
-          {(aiReasoning.evidence || [
-            `Registered POS merchant with valid GST (MCC: ${node.mcc_code})`,
-            `Business vintage: ${node.business_vintage_years || 12} years - established entity`,
-            'Regular inbound transaction pattern from multiple sources',
-            'No outward fragmentation detected (ratio: 0.0)'
-          ]).map((evidence, idx) => (
+          {generateMerchantXAIText(node).map((evidence) => (
             <motion.div
-              key={`merchant-evidence-${node.id}-${idx}`}
+              key={`merchant-evidence-${node.id}-${evidence}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
               className="flex items-start gap-1.5 p-1.5 rounded-md bg-emerald-950/20 border border-emerald-500/10"
             >
-              <span className="text-emerald-400 text-[10px] mt-0.5 flex-shrink-0">✓</span>
+              <AlertCircle className="w-3 h-3 text-emerald-300 mt-0.5 flex-shrink-0" />
               <span className="text-[10px] text-slate-300 break-words">{evidence}</span>
             </motion.div>
           ))}
@@ -161,6 +150,10 @@ const MerchantMetrics = ({ node, isContained = false }) => {
             <span className="text-[10px] font-bold text-red-400">{formatCurrency(tracedFunds)}</span>
           </div>
         </div>
+
+        <p className="text-[10px] text-slate-400 mt-2">
+          Under the proportional lien mechanism, only ₹{lienAmount.toLocaleString('en-IN')} is frozen - the exact amount of stolen funds traced to this account. The remaining ₹{(currentBalance - lienAmount).toLocaleString('en-IN')} stays accessible. The business continues operating normally. This prevents the collateral damage of a full account freeze while securing the recoverable stolen funds.
+        </p>
       </div>
 
       {/* Containment Status or Action */}

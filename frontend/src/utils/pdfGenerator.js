@@ -285,6 +285,99 @@ export const exportSARReport = (caseData, auditHash) => {
     currentY += boxHeight + 8
   })
 
+  // ============================================
+  // 4. CONTAINMENT ACTIONS SUMMARY
+  // ============================================
+
+  // Check if we need a new page
+  if (currentY > pageHeight - 90) {
+    doc.addPage()
+    currentY = 20
+  }
+
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(15, 23, 42)
+  doc.text('CONTAINMENT ACTIONS SUMMARY', leftMargin, currentY)
+  currentY += 6
+
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(71, 85, 105)
+  doc.text('Actions executed to secure assets without collateral damage', leftMargin, currentY)
+  currentY += 6
+
+  const containmentTableData = nodes.map((node) => {
+    if (node.type === 'mule') {
+      return [
+        maskPII(node.id),
+        node.type.toUpperCase(),
+        'FULL ACCOUNT FREEZE',
+        formatCurrency(node.received_amount || 0),
+        'Velocity and fragmentation signals exceed RBI AML thresholds'
+      ]
+    }
+
+    if (node.type === 'merchant') {
+      const lien = Math.min(node.current_balance || 3000000, node.traced_funds || 50000)
+      const totalBalance = node.current_balance || 3000000
+      return [
+        maskPII(node.id),
+        node.type.toUpperCase(),
+        `PROPORTIONAL LIEN - INR ${lien.toLocaleString('en-IN')} of INR ${totalBalance.toLocaleString('en-IN')} total balance`,
+        formatCurrency(lien),
+        'Passive innocent - only traced stolen amount secured, business continues operating'
+      ]
+    }
+
+    return [
+      maskPII(node.id),
+      node.type.toUpperCase(),
+      'PROTECTED - NO ACTION',
+      formatCurrency(0),
+      'Confirmed fraud victim under PMLA Section 12AA'
+    ]
+  })
+
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Masked ID', 'Node Role', 'Action Taken', 'Frozen Amount', 'Legal Basis']],
+    body: containmentTableData,
+    theme: 'grid',
+    tableWidth: 182,
+    styles: {
+      fontSize: 7.2,
+      cellPadding: 3.5,
+      valign: 'middle',
+      overflow: 'linebreak'
+    },
+    headStyles: {
+      fillColor: [30, 41, 59],
+      textColor: [255, 255, 255],
+      fontSize: 8,
+      fontStyle: 'bold',
+      halign: 'left',
+      cellPadding: 4
+    },
+    bodyStyles: {
+      textColor: [51, 65, 85],
+      font: 'helvetica'
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    },
+    columnStyles: {
+      0: { cellWidth: 32, fontStyle: 'bold', font: 'courier' },
+      1: { cellWidth: 20, halign: 'center' },
+      2: { cellWidth: 70 },
+      3: { cellWidth: 28 },
+      4: { cellWidth: 32 }
+    },
+    margin: { left: 14, right: 14 }
+  })
+
+  currentY = doc.lastAutoTable?.finalY + 12 || currentY + 50
+
   // Add spacing before Derived Evidence Matrix
   currentY += 5
 
@@ -295,7 +388,7 @@ export const exportSARReport = (caseData, auditHash) => {
   }
 
   // ============================================
-  // 4. DERIVED EVIDENCE MATRIX (AI Scores & Actions)
+  // 5. DERIVED EVIDENCE MATRIX (AI Scores & Actions)
   // ============================================
 
   doc.setFontSize(12)
@@ -376,7 +469,7 @@ export const exportSARReport = (caseData, auditHash) => {
   }
 
   // ============================================
-  // 5. CRYPTOGRAPHIC INTEGRITY BLOCK
+  // 6. CRYPTOGRAPHIC INTEGRITY BLOCK
   // ============================================
 
   doc.setFontSize(11)
@@ -397,7 +490,7 @@ export const exportSARReport = (caseData, auditHash) => {
   currentY += 15
 
   // ============================================
-  // 6. LEGAL CERTIFICATE (FOOTER)
+  // 7. LEGAL CERTIFICATE (FOOTER)
   // ============================================
 
   doc.setFillColor(254, 243, 199) // Amber-100

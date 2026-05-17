@@ -1,10 +1,9 @@
-import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Layers, Clock, GitBranch, Zap, AlertTriangle } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
 const RadarHUD = () => {
-  const { graphData, frozenNodes, playbackActiveNodeId, isForensicPlaybackActive } = useApp()
+  const { graphData, frozenNodes, playbackActiveNodeId, isForensicPlaybackActive, showGraph } = useApp()
 
   const nodeCount = graphData?.nodes?.length || 0
   const frozenCount = frozenNodes.length
@@ -66,6 +65,31 @@ const RadarHUD = () => {
                     <span className="text-cyan-400 font-mono">
                       {frozenCount} NODE{frozenCount > 1 ? 'S' : ''} CONTAINED
                     </span>
+                  </div>
+                </div>
+              )}
+
+              {showGraph && (
+                <div className="pt-2 border-t border-slate-700/50 space-y-1.5">
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#3b82f6' }} />
+                    Fraud Victim
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#f59e0b' }} />
+                    Compromised Account (Innocent)
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#ef4444' }} />
+                    Active Participant
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#a855f7' }} />
+                    Exit Point
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#10b981' }} />
+                    Merchant (Innocent)
                   </div>
                 </div>
               )}

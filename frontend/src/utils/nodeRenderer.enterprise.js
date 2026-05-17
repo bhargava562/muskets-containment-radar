@@ -5,31 +5,13 @@
 
 // Professional color palette - muted, high-contrast
 const COLORS = {
-  victim: {
-    fill: '#2563eb',      // Professional blue
-    stroke: '#3b82f6',
-    glow: 'rgba(37, 99, 235, 0.4)'
-  },
-  mule: {
-    fill: '#dc2626',      // Sharp red
-    stroke: '#ef4444',
-    glow: 'rgba(220, 38, 38, 0.4)'
-  },
-  merchant: {
-    fill: '#d97706',      // Amber
-    stroke: '#f59e0b',
-    glow: 'rgba(217, 119, 6, 0.4)'
-  },
-  frozen: {
-    fill: '#0ea5e9',      // Ice blue
-    stroke: '#38bdf8',
-    glow: 'rgba(14, 165, 233, 0.5)'
-  },
-  contained_merchant: {
-    fill: '#059669',      // Emerald green
-    stroke: '#10b981',
-    glow: 'rgba(5, 150, 105, 0.5)'
-  }
+  victim: { fill: '#1d4ed8', stroke: '#3b82f6', glow: 'rgba(29, 78, 216, 0.5)' },
+  compromised: { fill: '#92400e', stroke: '#f59e0b', glow: 'rgba(146, 64, 14, 0.5)' },
+  active: { fill: '#991b1b', stroke: '#ef4444', glow: 'rgba(153, 27, 27, 0.5)' },
+  exit_point: { fill: '#581c87', stroke: '#a855f7', glow: 'rgba(88, 28, 135, 0.6)' },
+  merchant: { fill: '#065f46', stroke: '#10b981', glow: 'rgba(6, 95, 70, 0.5)' },
+  frozen: { fill: '#0e7490', stroke: '#22d3ee', glow: 'rgba(14, 116, 144, 0.6)' },
+  contained_merchant: { fill: '#047857', stroke: '#34d399', glow: 'rgba(4, 120, 87, 0.5)' }
 }
 
 /**
@@ -47,8 +29,20 @@ export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = 
   let colors
   if (isFrozen) {
     colors = node.type === 'merchant' ? COLORS.contained_merchant : COLORS.frozen
+  } else if (node.type === 'victim') {
+    colors = COLORS.victim
+  } else if (node.type === 'merchant') {
+    colors = COLORS.merchant
+  } else if (node.type === 'mule') {
+    if (node.nodeSubtype === 'COMPROMISED') {
+      colors = COLORS.compromised
+    } else if (node.nodeSubtype === 'EXIT_POINT') {
+      colors = COLORS.exit_point
+    } else {
+      colors = COLORS.active
+    }
   } else {
-    colors = COLORS[node.type] || COLORS.victim
+    colors = COLORS.victim
   }
 
   const nodeSize = 10
@@ -119,7 +113,21 @@ export const drawNode = (node, ctx, globalScale, frozenNodes = [], isSelected = 
   ctx.textBaseline = 'middle'
 
   let label = node.label || node.id
-  
+
+  if (node.type === 'victim') {
+    label = 'VICTIM'
+  } else if (node.type === 'merchant') {
+    label = node.label || 'MERCHANT'
+  } else if (node.type === 'mule') {
+    if (node.nodeSubtype === 'COMPROMISED') {
+      label = 'COMP'
+    } else if (node.nodeSubtype === 'EXIT_POINT') {
+      label = 'EXIT'
+    } else {
+      label = 'MULE'
+    }
+  }
+
   // Abbreviate long labels
   if (label.length > 6) {
     label = label.substring(0, 6)

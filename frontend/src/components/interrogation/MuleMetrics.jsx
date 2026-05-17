@@ -10,6 +10,40 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
+const generateMuleXAIText = (node) => {
+  const vel = node.velocity || 0
+  const fr = node.fragmentation_ratio || 0
+  const dwell = node.ai_reasoning?.primary_evidence?.dwell_time || 'unknown'
+  const age = node.ai_reasoning?.account_age_days || node.account_age_days || 0
+  const ip = node.ai_reasoning?.primary_evidence?.ip_telemetry || ''
+  const device = node.ai_reasoning?.primary_evidence?.device_fingerprint || ''
+
+  const lines = []
+
+  if (vel > 10) {
+    lines.push(`Transaction velocity is ${vel} per minute - a legitimate customer averages 0.5 per day. This account moved money ${vel * 2} times faster than normal, which is a strong indicator of scripted or criminal activity.`)
+  }
+  if (fr > 3) {
+    lines.push(`Fragmentation ratio is ${fr.toFixed(1)} - the account split incoming funds into ${Math.round(fr)} smaller transfers within minutes. Normal accounts do not fragment money this way. This pattern is called "smurfing" and is designed to evade detection thresholds.`)
+  }
+  if (dwell && dwell !== 'unknown') {
+    lines.push(`Money stayed in this account for only ${dwell} before being forwarded. Legitimate customers hold funds for days. A dwell time under 2 minutes means this account was used as a pass-through, not a real account.`)
+  }
+  if (age > 0 && age < 20) {
+    lines.push(`This account was opened only ${age} days ago. New accounts receiving large transfers immediately after creation are a known mule account pattern identified by RBI AML guidelines.`)
+  }
+  if (ip.includes('VPN') || ip.includes('TOR')) {
+    lines.push("Login came from a VPN or anonymized IP address. The account holder's registered address does not match the login location. This indicates the login was not made by the legitimate account holder.")
+  }
+  if (device.includes('mismatch') || device.includes('Spoofed')) {
+    lines.push("The device used to initiate these transactions does not match the device on the account's KYC profile. This is strong evidence that someone other than the account holder was operating this account.")
+  }
+
+  return lines.length > 0
+    ? lines
+    : ['Behavioral pattern analysis indicates suspicious fund movement inconsistent with normal account activity.']
+}
+
 const MuleMetrics = ({ node, isContained = false }) => {
   const { deployNetworkContainment, frozenNodes } = useApp()
   const isFrozen = frozenNodes.includes(node.id) || isContained
@@ -24,6 +58,17 @@ const MuleMetrics = ({ node, isContained = false }) => {
   const velocity = node.velocity || 14
   const fragmentationRatio = node.fragmentation_ratio || 4.2
   const receivedAmount = node.received_amount || 80000
+  const nodeSubtype = node.nodeSubtype
+
+  const subtypeBadge = (() => {
+    if (nodeSubtype === 'COMPROMISED') {
+      return { text: 'COMPROMISED ACCOUNT - Likely innocent person\'s credentials were stolen', tone: 'bg-amber-500/20 text-amber-300 border-amber-400/40' }
+    }
+    if (nodeSubtype === 'EXIT_POINT') {
+      return { text: 'EXIT POINT - Final hop before cash left the network', tone: 'bg-red-950/60 text-red-300 border-red-500/60' }
+    }
+    return { text: 'ACTIVE PARTICIPANT - Behavioral signals indicate willing involvement', tone: 'bg-red-500/20 text-red-300 border-red-400/40' }
+  })()
 
   return (
     <div className="space-y-3">
@@ -39,6 +84,10 @@ const MuleMetrics = ({ node, isContained = false }) => {
               {node.mule_level === 1 ? 'Primary Mule' : node.mule_level === 2 ? 'Secondary Mule' : node.mule_level === 3 ? 'Tertiary Mule' : `Level ${node.mule_level || 1} Mule`}
             </p>
           </div>
+        </div>
+
+        <div className={`rounded-md border px-2 py-1 text-[9px] leading-4 ${subtypeBadge.tone}`}>
+          {subtypeBadge.text}
         </div>
 
         <div className="space-y-2">
@@ -99,20 +148,14 @@ const MuleMetrics = ({ node, isContained = false }) => {
         </div>
 
         <div className="space-y-1.5">
-          {(aiReasoning.evidence || [
-            `Velocity exceeds threshold: ${velocity} tx/min`,
-            `Fragmentation ratio critically high: ${fragmentationRatio}`,
-            'Immediate outward fragmentation detected',
-            'Device IP matches known risky cluster'
-          ]).map((evidence, idx) => (
+          {generateMuleXAIText(node).map((evidence) => (
             <motion.div
-              key={`mule-evidence-${node.id}-${idx}`}
+              key={`mule-evidence-${node.id}-${evidence}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
               className="flex items-start gap-1.5 p-1.5 rounded-md bg-red-950/20 border border-red-500/10"
             >
-              <span className="text-red-400 text-[10px] mt-0.5 flex-shrink-0">⚠</span>
+              <AlertTriangle className="w-3 h-3 text-amber-400 mt-0.5 flex-shrink-0" />
               <span className="text-[10px] text-slate-300 break-words">{evidence}</span>
             </motion.div>
           ))}
@@ -128,33 +171,6 @@ const MuleMetrics = ({ node, isContained = false }) => {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Account Details */}
-      <div className="glass-panel-dark rounded-lg p-3">
-        <h3 className="text-[9px] text-slate-500 mb-2 font-mono">ACCOUNT METADATA</h3>
-        <div className="grid grid-cols-2 gap-2 text-[9px] font-mono">
-          <div className="p-2 rounded-md bg-slate-800/50 min-w-0">
-            <span className="text-slate-500 block mb-0.5">ACCOUNT</span>
-            <span className="text-slate-300 truncate block">{node.account_number}</span>
-          </div>
-          <div className="p-2 rounded-md bg-slate-800/50 min-w-0">
-            <span className="text-slate-500 block mb-0.5">IFSC</span>
-            <span className="text-slate-300 truncate block">{node.ifsc_code}</span>
-          </div>
-          <div className="col-span-2 p-2 rounded-md bg-red-950/30 border border-red-500/20">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">RECEIVED AMOUNT</span>
-              <span className="text-sm font-bold text-red-400">{formatCurrency(receivedAmount)}</span>
-            </div>
-          </div>
-          <div className="col-span-2 p-2 rounded-md bg-slate-800/50">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-500">CURRENT BALANCE</span>
-              <span className="text-amber-400 font-semibold text-[10px]">{formatCurrency(node.current_balance || 12450)}</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Containment Status or Action */}
