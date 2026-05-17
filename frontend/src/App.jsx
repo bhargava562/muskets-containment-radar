@@ -1,4 +1,4 @@
-import { AppProvider } from './context/AppContext'
+import { AppProvider } from './context/AppContextSimplified'
 import MainLayout from './components/layout/MainLayout'
 import LoginPage from './components/auth/LoginPage'
 import { useAuth } from './components/auth/AuthContext'

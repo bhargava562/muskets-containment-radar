@@ -1,30 +1,19 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Target } from 'lucide-react'
-import { useApp, APP_STATES } from '../../context/AppContext'
-import SoftHoldNotification from '../notifications/SoftHoldNotification'
+import { useApp } from '../../context/AppContextSimplified'
 import InvestigationQueue from '../watchtower/InvestigationQueue'
 import RadarCanvas from '../radar/RadarCanvas'
 import ContainmentActionPanel from '../interrogation/ContainmentActionPanel'
 
 const AnalystWorkspace = ({ activeView }) => {
-  const { selectedNode, appState, containedNode } = useApp()
+  const { selectedCaseId } = useApp()
 
-  // Show right panel when node selected or during active states
-  const showRightPanel = selectedNode !== null ||
-    appState === APP_STATES.TRACING ||
-    appState === APP_STATES.INVESTIGATING ||
-    appState === APP_STATES.CONTAINED ||
-    appState === APP_STATES.AUDIT_LOGGED
+  // Show right panel when case is selected
+  const showRightPanel = selectedCaseId !== null
 
   return (
     <div className="h-full w-full relative">
-      {/* Soft Hold Notification */}
-      <SoftHoldNotification
-        appState={appState}
-        containedNode={containedNode}
-      />
-
-      {/* Main Content Based on Active View */}
+      {/* Main Content - Queue View */}
       <AnimatePresence mode="wait">
         {activeView === 'queue' && (
           <motion.div
