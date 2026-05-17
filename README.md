@@ -1,249 +1,264 @@
 <div align="center">
 
 # Muskets
-### Real-Time Fund Lineage Tracer and Investigator Response Engine
+### Post-Detection Containment and Operational Response Platform
 
-> **Stop the stolen money. Without stopping the innocent customer.**
+> **Preserve legitimate customer activity while securing traced funds.**
 
 **IOB Cybernova 2026 — Problem Statement 2: Advanced Controls for Mule Account Detection and AML Compliance**
 
-[![Progress](https://img.shields.io/badge/Status-Prototype_Complete_%7C_Frontend_Deployed_%7C_Backend_Planned-blue?style=for-the-badge)](#)
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel_Deployed-success?style=for-the-badge&logo=vercel)](https://muskets-containment-radar.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-success?style=for-the-badge&logo=vercel)](https://muskets-containment-radar.vercel.app/)
+[![Status](https://img.shields.io/badge/Status-Prototype_Complete-blue?style=for-the-badge)](#)
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Hackathon_Prototype-blueviolet?style=for-the-badge)](https://github.com/)
 
 </div>
 
 ---
 
-## The Problem
+## The Operational Challenge
 
-India recorded **80,465 mule accounts in January 2024**. By June 2025, after MuleHunter.AI was launched in December 2024, that number had grown to **1,47,445 — nearly doubled**. Detection alone did not stop the crime.
+When a suspicious transaction alert fires, funds have typically already moved across multiple accounts within seconds. The operational response that follows determines whether recoverable funds are secured, whether legitimate customers retain access to unaffected balances, and whether the resulting documentation meets regulatory and evidentiary standards.
 
-Why:
+Three operational gaps shape this challenge:
 
-- Most mule accounts are not criminal accounts. They are innocent people's accounts — credentials stolen through digital arrest scams, phishing, and SIM swap attacks. The criminal never uses their own account.
-- When fraud happens, money moves through the innocent person's account in **20 to 90 seconds** before exiting to a foreign account or ATM. After that, recovery is impossible.
-- MuleHunter.AI flags the account after the money has already moved. The investigator then spends **3 to 4 hours per case** manually tracing accounts, writing notes, and filing reports — all while the criminal has already escaped.
-- Today's bank systems freeze the entire account. An innocent merchant who received stolen funds into a 30-lakh account gets the entire account frozen. Their business stops. They file a lawsuit. The bank pays.
-- Only **10 percent of stolen funds are recovered on average** because the investigation response is too slow and too blunt.
-
-| Current System Pain | Criminal Reality |
+| Challenge | Operational Impact |
 |:---|:---|
-| Investigator manually traces across 5 tabs | Criminal moves money in under 90 seconds |
-| Full account freeze destroys innocent merchants | Most mule accounts belong to innocent people whose credentials were stolen |
-| 3 to 4 hours per case investigation | Money reaches foreign accounts before investigation starts |
-| Only 10 percent average fund recovery | Mule count doubled even after detection tool launched |
+| Funds move across 3–5 accounts in under 90 seconds | Investigators require immediate visual clarity of where money went |
+| Innocent account holders may receive stolen funds unknowingly | Restricting an entire account creates a second victim from a legitimate merchant |
+| Investigation, legal review, and customer handling are separate workflows | Without shared case state, each role works from incomplete information |
+| Manual evidence assembly across multiple screens | Investigators spend 3–4 hours per case preparing documentation that could be pre-assembled |
+
+Muskets is designed to address the response layer — the operational workflow that activates after a detection system generates an alert.
 
 ---
 
-## The Solution
+## What Muskets Does
 
-### What Muskets Does
+Muskets is a **post-detection operational response platform**. It does not perform fraud detection. It activates after an alert is generated and streamlines the containment, authorization, and customer handling workflow across three connected roles.
 
-Muskets is the response layer that activates after a fraud detection tool flags an alert. It does not compete with MuleHunter.AI on detection — it picks up where detection ends.
+1. **Pre-assembled evidence** — When an investigator opens a case, the fund lineage graph and AI-prepared summary are already loaded. The investigator reviews and decides — never starting from an empty screen.
 
-When an alert arrives:
+2. **Proportional restriction** — Instead of freezing an entire account, Muskets supports restricting only the traced amount. A merchant with ₹30L in their account who unknowingly received ₹50K in suspicious funds retains access to ₹29.5L.
 
-1. Muskets automatically traces where the money went — building a graph of every account the funds touched, up to 3 account hops within a 15-minute window
-2. Each account in the network is classified based on behavioral signals from the transaction data
-3. The investigator sees the complete fund path on one screen with a recommended action already prepared
-4. The investigator reviews and confirms with one click — AI never acts alone
-5. The action fires: mule accounts are frozen, innocent merchant accounts receive a proportional lien on only the traced amount
-6. A court-admissible PDF is auto-generated containing the raw transaction facts
+3. **Shared case lifecycle** — A single case flows from AML investigation through legal authorization to branch-level customer handling. All three roles operate on the same data in real time.
 
-**The key principle:** AI does all preparation. The investigator holds the final trigger. This is called the **Antigravity Mechanism** — AI lifts the weight up so the investigator never starts from an empty screen.
+4. **Operational documentation** — SAR reports and interbank coordination packets are generated directly from the case data, with audit-ready timelines and integrity hashes.
+
+5. **Human-in-the-loop containment** — No restriction is applied without explicit human approval. The system prepares, recommends, and documents. The investigator decides.
 
 ---
 
-## How Mule Accounts Actually Work
+## Core Innovation
 
-A mule account in the Indian context is not typically a criminal's own account. The criminal scams an innocent person — through fake customer care calls, digital arrest threats, or phishing — and obtains their account credentials. The criminal then logs into the innocent person's account from a different device (causing a device mismatch) and uses it to receive and forward stolen money.
+### Workflow Continuity Engine
 
-This means:
+Muskets introduces a shared case state model where a single containment case progresses through three operational stages. Each role sees only the cases relevant to their function, but all actions are reflected immediately across the platform.
 
-- The account holder is a victim, not a criminal
-- Freezing their entire account makes them a second victim
-- The criminal never appears in the transaction graph — only their footprint does
-- The same compromised account credentials get recycled and reused in new frauds next week if not properly closed
+When an AML Officer approves a partial hold, the case appears instantly in the Compliance Officer's pending review queue. When the Compliance Officer authorizes the restriction, the Branch Manager sees the customer and their restriction details in their assigned cases list. No handoffs are lost. No data is re-entered.
 
-Muskets classifies each account in the fraud network into one of three types:
+### Proportional Restriction Model
 
-- **COMPROMISED:** Account shows device mismatch, VPN or TOR login, first-time occurrence — the account holder is likely innocent and their credentials were stolen
-- **ACTIVE PARTICIPANT:** Account holder's own device initiated transfers — indicates possible willing involvement, requires full investigation
-- **EXIT POINT:** Final node where money left the network — highest priority for law enforcement, ATM location and timestamp available
+Muskets introduces **proportional lien** — restricting only the exact traced amount rather than the full account balance.
 
----
-
-## The Innovation — Three Things No Other AML Tool Does
-
-### Innovation 1 — Proportional Lien Instead of Full Freeze
-
-Every existing AML system has one enforcement instrument: freeze the entire account. Muskets introduces **proportional lien** — freezing only the exact amount of traced stolen funds, not the entire account balance.
-
-**Formula:**
 ```
-LIEN = MIN(current_account_balance, traced_stolen_funds)
+LIEN = MIN(account_balance, traced_amount)
 ```
 
 **Example:**
-- Merchant account balance: ₹30,00,000
-- Stolen funds that landed in this account: ₹50,000
-- **Legacy system action:** Freeze entire ₹30,00,000 → business stops → lawsuit filed
-- **Muskets action:** Lien of ₹50,000 only → ₹29,50,000 remains accessible → business continues at 98% capacity → no lawsuit
+- Merchant account balance: **₹30,00,000**
+- Traced suspicious funds: **₹50,000**
+- Muskets restriction: ₹50,000 only → **₹29,50,000 remains accessible**
+- Business continues at **98.3% capacity** — no disruption to legitimate operations
 
-This formula is simple, auditable, and legally grounded. No black box. Any judge can verify the arithmetic.
+This formula is simple, auditable, and verifiable by any reviewing authority without requiring specialized technical knowledge.
 
----
+### Human-in-the-Loop Containment
 
-### Innovation 2 — Primary Evidence Ledger for Section 63 BSA Compliance
-
-The Bharatiya Sakshya Adhiniyam 2023, Section 63 defines electronic records as admissible evidence only when they contain **primary facts** — the raw data that a system used to arrive at its conclusion. Indian courts have rejected AI fraud scores (like "Risk: 0.94 — Mule") because they are derived conclusions, not primary evidence.
-
-Muskets generates a PDF that shows **primary evidence first:**
-
-- Exact timestamp when money arrived in the account
-- Exact timestamps of every outbound transfer
-- How long money stayed in the account (dwell time)
-- IP address used at login and whether it was a VPN or TOR node
-- Device used at login and whether it matches the account's KYC profile
-- The mathematical formula that produced the risk classification
-
-This is followed by the AI-derived scores as secondary evidence. The court can verify the raw facts and check the arithmetic themselves. They do not need to trust the model.
+Every containment action in Muskets requires explicit human confirmation. The platform can prepare evidence, recommend actions, and pre-compute restriction amounts — but it cannot act. This design constraint ensures that human accountability is preserved at every stage, and that incorrect recommendations can be rejected before any operational impact occurs.
 
 ---
 
-### Innovation 3 — Antigravity Investigator Workflow
-
-**Current investigator workflow:** receive alert → open 5 tabs → manually trace accounts → write notes in Word → type SAR → submit to RBI. **Estimated time: 3 to 4 hours per case.**
-
-**Muskets workflow:** receive alert → click Initialize Trace → graph builds automatically → review pre-loaded evidence → click confirm → PDF generated automatically. **Estimated time: 10 to 15 minutes per case.**
-
-The design principle is called **Antigravity:** AI does all preparation before the investigator opens the case. The investigator's job is only to review and approve. AI never acts without human confirmation — so if the AI is wrong, the investigator can reject the recommendation and the system does nothing. No permanent action ever fires without a human decision.
-
----
-
-## How It Works — Step by Step
+## The 3-Step Workflow
 
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> MONITORING : Live Transaction Ingestion
-    MONITORING --> THREAT_DETECTED : Z-Score Anomaly Fires
-    THREAT_DETECTED --> INVESTIGATING : Investigator Clicks Initialize Trace, BFS Graph Builds
-    INVESTIGATING --> CONTAINED : Investigator Confirms — Proportional Lien and Freeze Deployed
-    CONTAINED --> AUDIT_LOGGED : SHA-256 Hash Generated, Section 63 PDF Ready
-    AUDIT_LOGGED --> MONITORING : Case Closed, Resume Monitoring
+    [*] --> PENDING_TRIAGE : Alert Received
+    PENDING_TRIAGE --> AWAITING_LEGAL_REVIEW : AML Officer Approves Partial Hold
+    AWAITING_LEGAL_REVIEW --> RESTRICTION_ACTIVE : Compliance Officer Authorizes Restriction
+    RESTRICTION_ACTIVE --> [*] : Branch Handles Customer Continuity
 ```
 
-| Step | Module | Action | Implementation Status |
+| Step | Role | Action | Outcome |
 |:---:|:---|:---|:---|
-| **Step 1** | **Watchtower** | Transaction feed monitors all incoming transactions. Z-score anomaly detection fires when a transaction is significantly above the account's historical average. | **Prototype:** Simulated via mock data stream |
-| **Step 2** | **Lineage Trace** | BFS graph extraction traces where flagged funds moved — up to 3 account hops within a 15-minute window. Graph builds node by node showing victim, mule accounts, and merchant exits. | **Prototype:** Rendered in 900ms using react-force-graph-2d |
-| **Step 3** | **Classification** | Each node in the graph is classified as COMPROMISED, ACTIVE, EXIT POINT, or PASSIVE INNOCENT based on velocity, fragmentation ratio, dwell time, IP telemetry, and device mismatch signals. | **Prototype:** Deterministic rule-based heuristics |
-| **Step 4** | **Containment** | Investigator reviews pre-loaded evidence and confirms. Mule accounts are frozen. Merchant accounts receive proportional lien of MIN(balance, traced_funds). SMS notification sent to account holder. | **Prototype:** Simulated — real implementation needs Finacle API |
-| **Step 5** | **Audit** | SHA-256 hash of all containment decisions generated. Section 63 compliant PDF with primary evidence ledger exported. Case pushed to DPIP network. | **Prototype:** PDF generation implemented with jspdf |
+| 1 | **AML Officer** | Reviews flagged case, views fund graph, approves partial hold | Case moves to legal review |
+| 2 | **Compliance Officer** | Validates audit trail, generates SAR, authorizes restriction | Restriction becomes active |
+| 3 | **Branch Manager** | Explains restriction to customer, collects clarification docs | Customer continuity maintained |
 
 ---
 
-## The Mathematics — Only What Is Actually Implemented
+## Workspace Architecture
 
-### Deterministic Heuristics (No Black Box)
+### AML Officer Workspace
 
-Every classification decision in Muskets uses explicit, auditable formulas. There is no trained machine learning model in the current prototype. All signals are computed from raw transaction fields in the dataset. This is intentional — **deterministic math is legally defensible**. An AI score requires a data scientist to explain in court. A formula requires only arithmetic.
+The primary operational workspace where most product value is concentrated.
 
----
+**What the officer sees:**
+- **Priority Queue** — Cases ranked P1 (Critical), P2 (High), P3 (Medium) with live elapsed-time counters. The highest-risk cases surface first.
+- **Fund Lineage Graph** — A force-directed network visualization showing the path of traced funds: Victim → Mule accounts → Merchant exits. Nodes are color-coded (blue for victims, red for mules, green for merchants).
+- **AI Summary** — A pre-assembled one-line description of the incident pattern, including amounts, account counts, and timing.
+- **Impact Comparison** — Side-by-side display of two containment options:
+  - *Option A: Full Freeze* — Entire account balance blocked, business stops, lawsuit risk
+  - *Option B: Partial Lien (Recommended)* — Only traced amount restricted, business continues
 
-#### Formula 1: Z-Score Anomaly Trigger
+**Key action:** The officer clicks **Approve Partial Hold**. The case transitions to `AWAITING_LEGAL_REVIEW` and appears instantly in the Compliance workspace.
 
-```
-Z = (x - μ) / σ
-```
-
-**Variables:**
-- `x` = current transaction amount
-- `μ` = historical mean amount for this account (from account profile)
-- `σ` = historical standard deviation for this account
-- **Threshold:** `|Z| > 3.0` triggers lineage trace
-
-**Plain English:** If a transaction is more than 3 standard deviations above what this account normally receives, it is flagged as anomalous.
+**Why it matters:** The investigator never manually traces accounts, never assembles evidence from scratch, and never starts from an empty screen. Time per case is reduced from hours to minutes.
 
 ---
 
-#### Formula 2: Fragmentation Ratio
+### Compliance Officer Workspace
 
-```
-FR = outbound_splits_within_10_minutes / historical_daily_average_splits
-```
+A governance and authorization workspace. The investigation is already complete — this workspace exists for structured legal review and documentation.
 
-**Threshold:** `FR > 3.0` is a strong mule signal
+**What the officer sees:**
+- **Pending Reviews Table** — Clean enterprise data table showing all cases awaiting legal sign-off, including case ID, customer name, traced amount, approving analyst, and timestamp.
+- **Audit Timeline** — Vertical stepper showing the chronological history: Alert Received → Trace Completed → Analyst Approved → Awaiting Authorization.
+- **Case Governance Panel** — Summary of the analyst's reasoning, financial breakdown, and recommended action.
 
-**Plain English:** A normal customer splits their money once every few days on average. An account that receives funds and immediately splits them into 4 or more transfers within minutes has a fragmentation ratio 8 to 20 times above normal. This is the smurfing pattern.
+**Key actions:**
+- **Generate SAR PDF** — Suspicious Activity Report with full audit trail, transaction details, and integrity hash
+- **Export DPIP Interbank Packet** — Standardized operational packet for interbank coordination workflows
+- **Authorize & Finalize Restriction** — Transitions the case to `RESTRICTION_ACTIVE`
 
-**Example:** Historical average 0.5 splits per day. Current: 4 splits in 2 minutes. `FR = (4 / (2/1440)) / 0.5 = displayed as 8.0 in the UI`.
-
----
-
-#### Formula 3: Propagation Velocity
-
-```
-Velocity = outbound_transactions / time_window_minutes
-```
-
-**Displayed as:** transactions per minute
-
-**Threshold:** `> 10 per minute` combined with `FR > 3.0` confirms active mule pattern
-
-**Plain English:** Innocent people let money sit. Criminals move it in seconds. A velocity of 14 transactions per minute means the account processed more transactions in one minute than a normal customer processes in a month.
+**Why it matters:** Compliance teams receive pre-structured documentation with complete audit trails. No manual report assembly is required. Export formats support regulatory reporting workflows.
 
 ---
 
-#### Formula 4: Dwell Time
+### Branch Manager Workspace
 
-```
-Dwell Time = timestamp_of_first_outbound - timestamp_of_incoming_transfer
-```
+A customer-facing operational continuity workspace. Branch staff handle the human side of containment — communicating with affected customers and collecting clarification documents.
 
-**Displayed as:** seconds or minutes
+**What the manager sees:**
+- **Assigned Customer Cases** — List of customers with active restrictions who may visit the branch. Each card shows the customer name, restricted amount, available balance, and a visual impact bar.
+- **Restriction Explanation** — Pre-written communication template: *"A proportional restriction has been placed on this account as part of an ongoing investigation. Essential banking services remain fully active."*
+- **Impact Visibility** — Visual breakdown showing restricted funds vs. available balance, so branch staff can clearly communicate what remains accessible.
 
-**Threshold:** `< 5 minutes` is high suspicion, `< 2 minutes` is critical
+**Key actions:**
+- **Upload Clarification Documents** — Drag-and-drop zone for KYC documents, invoices, or GST proofs provided by the customer
+- **Escalate for Central Review** — Send the case back to the central AML team with notes if the customer disputes the restriction
 
-**Plain English:** Normal bank customers receive money and let it sit for days before spending. An account that receives ₹70,000 and forwards it within 33 seconds was not being used as a real account — it was a money relay.
+**Operational constraint:** Branch staff **cannot** modify or release restrictions. All restriction decisions are managed exclusively by AML and Compliance teams. This separation ensures that containment integrity is maintained at the branch level.
 
----
-
-#### Formula 5: Proportional Lien
-
-```
-LIEN = MIN(current_account_balance, traced_stolen_funds)
-```
-
-This is the only enforcement calculation in the system. No other formula drives containment decisions. **Human investigator must confirm before any lien or freeze is applied.**
+**Why it matters:** When a customer walks into a branch asking "Why is my account restricted?", the branch manager has immediate access to the explanation, the financial impact breakdown, and a clear escalation path — without needing to contact the central team first.
 
 ---
 
-## What Is Built vs What Is Planned
+## Fund Lineage Visualization
 
-| Feature | Status | Notes |
-|:---|:---|:---|
-| Transaction anomaly detection | **Built — prototype** | Rule-based Z-score on mock data stream. No real Kafka connection. |
-| BFS fund lineage graph | **Built — prototype** | react-force-graph-2d with 4 mock graph topologies. Real implementation needs Neo4j or in-memory graph store. |
-| Node classification (Compromised / Active / Exit Point) | **Built — prototype** | Deterministic heuristics from transaction fields. No ML model trained. |
-| Proportional lien formula | **Built — prototype** | MIN(balance, traced) computed from mock data fields and displayed to investigator. |
-| Investigator triage state machine | **Built — prototype** | 5-state machine fully implemented in React context. |
-| Section 63 PDF export | **Built — prototype** | Primary evidence ledger + derived matrix + SHA-256 hash. jspdf implementation complete. |
-| Login and role-based access | **Built — prototype** | Mock authentication with three investigator roles. No real auth backend. |
-| SMS notification to account holder | **Built — prototype** | Simulated popup when lien is placed. No real SMS gateway. |
-| DPIP network push | **Simulated** | Button exists but does nothing real. Requires RBI DPIP API access. |
-| Real-time Kafka stream | **Not built** | Prototype uses simulated transaction stream with mock data cycling. |
-| Core banking API integration | **Not built** | Finacle webhook integration required for real freeze and lien enforcement. |
-| Neo4j graph database | **Not built** | Prototype uses in-memory JSON. Production requires persistent graph store. |
-| Cross-bank tracing | **Not built** | Muskets currently traces only within a single bank's transaction network. Inter-bank requires DPIP hash token sharing. |
-| Foreign account recovery | **Not applicable** | Once funds reach a foreign account they are outside the reach of any domestic AML system. Muskets does not claim to solve this. |
+Muskets provides an operational evidence visualization that displays the path of traced funds through the account network.
+
+Each case is associated with a graph structure showing:
+- **Victim nodes** (blue) — Source accounts from which funds were diverted
+- **Mule nodes** (red) — Intermediate accounts used to relay funds
+- **Merchant nodes** (green) — Downstream accounts that received funds, often belonging to legitimate businesses
+
+The graph is rendered as an interactive force-directed network. Investigators can pan, zoom, and inspect individual nodes to understand the fund path before making a containment decision.
+
+This visualization replaces the manual process of opening multiple banking tabs and tracing transactions sequentially. The complete fund path is assembled and displayed in one view.
+
+---
+
+## Proportional Restriction Logic
+
+Muskets uses a single, transparent formula for all restriction calculations:
+
+```
+LIEN = MIN(account_balance, traced_amount)
+```
+
+| Variable | Meaning |
+|:---|:---|
+| `account_balance` | Current balance of the account being restricted |
+| `traced_amount` | Total suspicious funds traced to this account |
+
+**Plain English:** The restricted amount never exceeds either the traced suspicious funds or the actual account balance — whichever is smaller. This ensures that restrictions are mathematically proportional and that no account is over-restricted.
+
+**Example:**
+
+| Scenario | Account Balance | Traced Funds | Restriction | Available |
+|:---|:---:|:---:|:---:|:---:|
+| Merchant received partial stolen funds | ₹30,00,000 | ₹50,000 | ₹50,000 | ₹29,50,000 |
+| Mule account nearly emptied | ₹8,200 | ₹60,000 | ₹8,200 | ₹0 |
+
+This formula is auditable, verifiable without specialized knowledge, and requires human confirmation before application.
+
+---
+
+## SAR and DPIP Workflow
+
+### Suspicious Activity Report (SAR)
+
+The Compliance workspace generates SAR PDFs directly from case data. Each report includes:
+
+- Case identification and priority classification
+- AI-prepared incident summary
+- Financial breakdown (risk amount, traced amount, containment action)
+- Analyst who approved the containment and timestamp
+- Audit timeline (alert → trace → approval → authorization)
+- SHA-256 integrity hash for tamper detection
+
+### DPIP Interbank Coordination Packet
+
+For cases involving accounts across multiple banks, the Compliance workspace exports a standardized operational packet containing:
+
+- Case reference and traced amount
+- Affected account numbers and recommended hold types
+- Incident summary for recipient bank coordination
+
+Muskets generates these packets in a structured format designed for interbank operational sharing workflows. The prototype simulates packet generation; production deployment would integrate with DPIP API infrastructure.
+
+---
+
+## Compliance Alignment
+
+| Regulation | Muskets Support |
+|:---|:---|
+| **BSA 2023, Section 63** | Exports primary evidence (timestamps, amounts, fund paths) before derived conclusions. Audit trail with SHA-256 hash supports electronic record admissibility. |
+| **RBI Fraud Risk Management 2024** | SAR generation with audit timelines supports prescribed reporting workflows. |
+| **PMLA Section 12AA** | Proportional lien secures recoverable funds without disproportionate impact on third parties. |
+| **Human Accountability** | No automated restriction without explicit investigator confirmation. Every action logged with operator identity and timestamp. |
+
+---
+
+## Frontend Architecture
+
+The prototype implements workflow continuity using React Context shared state. All three workspaces read from and write to the same cases array. When one role updates a case status, the change is immediately visible to the other roles.
+
+```mermaid
+graph TD
+    A["Mock Data (JSON)"] -->|initializes| B["React Context (Shared State)"]
+    B -->|PENDING_TRIAGE cases| C[AML Workspace]
+    B -->|AWAITING_LEGAL_REVIEW cases| D[Compliance Workspace]
+    B -->|RESTRICTION_ACTIVE cases| E[Branch Workspace]
+    C -->|approveContainment| B
+    D -->|finalizeRestriction| B
+    F[Auth Context] -->|role| G[MainLayout]
+    G -->|routes by role| C
+    G -->|routes by role| D
+    G -->|routes by role| E
+```
+
+**Key design decisions:**
+- A single `cases` array is the source of truth for all workspaces
+- Status transitions (`PENDING_TRIAGE` → `AWAITING_LEGAL_REVIEW` → `RESTRICTION_ACTIVE`) drive which workspace displays which cases
+- No backend is required for the prototype — all state lives in the browser session
+- Graph structures are loaded from static JSON keyed by case ID
+- Role-based rendering is handled through a lightweight auth context
 
 ---
 
@@ -251,86 +266,79 @@ This is the only enforcement calculation in the system. No other formula drives 
 
 | Layer | Technology | Purpose |
 |:---|:---|:---|
-| **Frontend UI** | React 19 + Vite 8 | Component architecture and state management |
-| **Styling** | TailwindCSS 4 + custom glassmorphism | Dark forensic dashboard aesthetic |
-| **Graph Visualization** | react-force-graph-2d (HTML5 Canvas) | Force-directed fund lineage network rendering |
-| **Animation** | framer-motion | Smooth state transitions and cascade animations |
-| **PDF Generation** | jspdf + jspdf-autotable | Section 63 compliant SAR report generation |
-| **State Management** | React Context API | 5-state triage machine |
-| **Icons** | lucide-react | Consistent iconography |
-| **Mock Data** | JSON static file | 4 fraud network topologies with realistic transaction fields |
-| **Deployment** | Vercel | Static SPA deployment |
+| **UI Framework** | React 19 + Vite 8 | Component architecture and state management |
+| **Styling** | TailwindCSS 4 | Utility-first responsive design |
+| **Graph Rendering** | react-force-graph-2d | Force-directed fund lineage visualization |
+| **Animation** | Framer Motion | Smooth workspace transitions and case animations |
+| **PDF Generation** | jsPDF + jsPDF-AutoTable | SAR and DPIP packet export |
+| **State Management** | React Context API | Shared case lifecycle across all workspaces |
+| **Icons** | Lucide React | Consistent operational iconography |
+| **Deployment** | Vercel | Static single-page application hosting |
 
-### Planned Backend (Not Built)
+---
 
-| Layer | Technology | Purpose |
+## What Is Built vs. What Is Planned
+
+| Feature | Status | Notes |
 |:---|:---|:---|
-| **Event Streaming** | Apache Kafka | Real-time transaction event streaming |
-| **Graph Database** | Neo4j | Graph database for fund lineage persistence |
-| **API Layer** | Spring Boot 3 | REST API and Finacle webhook handler |
-| **AI Engine** | FastAPI + Python | AI scoring engine (future ML integration) |
-| **Audit Storage** | PostgreSQL | WORM audit log storage |
-| **Cache** | Redis | Account profile baseline cache |
+| 3-role operational workflow | **Built — prototype** | AML → Compliance → Branch with shared state |
+| Priority-based investigation queue | **Built — prototype** | P1/P2/P3 ranking with live elapsed timers |
+| Fund lineage graph visualization | **Built — prototype** | 5 graph topologies with color-coded nodes |
+| Proportional lien comparison | **Built — prototype** | Full Freeze vs. Partial Lien side-by-side |
+| SAR PDF generation | **Built — prototype** | Audit timeline + financial breakdown + SHA-256 hash |
+| DPIP interbank packet export | **Built — prototype** | Structured PDF with account-level freeze instructions |
+| Role-based workspace routing | **Built — prototype** | Mock auth with three roles |
+| Branch customer handling | **Built — prototype** | Restriction explanation, doc upload, escalation |
+| Real-time transaction ingestion | **Not built** | Prototype uses static mock data. Requires Kafka or equivalent. |
+| Core banking API integration | **Not built** | Real lien/freeze enforcement requires Finacle or core banking API. |
+| Graph database persistence | **Not built** | Prototype uses in-memory JSON. Production requires Neo4j or equivalent. |
+| Cross-bank tracing | **Not built** | Inter-bank fund tracing requires DPIP API access. |
+| Production authentication | **Not built** | Real deployment requires SSO/LDAP integration. |
 
 ---
 
-## Compliance and Legal Alignment
-
-### Point 1 — Bharatiya Sakshya Adhiniyam 2023, Section 63
-
-Electronic records are admissible as evidence if they are generated by a system that was functioning correctly, contain primary facts (not just derived conclusions), and have an audit trail. Muskets exports a PDF that satisfies all three conditions: raw transaction timestamps and amounts as primary facts, the deterministic formula that produced each classification, and a SHA-256 cryptographic hash that detects any tampering.
-
-### Point 2 — RBI Master Direction on Fraud Risk Management 2024
-
-Requires banks to report fraud within prescribed timelines, maintain audit trails for all fraud-related actions, and file Suspicious Activity Reports. The Muskets SAR export is structured to align with this reporting requirement.
-
-### Point 3 — PMLA Section 12AA
-
-Protects fraud victims and requires banks to take steps to recover misappropriated funds. The proportional lien mechanism is designed to secure recoverable funds without causing disproportionate harm to third parties who received funds unknowingly.
-
-### Point 4 — Antigravity Compliance Principle
-
-No automated system should freeze or lien an account without human approval. Muskets enforces this as a design constraint — every containment action requires explicit investigator confirmation. The system can suggest, prepare, and pre-compute, but it cannot act. This keeps humans accountable and legally defensible.
-
----
-
-## Deployment Setup
+## Demo Walkthrough
 
 ### Quick Start
 
 ```bash
-git clone https://github.com/[your-repo]/muskets-pfce.git
-cd muskets-pfce/frontend
+git clone https://github.com/bhargava562/muskets-containment-radar.git
+cd muskets-containment-radar/frontend
 npm install
 npm run dev
 ```
 
-Then open `http://localhost:5173`
+Open `http://localhost:5173`
 
-**Demo login:** any Employee ID, any password, select role **Fraud Investigator**
+### Walkthrough
 
-### Available Scripts
+**Step 1 — AML Officer**
 
-```bash
-npm run dev      # Development server with hot reload
-npm run build    # Production build
-npm run preview  # Preview production build locally
-npm run lint     # Lint check
-```
+Login with any Employee ID, any password, role: **AML Compliance Officer**
 
----
+- See 3 cases in the priority queue (2× P1 Critical, 1× P2 High)
+- Click a P1 case → fund lineage graph loads in the center panel
+- Review the AI summary and impact comparison in the right panel
+- Click **Approve Partial Hold** → case disappears from queue with animation
 
-## Known Limitations
+**Step 2 — Compliance Officer**
 
-1. All transaction data is simulated from a static JSON file. No real bank transaction feed is connected.
+Logout → Login with role: **Legal & Principal Officer**
 
-2. The Z-score threshold (`|Z| > 3.0`) and fragmentation ratio threshold (`FR > 3.0`) are chosen based on AML literature and RBI guidelines but are not calibrated against a real Indian banking dataset. Real deployment would require threshold tuning against historical fraud cases.
+- See the newly approved case in the Pending Reviews table
+- Click the case row to view the audit timeline and governance details
+- Click **Generate SAR PDF** → PDF downloads with full evidence bundle
+- Click **Authorize & Finalize Restriction** → case moves to active
 
-3. Classification of COMPROMISED versus ACTIVE PARTICIPANT is based on device mismatch and IP signals from the mock data. In reality, this signal requires access to the bank's core banking system login records, which are not available in the prototype.
+**Step 3 — Branch Manager**
 
-4. The SHA-256 hash in the PDF is generated client-side from a random string. In production it would be a cryptographic hash of the actual containment decision data stored in a WORM database.
+Logout → Login with role: **Branch Manager**
 
-5. Cross-bank tracing is not implemented. The graph shows only accounts within the traced network from the mock data. Real inter-bank tracing requires DPIP API access.
+- See the restricted customer in the Assigned Cases list
+- Click the customer → see restriction explanation and impact visualization
+- View the animated bar showing restricted funds (amber) vs. available balance (green)
+- Upload clarification documents or escalate for central review
+- Note: no option to release or modify the restriction exists
 
 ---
 
@@ -338,17 +346,30 @@ npm run lint     # Lint check
 
 | Phase | Description | Duration |
 |:---|:---|:---:|
-| **Phase 1 (Pilot)** | Shadow mode deployment in parallel with existing AML system. No enforcement actions. Measure detection accuracy against real investigator outcomes. | 60 days |
-| **Phase 2 (Integration)** | Connect to Finacle webhook for real transaction events. Connect to Neo4j for graph persistence. Human-approved lien enforcement via core banking API. | 45 days |
-| **Phase 3 (Tuning)** | Investigator feedback loop. Threshold calibration from real case outcomes. SAR export tested with compliance team and legal team. | 60 days |
-| **Phase 4 (Scale)** | Multi-bank DPIP integration. Kubernetes deployment. National-scale rollout. | 90 days |
+| **Phase 1 — Shadow Mode** | Deploy alongside existing AML workflow. No enforcement. Measure operational alignment with real investigator outcomes. | 60 days |
+| **Phase 2 — Integration** | Connect to core banking API for real transaction events. Integrate Neo4j for graph persistence. Enable human-approved lien enforcement. | 45 days |
+| **Phase 3 — Calibration** | Investigator feedback loop. SAR export validation with compliance and legal teams. Threshold tuning against historical case data. | 60 days |
+| **Phase 4 — Scale** | Multi-bank DPIP integration. Kubernetes deployment for institutional-scale operations. | 90 days |
+
+---
+
+## Known Limitations
+
+1. All case and transaction data is simulated from a static JSON file. No real banking data feed is connected.
+
+2. The SHA-256 hash in exported PDFs is generated client-side. In production, this would be a cryptographic hash of actual containment decision data stored in a write-once audit database.
+
+3. Cross-bank fund tracing is not implemented. The graph shows only accounts within the simulated network. Real inter-bank tracing requires DPIP API access.
+
+4. The proportional lien is displayed and recommended but not enforced against a real core banking system. Production deployment requires Finacle or equivalent API integration.
 
 ---
 
 <div align="center">
 
-**Built for IOB Cybernova Hackathon 2026 — Problem Statement 2: Advanced Controls for Mule Account Detection and AML Compliance**
+**Built for IOB Cybernova Hackathon 2026**
+Problem Statement 2: Advanced Controls for Mule Account Detection and AML Compliance
 
-*The goal of Muskets is not to replace human investigators. It is to make sure they never start from an empty screen.*
+*Muskets is designed to ensure investigators never begin from an empty operational screen.*
 
 </div>
