@@ -182,15 +182,18 @@ const MerchantMetrics = ({ node, isContained = false }) => {
           </div>
         </motion.div>
       ) : (
-        <motion.button
-          onClick={handleContainment}
-          className="w-full py-2.5 px-4 rounded-lg btn-freeze text-white font-bold text-xs flex items-center justify-center gap-2"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Shield className="w-4 h-4" />
-          DEPLOY PROPORTIONAL LIEN
-        </motion.button>
+        <div className="relative">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/30 to-emerald-500/30 rounded-lg blur opacity-75 animate-pulse" />
+          <motion.button
+            onClick={handleContainment}
+            className="relative w-full py-3 px-4 rounded-lg bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/30 border border-cyan-500/50"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Shield className="w-5 h-5" />
+            APPROVE PARTIAL HOLD
+          </motion.button>
+        </div>
       )}
     </div>
   )

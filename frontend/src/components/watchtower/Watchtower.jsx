@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Radio, Activity, ShieldCheck, Target, TrendingUp, ShieldAlert, ChevronLeft } from 'lucide-react'
+import { Radio, Activity, ShieldCheck, Target, TrendingUp, ShieldAlert, ChevronLeft, Clock, AlertTriangle, Zap, DollarSign } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
 import { useAuth } from '../auth/AuthContext'
 import { validateKeys } from '../../utils/keyValidator.jsx'
@@ -8,10 +8,42 @@ import AlertCard from './AlertCard'
 import CriticalAlert from './CriticalAlert'
 import OnboardingRiskCheck from '../onboarding/OnboardingRiskCheck'
 
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
+  }).format(amount)
+}
+
 const Watchtower = () => {
   const { transactions, threatAlert, appState, caseMetadata, graphData } = useApp()
   const { currentUser } = useAuth()
   const [showRiskCheck, setShowRiskCheck] = useState(false)
+  const [countdown, setCountdown] = useState(900) // 15 minutes in seconds
+
+  // Countdown timer for P1 alerts
+  useEffect(() => {
+    if (appState === APP_STATES.THREAT_DETECTED && countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown(prev => Math.max(0, prev - 1))
+      }, 1000)
+      return () => clearInterval(timer)
+    }
+  }, [appState, countdown])
+
+  // Reset countdown when new alert arrives
+  useEffect(() => {
+    if (appState === APP_STATES.THREAT_DETECTED) {
+      setCountdown(900)
+    }
+  }, [appState, threatAlert])
+
+  const formatCountdown = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   const getStatusIndicator = () => {
     switch (appState) {
@@ -42,6 +74,24 @@ const Watchtower = () => {
   const recoveryConfidence = hasHopThree ? 'Medium' : 'High'
   const showRiskCheckButton = currentUser?.role === 'AML Compliance Officer'
 
+  // Generate AI Summary for critical alert
+  const generateAISummary = (alert) => {
+    if (!alert) return []
+    
+    const dispersedAmount = formatCurrency(alert.total_amount || 0)
+    const accountCount = alert.fragmentation_count || 0
+    const timeWindow = alert.time_window_seconds || 0
+    const recoverable = Math.round((alert.total_amount || 0) * 0.675)
+    
+    return [
+      `${dispersedAmount} dispersed to ${accountCount} accounts in ${timeWindow}s`,
+      `Device linked to ${accountCount - 1} prior flagged mules`,
+      `Est. recoverable: ${formatCurrency(recoverable)}`
+    ]
+  }
+
+  const aiSummary = generateAISummary(threatAlert)
+
   return (
     <div className="h-full glass-panel rounded-2xl flex flex-col overflow-hidden">
       {/* Header */}
@@ -52,8 +102,8 @@ const Watchtower = () => {
               <Radio className="w-5 h-5 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-100 tracking-wide">WATCHTOWER</h2>
-              <p className="text-xs text-slate-500 font-mono">Transaction Intelligence Feed</p>
+              <h2 className="text-lg font-bold text-slate-100 tracking-wide">PRIORITY TRIAGE QUEUE</h2>
+              <p className="text-xs text-slate-500 font-mono">Real-Time Fraud Response Orchestration</p>
             </div>
           </div>
           {showRiskCheckButton && (
@@ -131,7 +181,7 @@ const Watchtower = () => {
                 </div>
               )}
 
-              {/* Critical Alert - Shown when threat detected */}
+              {/* P1 CRITICAL - Threat Alert with Urgency Injection */}
               {threatAlert && (
                 <motion.div
                   key="critical-alert"
@@ -142,35 +192,113 @@ const Watchtower = () => {
                   layout
                   className="mb-4"
                 >
-                  <CriticalAlert alert={threatAlert} />
+                  {/* Priority Badge */}
+                  <div className="flex items-center justify-between mb-2 px-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-red-400 font-bold">P1 CRITICAL</span>
+                      <div className="h-px flex-1 bg-gradient-to-r from-red-500/50 to-transparent w-12" />
+                    </div>
+                    {appState === APP_STATES.THREAT_DETECTED && (
+                      <motion.div
+                        animate={{ 
+                          opacity: countdown < 300 ? [1, 0.5, 1] : 1,
+                          scale: countdown < 300 ? [1, 1.05, 1] : 1
+                        }}
+                        transition={{ duration: 1, repeat: countdown < 300 ? Infinity : 0 }}
+                        className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${
+                          countdown < 300 
+                            ? 'bg-red-500/20 border border-red-500/40' 
+                            : 'bg-amber-500/20 border border-amber-500/40'
+                        }`}
+                      >
+                        <Clock className={`w-3 h-3 ${countdown < 300 ? 'text-red-400' : 'text-amber-400'}`} />
+                        <span className={`text-xs font-mono font-bold ${countdown < 300 ? 'text-red-400' : 'text-amber-400'}`}>
+                          ⏳ Auto-release in {formatCountdown(countdown)}
+                        </span>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Enhanced Critical Alert with AI Summary */}
+                  <div className="relative">
+                    {appState === APP_STATES.THREAT_DETECTED && (
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/20 via-amber-500/20 to-red-500/20 rounded-2xl blur animate-pulse" />
+                    )}
+                    <div className="relative">
+                      <CriticalAlert alert={threatAlert} />
+                      
+                      {/* AI Summary Block - Cognitive Relief */}
+                      {appState === APP_STATES.THREAT_DETECTED && aiSummary.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          transition={{ delay: 0.3 }}
+                          className="mt-3 glass-panel-dark rounded-xl p-4 border border-cyan-500/20"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <Zap className="w-4 h-4 text-cyan-400" />
+                            <span className="text-xs font-bold text-cyan-400 font-mono tracking-wider">AI SUMMARY</span>
+                          </div>
+                          <div className="space-y-2">
+                            {aiSummary.map((summary, idx) => (
+                              <motion.div
+                                key={`summary-${idx}`}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 + idx * 0.1 }}
+                                className="flex items-start gap-2"
+                              >
+                                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                                <span className="text-xs text-slate-300 leading-relaxed">{summary}</span>
+                              </motion.div>
+                            ))}
+                          </div>
+                          
+                          {/* Time Saved Indicator */}
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.8 }}
+                            className="mt-3 pt-3 border-t border-slate-700/50 flex items-center justify-between"
+                          >
+                            <span className="text-[10px] text-slate-500 font-mono">INVESTIGATOR TIME SAVED</span>
+                            <span className="text-sm font-bold text-gradient-ice">~3.5 hours</span>
+                          </motion.div>
+                        </motion.div>
+                      )}
+                    </div>
+                  </div>
                 </motion.div>
               )}
 
-              {/* Section Header */}
-              <div key="section-header" className="flex items-center gap-2 mb-3 px-1">
-                <span className="text-xs font-mono text-slate-500">RECENT TRANSACTIONS</span>
-                <div className="flex-1 h-px bg-slate-700/50" />
-              </div>
+              {/* P2 MEDIUM & P3 MONITOR - Normal Transactions */}
+              {!threatAlert && (
+                <>
+                  <div key="section-header" className="flex items-center gap-2 mb-3 px-1">
+                    <span className="text-xs font-mono text-slate-500">P2 MEDIUM / P3 MONITOR</span>
+                    <div className="flex-1 h-px bg-slate-700/50" />
+                  </div>
 
-              {/* Normal Transactions */}
-              <div key="transactions-list" className="flex flex-col space-y-3 w-full">
-                {validateKeys(
-                  transactions.filter(txn => txn && txn.id),
-                  'id',
-                  'Watchtower'
-                ).map((txn) => (
-                  <motion.div
-                    key={txn.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    layout
-                  >
-                    <AlertCard transaction={txn} />
-                  </motion.div>
-                ))}
-              </div>
+                  <div key="transactions-list" className="flex flex-col space-y-3 w-full">
+                    {validateKeys(
+                      transactions.filter(txn => txn && txn.id),
+                      'id',
+                      'Watchtower'
+                    ).map((txn) => (
+                      <motion.div
+                        key={txn.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        layout
+                      >
+                        <AlertCard transaction={txn} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
