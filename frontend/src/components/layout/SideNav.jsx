@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion'
-import { Inbox, Shield, FileText, Users, BarChart3, LogOut, Scale } from 'lucide-react'
+import { Inbox, Shield, FileText, Users, BarChart3, LogOut, Scale, RotateCcw } from 'lucide-react'
 import { useState } from 'react'
 import { useApp, CASE_STATUS } from '../../context/AppContextSimplified'
 import { useAuth } from '../auth/AuthContext'
 
 const SideNav = ({ activeView, onViewChange, role }) => {
   const [isExpanded, setIsExpanded] = useState(false)
-  const { getCasesByStatus } = useApp()
+  const { getCasesByStatus, resetDatabase } = useApp()
   const { logout } = useAuth()
 
   // Live case counts for badges
@@ -134,6 +134,23 @@ const SideNav = ({ activeView, onViewChange, role }) => {
             {getRoleShort()}
           </motion.span>
         </div>
+
+        {/* Demo Reset */}
+        <motion.button
+          onClick={() => { resetDatabase(); logout(); }}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:text-amber-400 hover:bg-amber-500/10 transition-all w-full"
+          whileTap={{ scale: 0.97 }}
+        >
+          <RotateCcw className="w-3.5 h-3.5 flex-shrink-0" />
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isExpanded ? 1 : 0 }}
+            transition={{ duration: 0.15 }}
+            className="text-[10px] font-medium whitespace-nowrap"
+          >
+            Reset Demo
+          </motion.span>
+        </motion.button>
 
         {/* Logout */}
         <motion.button

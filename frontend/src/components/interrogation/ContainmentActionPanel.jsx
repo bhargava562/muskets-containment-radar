@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ShieldCheck, ShieldAlert, Lock, Unlock, Sparkles } from 'lucide-react'
 import { useApp } from '../../context/AppContextSimplified'
@@ -12,6 +13,7 @@ const formatCurrency = (amount) => {
 
 const ContainmentActionPanel = () => {
   const { getSelectedCase, approveContainment } = useApp()
+  const [isApproving, setIsApproving] = useState(false)
   const caseData = getSelectedCase()
 
   if (!caseData) {
@@ -23,7 +25,12 @@ const ContainmentActionPanel = () => {
   }
 
   const handleApprove = () => {
-    approveContainment(caseData.id)
+    if (isApproving) return
+    setIsApproving(true)
+    setTimeout(() => {
+      approveContainment(caseData.id)
+      setIsApproving(false)
+    }, 600)
   }
 
   const fullFreezeAmount = caseData.totalBalance
@@ -152,12 +159,13 @@ const ContainmentActionPanel = () => {
       <div className="border-t border-slate-800/50 p-4 space-y-2">
         <motion.button
           onClick={handleApprove}
-          whileHover={{ scale: 1.01, boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)' }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl text-sm tracking-wide shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+          whileHover={!isApproving ? { scale: 1.01, boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)' } : {}}
+          whileTap={!isApproving ? { scale: 0.98 } : {}}
+          disabled={isApproving}
+          className={`w-full py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl text-sm tracking-wide shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all ${isApproving ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <ShieldCheck className="w-5 h-5" />
-          APPROVE PARTIAL HOLD
+          {isApproving ? 'APPROVING...' : 'APPROVE PARTIAL HOLD'}
         </motion.button>
 
         <p className="text-center text-[10px] text-slate-600">

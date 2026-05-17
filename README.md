@@ -199,6 +199,80 @@ This formula is auditable, verifiable without specialized knowledge, and require
 
 ---
 
+## Detection Heuristics — Auditable, Deterministic, No Black Box
+
+Muskets uses explicit, auditable formulas for all classification signals. There is no trained machine learning model. Every signal is computed from raw transaction fields and can be verified with basic arithmetic. This is intentional — **deterministic math is legally defensible** without requiring a data scientist to explain it in court.
+
+---
+
+### Formula 1: Z-Score Anomaly Trigger
+
+```
+Z = (x - μ) / σ
+```
+
+| Variable | Meaning |
+|:---|:---|
+| `x` | Current transaction amount |
+| `μ` | Historical mean transaction amount for this account |
+| `σ` | Historical standard deviation for this account |
+| **Threshold** | \|Z\| > 3.0 triggers a lineage trace |
+
+**Plain English:** If a transaction is more than 3 standard deviations above what this account normally receives, it is flagged as anomalous. This is a standard statistical signal used across banking and quality control.
+
+---
+
+### Formula 2: Fragmentation Ratio
+
+```
+FR = outbound_splits_within_10_minutes / historical_daily_average_splits
+```
+
+| Threshold | Interpretation |
+|:---|:---|
+| FR > 3.0 | Strong mule signal — account is splitting received funds at an abnormal rate |
+
+**Plain English:** A normal customer splits outgoing payments once every few days on average. An account that receives funds and immediately splits them into 4+ transfers within minutes exhibits a fragmentation ratio far above normal. This is the classic smurfing pattern.
+
+**Example:** Historical average: 0.5 splits per day. Current: 4 splits in 2 minutes → FR ≈ 8.0
+
+---
+
+### Formula 3: Propagation Velocity
+
+```
+Velocity = outbound_transactions / time_window_minutes
+```
+
+| Threshold | Interpretation |
+|:---|:---|
+| > 10 per minute (combined with FR > 3.0) | Confirms active mule relay pattern |
+
+**Plain English:** Legitimate customers let received funds sit for hours or days before spending. An account processing 14 outbound transactions per minute is operating as a money relay, not a personal account.
+
+---
+
+### Formula 4: Dwell Time
+
+```
+Dwell Time = timestamp_of_first_outbound - timestamp_of_incoming_transfer
+```
+
+| Threshold | Interpretation |
+|:---|:---|
+| < 5 minutes | High suspicion |
+| < 2 minutes | Critical — funds are being relayed immediately |
+
+**Plain English:** Normal bank customers receive money and let it sit. An account that receives ₹70,000 and forwards it within 33 seconds was not being used as a real account — it was operating as a financial relay.
+
+---
+
+### Why These Formulas Matter
+
+All four signals are computed from raw transaction timestamps and amounts — primary facts that satisfy evidentiary requirements under the Bharatiya Sakshya Adhiniyam 2023, Section 63. A court can verify the arithmetic directly. No model weights, no training data, no opacity.
+
+---
+
 ## SAR and DPIP Workflow
 
 ### Suspicious Activity Report (SAR)
