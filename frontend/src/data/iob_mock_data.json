@@ -55,14 +55,14 @@
       "riskAmount": 175000,
       "tracedAmount": 128000,
       "totalBalance": 2100000,
-      "status": "AWAITING_LEGAL_REVIEW",
+      "status": "PENDING_TRIAGE",
       "aiSummary": "₹1.75L cascaded through 4 accounts in 67 seconds. TOR browser access detected. Partial lien of ₹1.28L approved by analyst.",
       "graphId": "graph_cascade",
       "victimAccount": "185501000078901",
       "muleAccounts": ["602305001234567", "039405009876543"],
       "merchantAccounts": ["185501000067890"],
       "timestamp": "2026-05-17T12:30:05.000Z",
-      "analystName": "Rajesh Iyer"
+      "analystName": ""
     },
     {
       "id": "FRA-2026-IOB-00695",
@@ -71,14 +71,14 @@
       "riskAmount": 50000,
       "tracedAmount": 50000,
       "totalBalance": 2950000,
-      "status": "RESTRICTION_ACTIVE",
+      "status": "PENDING_TRIAGE",
       "aiSummary": "₹50K partial restriction applied on traced funds. Merchant claims legitimate payment received from known supplier.",
       "graphId": "graph_merchant_exit",
       "victimAccount": "185501000045678",
       "muleAccounts": ["185502000034567"],
       "merchantAccounts": ["916010000098765"],
       "timestamp": "2026-05-17T10:15:33.000Z",
-      "analystName": "Rajesh Iyer"
+      "analystName": ""
     }
   ],
   "graphStructures": {

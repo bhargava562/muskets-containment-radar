@@ -138,8 +138,6 @@ const ComplianceWorkspace = () => {
 
   // --- RENDER ---
 
-  const targetCase = selectedReviewCase || pendingReview[0] || null
-
   return (
     <div className="h-full w-full flex flex-col overflow-hidden bg-slate-950">
       {/* Toast */}
@@ -208,44 +206,6 @@ const ComplianceWorkspace = () => {
               )}
             </AnimatePresence>
           </div>
-
-          {/* Export Center */}
-          {pendingReview.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-[10px] font-bold text-slate-400 tracking-widest">EXPORT CENTER</h2>
-              <div className="flex gap-3">
-                {/* SAR Button */}
-                <motion.button
-                  onClick={() => handleGenerateSAR(targetCase)}
-                  whileHover={!isAnyActionProcessing && !sarGenerated ? { scale: 1.02 } : {}}
-                  whileTap={!isAnyActionProcessing && !sarGenerated ? { scale: 0.98 } : {}}
-                  disabled={isAnyActionProcessing || sarGenerated}
-                  className={`flex-1 px-4 py-3 rounded-xl border transition-all ${sarGenerated ? 'border-emerald-500/30 bg-emerald-500/5' : isGeneratingSAR ? 'border-slate-700/50 bg-slate-900/50 opacity-50 cursor-not-allowed' : 'border-slate-700/50 bg-slate-900/50 hover:bg-slate-800/50'}`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    {isGeneratingSAR ? <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" /> : sarGenerated ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <FileText className="w-4 h-4 text-cyan-400" />}
-                    <span className={`text-xs font-bold ${sarGenerated ? 'text-emerald-400' : 'text-slate-300'}`}>{isGeneratingSAR ? 'Generating...' : sarGenerated ? 'SAR Generated ✓' : 'Generate SAR PDF'}</span>
-                  </div>
-                  <p className="text-[10px] text-slate-500">Suspicious Activity Report with audit trail</p>
-                </motion.button>
-
-                {/* DPIP Button */}
-                <motion.button
-                  onClick={() => handleGenerateDPIP(targetCase)}
-                  whileHover={!isAnyActionProcessing && !dpipGenerated ? { scale: 1.02 } : {}}
-                  whileTap={!isAnyActionProcessing && !dpipGenerated ? { scale: 0.98 } : {}}
-                  disabled={isAnyActionProcessing || dpipGenerated}
-                  className={`flex-1 px-4 py-3 rounded-xl border transition-all ${dpipGenerated ? 'border-emerald-500/30 bg-emerald-500/5' : isGeneratingDPIP ? 'border-slate-700/50 bg-slate-900/50 opacity-50 cursor-not-allowed' : 'border-slate-700/50 bg-slate-900/50 hover:bg-slate-800/50'}`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    {isGeneratingDPIP ? <Loader2 className="w-4 h-4 text-amber-400 animate-spin" /> : dpipGenerated ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Download className="w-4 h-4 text-amber-400" />}
-                    <span className={`text-xs font-bold ${dpipGenerated ? 'text-emerald-400' : 'text-slate-300'}`}>{isGeneratingDPIP ? 'Exporting...' : dpipGenerated ? 'DPIP Exported ✓' : 'Export DPIP Packet'}</span>
-                  </div>
-                  <p className="text-[10px] text-slate-500">Standardized interbank coordination packet</p>
-                </motion.button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right — Case Governance Panel */}
@@ -289,6 +249,40 @@ const ComplianceWorkspace = () => {
                       </div>
                     )
                   })}
+                </div>
+              </div>
+
+              {/* Export Center (Strictly tied to selectedCase) */}
+              <div className="space-y-3 pt-2 border-t border-slate-800/50">
+                <h2 className="text-[10px] font-bold text-slate-400 tracking-widest">EXPORT CENTER</h2>
+                <div className="flex gap-2">
+                  {/* SAR Button */}
+                  <motion.button
+                    onClick={() => handleGenerateSAR(selectedReviewCase)}
+                    whileHover={!isAnyActionProcessing && !sarGenerated ? { scale: 1.02 } : {}}
+                    whileTap={!isAnyActionProcessing && !sarGenerated ? { scale: 0.98 } : {}}
+                    disabled={isAnyActionProcessing || sarGenerated}
+                    className={`flex-1 px-3 py-2.5 rounded-xl border transition-all ${sarGenerated ? 'border-emerald-500/30 bg-emerald-500/5' : isGeneratingSAR ? 'border-slate-700/50 bg-slate-900/50 opacity-50 cursor-not-allowed' : 'border-slate-700/50 bg-slate-900/50 hover:bg-slate-800/50'}`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      {isGeneratingSAR ? <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin" /> : sarGenerated ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <FileText className="w-3.5 h-3.5 text-cyan-400" />}
+                      <span className={`text-[11px] font-bold ${sarGenerated ? 'text-emerald-400' : 'text-slate-300'}`}>{isGeneratingSAR ? 'Generating...' : sarGenerated ? 'SAR ✓' : 'SAR PDF'}</span>
+                    </div>
+                  </motion.button>
+
+                  {/* DPIP Button */}
+                  <motion.button
+                    onClick={() => handleGenerateDPIP(selectedReviewCase)}
+                    whileHover={!isAnyActionProcessing && !dpipGenerated ? { scale: 1.02 } : {}}
+                    whileTap={!isAnyActionProcessing && !dpipGenerated ? { scale: 0.98 } : {}}
+                    disabled={isAnyActionProcessing || dpipGenerated}
+                    className={`flex-1 px-3 py-2.5 rounded-xl border transition-all ${dpipGenerated ? 'border-emerald-500/30 bg-emerald-500/5' : isGeneratingDPIP ? 'border-slate-700/50 bg-slate-900/50 opacity-50 cursor-not-allowed' : 'border-slate-700/50 bg-slate-900/50 hover:bg-slate-800/50'}`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      {isGeneratingDPIP ? <Loader2 className="w-3.5 h-3.5 text-amber-400 animate-spin" /> : dpipGenerated ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Download className="w-3.5 h-3.5 text-amber-400" />}
+                      <span className={`text-[11px] font-bold ${dpipGenerated ? 'text-emerald-400' : 'text-slate-300'}`}>{isGeneratingDPIP ? 'Exporting...' : dpipGenerated ? 'DPIP ✓' : 'DPIP Packet'}</span>
+                    </div>
+                  </motion.button>
                 </div>
               </div>
 

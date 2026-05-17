@@ -12,6 +12,7 @@ export const CASE_STATUS = {
 }
 
 function safeReadStorage(key, fallback) {
+  if (typeof window === 'undefined') return fallback;
   try {
     const saved = localStorage.getItem(key)
     if (saved) return JSON.parse(saved)
@@ -48,6 +49,21 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (selectedCaseId && !cases.find(c => c.id === selectedCaseId)) setSelectedCaseId(null)
   }, [cases, selectedCaseId])
+
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === STORAGE_KEYS.CASES && e.newValue) {
+        try { setCases(JSON.parse(e.newValue)); } catch(err) {}
+      }
+      if (e.key === STORAGE_KEYS.SELECTED) {
+        try { setSelectedCaseId(e.newValue ? JSON.parse(e.newValue) : null); } catch(err) {}
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
+  }, []);
 
   const getSelectedCase = useCallback(() => cases.find(c => c.id === selectedCaseId) || null, [cases, selectedCaseId])
 
