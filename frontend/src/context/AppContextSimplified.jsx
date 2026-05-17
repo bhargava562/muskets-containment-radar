@@ -1,108 +1,66 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
 import mockData from '../data/iob_mock_data.json'
 
 const AppContext = createContext(null)
 
-// Case statuses for workflow continuity
+// Case statuses — the 3-step workflow pipeline
 export const CASE_STATUS = {
   PENDING_TRIAGE: 'PENDING_TRIAGE',
   AWAITING_LEGAL_REVIEW: 'AWAITING_LEGAL_REVIEW',
-  RESOLVED: 'RESOLVED'
+  RESTRICTION_ACTIVE: 'RESTRICTION_ACTIVE'
 }
 
-// Initial mock cases - hardcoded for prototype
-const INITIAL_CASES = [
-  {
-    id: 'FRA-2026-IOB-00847',
-    priority: 'P1',
-    riskAmount: 200000,
-    recoverableAmount: 135000,
-    status: CASE_STATUS.PENDING_TRIAGE,
-    summary: '₹2L dispersed to 5 accounts in 42s. Device mismatch detected.',
-    timestamp: new Date().toISOString(),
-    victimAccount: '185501000012847',
-    muleAccounts: ['185502000087321', '039405001234567', '602305001987654'],
-    merchantAccounts: ['916010000045678', '185501000089123'],
-    graphStructureId: 'fragmentation_network'
-  },
-  {
-    id: 'FRA-2026-IOB-00923',
-    priority: 'P2',
-    riskAmount: 85000,
-    recoverableAmount: 62000,
-    status: CASE_STATUS.PENDING_TRIAGE,
-    summary: '₹85K split through 3 mules. VPN login flagged.',
-    timestamp: new Date(Date.now() - 300000).toISOString(),
-    victimAccount: '185501000034567',
-    muleAccounts: ['501234000098765', '403201000054321'],
-    merchantAccounts: ['916010000045678'],
-    graphStructureId: 'fragmentation_network'
-  },
-  {
-    id: 'FRA-2026-IOB-01124',
-    priority: 'P3',
-    riskAmount: 45000,
-    recoverableAmount: 32000,
-    status: CASE_STATUS.PENDING_TRIAGE,
-    summary: '₹45K fragmentation. Low velocity pattern.',
-    timestamp: new Date(Date.now() - 600000).toISOString(),
-    victimAccount: '185501000056789',
-    muleAccounts: ['712308000034521'],
-    merchantAccounts: ['185501000089123'],
-    graphStructureId: 'fragmentation_network'
-  }
-]
-
 export function AppProvider({ children }) {
-  const [cases, setCases] = useState(INITIAL_CASES)
+  const [cases, setCases] = useState(mockData.cases)
   const [selectedCaseId, setSelectedCaseId] = useState(null)
-  const [currentUser, setCurrentUser] = useState({ role: 'analyst' }) // 'analyst', 'compliance', 'branch'
-
-  // Get graph data from mock data by structureId
-  const getCaseGraphData = (graphStructureId) => {
-    return mockData.graph_structures[graphStructureId] || null
-  }
 
   // Get the currently selected case object
-  const getSelectedCase = () => {
+  const getSelectedCase = useCallback(() => {
     return cases.find(c => c.id === selectedCaseId) || null
-  }
+  }, [cases, selectedCaseId])
 
-  // Update case status - core workflow continuity function
-  const updateCaseStatus = (caseId, newStatus) => {
-    setCases(prev => prev.map(c => 
+  // Update case status — core workflow function
+  const updateCaseStatus = useCallback((caseId, newStatus) => {
+    setCases(prev => prev.map(c =>
       c.id === caseId ? { ...c, status: newStatus } : c
     ))
-  }
+  }, [])
 
-  // Approve containment - Analyst action
-  const approveContainment = (caseId) => {
-    updateCaseStatus(caseId, CASE_STATUS.AWAITING_LEGAL_REVIEW)
+  // AML Analyst action: approve containment → AWAITING_LEGAL_REVIEW
+  const approveContainment = useCallback((caseId) => {
+    setCases(prev => prev.map(c =>
+      c.id === caseId
+        ? { ...c, status: CASE_STATUS.AWAITING_LEGAL_REVIEW, analystName: 'Current Officer' }
+        : c
+    ))
     setSelectedCaseId(null)
-  }
+  }, [])
 
-  // Resolve case - Compliance action
-  const resolveCase = (caseId) => {
-    updateCaseStatus(caseId, CASE_STATUS.RESOLVED)
-  }
+  // Compliance action: finalize restriction → RESTRICTION_ACTIVE
+  const finalizeRestriction = useCallback((caseId) => {
+    updateCaseStatus(caseId, CASE_STATUS.RESTRICTION_ACTIVE)
+  }, [updateCaseStatus])
 
-  // Get cases by status
-  const getCasesByStatus = (status) => {
+  // Get cases filtered by status
+  const getCasesByStatus = useCallback((status) => {
     return cases.filter(c => c.status === status)
-  }
+  }, [cases])
+
+  // Get graph data for a case by graphId
+  const getGraphForCase = useCallback((graphId) => {
+    return mockData.graphStructures[graphId] || null
+  }, [])
 
   const value = {
     cases,
     selectedCaseId,
     setSelectedCaseId,
-    currentUser,
-    setCurrentUser,
+    getSelectedCase,
     updateCaseStatus,
     approveContainment,
-    resolveCase,
+    finalizeRestriction,
     getCasesByStatus,
-    getCaseGraphData,
-    getSelectedCase
+    getGraphForCase
   }
 
   return (

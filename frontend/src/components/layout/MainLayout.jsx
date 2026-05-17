@@ -1,5 +1,4 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import SideNav from './SideNav'
@@ -8,22 +7,20 @@ import ComplianceWorkspace from '../workspaces/ComplianceWorkspace'
 import BranchWorkspace from '../workspaces/BranchWorkspace'
 
 const MainLayout = () => {
-  const { currentUser, logout } = useAuth()
+  const { currentUser } = useAuth()
   const [activeView, setActiveView] = useState(() => {
-    // Default view based on role
     switch (currentUser?.role) {
       case 'AML Compliance Officer':
         return 'queue'
       case 'Legal & Principal Officer':
         return 'pending'
       case 'Branch Manager':
-        return 'lookup'
+        return 'assigned'
       default:
         return 'queue'
     }
   })
 
-  // Role-Based Access Control (RBAC) - Route to appropriate workspace
   const renderWorkspace = () => {
     switch (currentUser?.role) {
       case 'AML Compliance Officer':
@@ -45,55 +42,29 @@ const MainLayout = () => {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-slate-950 font-sans flex flex-col">
-      {/* Fixed Header - No Overlap */}
-      <header className="flex-shrink-0 flex items-center justify-end gap-4 px-6 py-4 bg-slate-950/50 backdrop-blur-sm border-b border-slate-800/50 z-30">
-        {currentUser?.role && (
+    <div className="h-screen w-screen overflow-hidden bg-slate-950 font-sans flex">
+      {/* Hoverable SideNav */}
+      <SideNav
+        activeView={activeView}
+        onViewChange={setActiveView}
+        role={currentUser?.role}
+      />
+
+      {/* Workspace Content — Offset for SideNav */}
+      <main className="flex-1 ml-16 overflow-hidden">
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            key={`${currentUser?.role}-${activeView}`}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="px-3 py-1.5 rounded-full text-[10px] font-mono text-slate-200 bg-slate-900/80 border border-slate-800"
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="h-full w-full"
           >
-            {currentUser.role}
+            {renderWorkspace()}
           </motion.div>
-        )}
-        <motion.button
-          type="button"
-          onClick={logout}
-          className="p-2 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-cyan-400 transition"
-          aria-label="Log out"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <LogOut className="w-4 h-4" />
-        </motion.button>
-      </header>
-
-      {/* Main Content Area with SideNav */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Hoverable SideNav */}
-        <SideNav 
-          activeView={activeView} 
-          onViewChange={setActiveView}
-          role={currentUser?.role}
-        />
-
-        {/* Workspace Content - Offset for SideNav */}
-        <main className="flex-1 ml-16 overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${currentUser?.role}-${activeView}`}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="h-full w-full"
-            >
-              {renderWorkspace()}
-            </motion.div>
-          </AnimatePresence>
-        </main>
-      </div>
+        </AnimatePresence>
+      </main>
     </div>
   )
 }

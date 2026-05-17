@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Search, Upload, Send, AlertTriangle, Info, CheckCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Upload, Send, AlertTriangle, CheckCircle, Users, ShieldAlert, FileText, ArrowUpRight } from 'lucide-react'
 import { useApp, CASE_STATUS } from '../../context/AppContextSimplified'
 
 const formatCurrency = (amount) => {
@@ -11,42 +11,14 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-const BranchWorkspace = ({ activeView }) => {
-  const { cases } = useApp()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState(null)
+const BranchWorkspace = () => {
+  const { getCasesByStatus } = useApp()
+  const [selectedCustomerCase, setSelectedCustomerCase] = useState(null)
   const [escalationNote, setEscalationNote] = useState('')
   const [escalationSubmitted, setEscalationSubmitted] = useState(false)
   const [uploadedDocs, setUploadedDocs] = useState([])
 
-  const handleSearch = () => {
-    if (!searchQuery.trim()) return
-
-    // Search across all cases for the account
-    for (const caseItem of cases) {
-      if (caseItem.victimAccount === searchQuery ||
-          caseItem.muleAccounts.includes(searchQuery) ||
-          caseItem.merchantAccounts.includes(searchQuery)) {
-
-        // Found the account - determine status
-        const isRestricted = caseItem.status !== CASE_STATUS.PENDING_TRIAGE
-
-        setSelectedCustomer({
-          account: searchQuery,
-          caseId: caseItem.id,
-          caseStatus: caseItem.status,
-          isRestricted: isRestricted,
-          restrictedAmount: isRestricted ? caseItem.recoverableAmount : 0,
-          availableBalance: isRestricted ? 2000000 - caseItem.recoverableAmount : 2000000,
-          totalBalance: 2000000
-        })
-        return
-      }
-    }
-
-    // Account not found
-    setSelectedCustomer(null)
-  }
+  const activeCases = getCasesByStatus(CASE_STATUS.RESTRICTION_ACTIVE)
 
   const handleEscalation = () => {
     setEscalationSubmitted(true)
@@ -66,159 +38,259 @@ const BranchWorkspace = ({ activeView }) => {
     setUploadedDocs(prev => [...prev, ...files.map(f => f.name)])
   }
 
-  return (
-    <div className="h-full w-full flex flex-col overflow-hidden bg-white rounded-lg border">
-      {/* Header */}
-      <div className="px-6 py-4 border-b bg-slate-50">
-        <h1 className="text-lg font-bold text-slate-900">CUSTOMER LOOKUP</h1>
-        <p className="text-sm text-slate-600 mt-1">Search for accounts and view restriction status</p>
-      </div>
+  const handleFileInput = (e) => {
+    const files = Array.from(e.target.files)
+    setUploadedDocs(prev => [...prev, ...files.map(f => f.name)])
+  }
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Search Section */}
-        <div className="space-y-3">
-          <label className="text-sm font-semibold text-slate-900">Account Number</label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Enter account number (e.g., 185501000012847)"
-              className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400"
-            />
-            <motion.button
-              onClick={handleSearch}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-4 py-2 bg-slate-700 text-white rounded-lg font-semibold hover:bg-slate-800"
-            >
-              <Search className="w-4 h-4" />
-            </motion.button>
+  return (
+    <div className="h-full w-full flex overflow-hidden bg-slate-950">
+      {/* Left — Assigned Customer Cases */}
+      <div className="w-[320px] flex-shrink-0 h-full flex flex-col border-r border-slate-800/50">
+        {/* Header */}
+        <div className="px-4 py-4 border-b border-slate-800/50">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-slate-400" />
+            <h2 className="text-sm font-bold text-slate-200 tracking-wide">ASSIGNED CASES</h2>
           </div>
+          <p className="text-[11px] text-slate-500 mt-1">
+            {activeCases.length} customer{activeCases.length !== 1 ? 's' : ''} with active restrictions
+          </p>
         </div>
 
-        {/* Results */}
-        {selectedCustomer ? (
+        {/* Case List */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {activeCases.length === 0 ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center text-slate-600">
+                <CheckCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                <p className="text-xs">No active restrictions</p>
+                <p className="text-[10px] text-slate-700 mt-1">All clear at this branch</p>
+              </div>
+            </div>
+          ) : (
+            <AnimatePresence>
+              {activeCases.map(caseItem => {
+                const isSelected = selectedCustomerCase?.id === caseItem.id
+                const restrictedPercent = ((caseItem.tracedAmount / caseItem.totalBalance) * 100).toFixed(1)
+
+                return (
+                  <motion.button
+                    key={caseItem.id}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    onClick={() => setSelectedCustomerCase(caseItem)}
+                    className={`w-full text-left p-3.5 rounded-xl border transition-all ${
+                      isSelected
+                        ? 'border-amber-500/30 bg-amber-500/5 ring-1 ring-amber-500/20'
+                        : 'border-slate-800/50 bg-slate-900/30 hover:bg-slate-800/30'
+                    }`}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <ShieldAlert className="w-4 h-4 text-amber-400" />
+                        <span className="text-xs font-bold text-slate-300">{caseItem.customerName}</span>
+                      </div>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold">
+                        RESTRICTED
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Restricted</span>
+                        <span className="font-mono text-amber-400">{formatCurrency(caseItem.tracedAmount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Available</span>
+                        <span className="font-mono text-emerald-400">{formatCurrency(caseItem.totalBalance - caseItem.tracedAmount)}</span>
+                      </div>
+                      {/* Mini progress bar */}
+                      <div className="w-full h-1 rounded-full bg-slate-800 mt-1.5 overflow-hidden flex">
+                        <div className="h-full bg-amber-500/50" style={{ width: `${restrictedPercent}%` }} />
+                        <div className="h-full bg-emerald-500/40" style={{ width: `${100 - parseFloat(restrictedPercent)}%` }} />
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-slate-600 font-mono mt-2">{caseItem.id}</p>
+                  </motion.button>
+                )
+              })}
+            </AnimatePresence>
+          )}
+        </div>
+      </div>
+
+      {/* Right — Customer Interaction Panel */}
+      <div className="flex-1 overflow-y-auto">
+        {selectedCustomerCase ? (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="space-y-4"
+            key={selectedCustomerCase.id}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="p-6 space-y-5 max-w-2xl"
           >
-            {/* Restriction Status Card */}
-            <div className={`p-4 rounded-lg border-2 ${
-              selectedCustomer.isRestricted
-                ? 'bg-red-50 border-red-300'
-                : 'bg-emerald-50 border-emerald-300'
-            }`}>
+            {/* Customer Header */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-amber-400">
+                {selectedCustomerCase.customerName.charAt(0)}
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-200">{selectedCustomerCase.customerName}</h2>
+                <p className="text-[11px] text-slate-500 font-mono">{selectedCustomerCase.id}</p>
+              </div>
+            </div>
+
+            {/* Restriction Explanation Card */}
+            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
               <div className="flex items-start gap-3">
-                {selectedCustomer.isRestricted ? (
-                  <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <CheckCircle className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <h3 className="font-bold text-slate-900">
-                    {selectedCustomer.isRestricted ? 'RESTRICTED' : 'ACTIVE'}
-                  </h3>
-                  <p className="text-sm text-slate-700 mt-2">
-                    Account: <span className="font-mono font-bold">{selectedCustomer.account}</span>
+                <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-bold text-amber-400 mb-2">Temporary Restriction Applied</h3>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    A proportional restriction has been placed on this account as part of an ongoing investigation.
+                    Essential banking services remain fully active. This is a precautionary measure to protect
+                    recoverable funds while the investigation is resolved.
                   </p>
                 </div>
               </div>
+            </div>
 
-              {/* Financial Details */}
-              {selectedCustomer.isRestricted && (
-                <div className="mt-4 space-y-2 border-t pt-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Restricted Amount:</span>
-                    <span className="font-bold text-red-600">{formatCurrency(selectedCustomer.restrictedAmount)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Available Balance:</span>
-                    <span className="font-bold text-emerald-600">{formatCurrency(selectedCustomer.availableBalance)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm border-t pt-2">
-                    <span className="text-slate-600">Total Balance:</span>
-                    <span className="font-bold">{formatCurrency(selectedCustomer.totalBalance)}</span>
-                  </div>
+            {/* Impact Visibility — Restricted vs Available */}
+            <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800/50 space-y-4">
+              <h3 className="text-[10px] font-bold text-slate-400 tracking-widest">ACCOUNT IMPACT</h3>
 
-                  {/* Explanation */}
-                  <div className="mt-4 p-3 bg-white rounded border border-slate-200">
-                    <p className="text-xs text-slate-700">
-                      <span className="font-semibold">Why this restriction?</span><br/>
-                      Temporary restriction applied due to suspicious transaction velocity. Essential services remain active. This is a precautionary measure while investigation is ongoing.
-                    </p>
-                  </div>
+              {/* Visual bar */}
+              <div>
+                <div className="flex justify-between text-xs mb-2">
+                  <span className="text-amber-400 font-semibold">Restricted Funds</span>
+                  <span className="text-emerald-400 font-semibold">Available Balance</span>
                 </div>
-              )}
+                <div className="w-full h-8 rounded-xl overflow-hidden flex bg-slate-800">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(selectedCustomerCase.tracedAmount / selectedCustomerCase.totalBalance * 100)}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="h-full bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
+                  >
+                    <span className="text-[10px] font-bold text-white px-2 whitespace-nowrap">
+                      {formatCurrency(selectedCustomerCase.tracedAmount)}
+                    </span>
+                  </motion.div>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${((selectedCustomerCase.totalBalance - selectedCustomerCase.tracedAmount) / selectedCustomerCase.totalBalance * 100)}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+                    className="h-full bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
+                  >
+                    <span className="text-[10px] font-bold text-white px-2 whitespace-nowrap">
+                      {formatCurrency(selectedCustomerCase.totalBalance - selectedCustomerCase.tracedAmount)}
+                    </span>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Breakdown */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-2.5 rounded-lg bg-slate-800/50 text-center">
+                  <p className="text-[10px] text-slate-500 mb-1">Restricted</p>
+                  <p className="text-sm font-mono font-bold text-amber-400">{formatCurrency(selectedCustomerCase.tracedAmount)}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-800/50 text-center">
+                  <p className="text-[10px] text-slate-500 mb-1">Available</p>
+                  <p className="text-sm font-mono font-bold text-emerald-400">{formatCurrency(selectedCustomerCase.totalBalance - selectedCustomerCase.tracedAmount)}</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-800/50 text-center">
+                  <p className="text-[10px] text-slate-500 mb-1">Total Balance</p>
+                  <p className="text-sm font-mono font-bold text-slate-300">{formatCurrency(selectedCustomerCase.totalBalance)}</p>
+                </div>
+              </div>
             </div>
 
-            {/* Request Central Review */}
+            {/* Upload Clarification Docs */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-slate-900">REQUEST CENTRAL REVIEW</h3>
-              <textarea
-                value={escalationNote}
-                onChange={(e) => setEscalationNote(e.target.value)}
-                placeholder="Add notes for central team (optional)"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 text-sm"
-                rows={4}
-              />
-              <motion.button
-                onClick={handleEscalation}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={escalationSubmitted}
-                className={`w-full px-4 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 ${
-                  escalationSubmitted
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-slate-700 text-white hover:bg-slate-800'
-                }`}
-              >
-                {escalationSubmitted ? (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    Submitted
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Submit Escalation
-                  </>
-                )}
-              </motion.button>
-            </div>
+              <h3 className="text-[10px] font-bold text-slate-400 tracking-widest">UPLOAD CLARIFICATION DOCUMENTS</h3>
+              <p className="text-[11px] text-slate-500">Customer-provided KYC documents, invoices, or transaction proofs</p>
 
-            {/* KYC Document Upload */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-slate-900">KYC VERIFICATION DOCS</h3>
               <div
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                className="p-6 border-2 border-dashed border-slate-300 rounded-lg text-center cursor-pointer hover:border-slate-400 hover:bg-slate-50 transition-colors"
+                className="p-5 border-2 border-dashed border-slate-700 rounded-xl text-center cursor-pointer hover:border-slate-600 hover:bg-slate-900/30 transition-all group"
               >
-                <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-sm text-slate-600">Drag & drop KYC documents here</p>
-                <p className="text-xs text-slate-500 mt-1">or click to browse</p>
+                <Upload className="w-7 h-7 text-slate-600 mx-auto mb-2 group-hover:text-slate-400 transition-colors" />
+                <p className="text-xs text-slate-500 group-hover:text-slate-400">Drag & drop documents here</p>
+                <p className="text-[10px] text-slate-600 mt-1">KYC • Invoices • GST Proof • Bank Statements</p>
+                <label className="inline-block mt-3 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/15 cursor-pointer transition-colors">
+                  Browse Files
+                  <input type="file" className="hidden" multiple onChange={handleFileInput} />
+                </label>
               </div>
 
               {uploadedDocs.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {uploadedDocs.map((doc, idx) => (
-                    <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded text-sm">
-                      <Info className="w-4 h-4 text-slate-400" />
-                      <span className="text-slate-700">{doc}</span>
+                    <div key={idx} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900/50 border border-slate-800/30">
+                      <FileText className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="text-xs text-slate-400 flex-1 truncate">{doc}</span>
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
                     </div>
                   ))}
                 </div>
               )}
             </div>
+
+            {/* Escalate for Central Review */}
+            <div className="space-y-3 p-4 rounded-xl bg-slate-900/50 border border-slate-800/50">
+              <h3 className="text-[10px] font-bold text-slate-400 tracking-widest">ESCALATE FOR CENTRAL REVIEW</h3>
+              <p className="text-[11px] text-slate-500">
+                If the customer disputes the restriction, escalate to the central AML team for re-review.
+              </p>
+              <textarea
+                value={escalationNote}
+                onChange={(e) => setEscalationNote(e.target.value)}
+                placeholder="Customer claims legitimate payment from known supplier. Requesting analyst re-review..."
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 resize-none"
+                rows={3}
+              />
+              <motion.button
+                onClick={handleEscalation}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={escalationSubmitted}
+                className={`w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                  escalationSubmitted
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                }`}
+              >
+                {escalationSubmitted ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Escalation Submitted
+                  </>
+                ) : (
+                  <>
+                    <ArrowUpRight className="w-4 h-4" />
+                    Escalate for Central Review
+                  </>
+                )}
+              </motion.button>
+            </div>
+
+            {/* Safety Notice */}
+            <div className="p-3 rounded-xl bg-slate-900/30 border border-slate-800/30">
+              <p className="text-[10px] text-slate-600 text-center">
+                Branch staff cannot modify or release account restrictions. All restriction decisions are managed by the central AML and compliance teams.
+              </p>
+            </div>
           </motion.div>
         ) : (
-          <div className="text-center py-12 text-slate-500">
-            <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">Search for an account to get started</p>
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center text-slate-600">
+              <Users className="w-10 h-10 mx-auto mb-3 opacity-20" />
+              <p className="text-xs">Select a customer case to view details</p>
+              <p className="text-[10px] text-slate-700 mt-1">Customers with active restrictions will appear in the list</p>
+            </div>
           </div>
         )}
       </div>
