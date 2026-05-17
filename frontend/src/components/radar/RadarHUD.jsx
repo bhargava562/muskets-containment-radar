@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Layers, Clock, GitBranch, Zap, AlertTriangle, DollarSign, Shield, TrendingUp, CheckCircle } from 'lucide-react'
+import { Layers, Clock, GitBranch, Zap, AlertTriangle, DollarSign, Shield, TrendingUp, CheckCircle, Settings } from 'lucide-react'
 import { useApp, APP_STATES } from '../../context/AppContext'
 
 const formatCurrency = (amount) => {
@@ -12,6 +13,7 @@ const formatCurrency = (amount) => {
 
 const RadarHUD = () => {
   const { graphData, frozenNodes, playbackActiveNodeId, isForensicPlaybackActive, showGraph, appState } = useApp()
+  const [showSettingsPopover, setShowSettingsPopover] = useState(false)
 
   const nodeCount = graphData?.nodes?.length || 0
   const frozenCount = frozenNodes.length
@@ -43,129 +45,147 @@ const RadarHUD = () => {
 
   return (
     <>
-      {/* Standard HUD - Top Right (only when not in forensic mode) */}
+      {/* Settings Button - Top Right (only when not in forensic mode) */}
       <AnimatePresence mode="wait">
         {!isForensicPlaybackActive && (
           <motion.div
-            key="standard-hud-panel"
+            key="settings-button"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
             className="absolute top-4 right-4 z-10"
           >
-            <div className="glass-panel-dark rounded-xl px-4 py-3 space-y-2 max-w-xs">
-              {/* Header */}
-              <div className="flex items-center gap-2 text-xs text-slate-400 border-b border-slate-700/50 pb-2">
-                <span className="font-mono tracking-wider">GRAPH CONSTRAINTS</span>
-              </div>
+            <motion.button
+              onClick={() => setShowSettingsPopover(!showSettingsPopover)}
+              className="p-3 rounded-full glass-panel-dark border border-slate-700/50 hover:border-cyan-500/50 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Settings className="w-5 h-5 text-slate-400 hover:text-cyan-400 transition-colors" />
+            </motion.button>
 
-              {/* Constraints */}
-              <div className="flex flex-wrap gap-3 text-xs font-mono">
-                <div className="flex items-center gap-1.5">
-                  <GitBranch className="w-3 h-3 text-cyan-400" />
-                  <span className="text-slate-500">DEPTH:</span>
-                  <span className="text-cyan-400">3 HOPS</span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-amber-400" />
-                  <span className="text-slate-500">WINDOW:</span>
-                  <span className="text-amber-400">15 MINS</span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Layers className="w-3 h-3 text-emerald-400" />
-                  <span className="text-slate-500">NODES:</span>
-                  <span className="text-emerald-400">{nodeCount}</span>
-                </div>
-              </div>
-
-              {/* Containment Status */}
-              {showContainmentStatus && (
+            {/* Settings Popover */}
+            <AnimatePresence>
+              {showSettingsPopover && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="pt-2 border-t border-cyan-500/30 space-y-2"
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-16 right-0 glass-panel-dark rounded-xl px-4 py-3 space-y-3 w-72 border border-slate-700/50 backdrop-blur-xl"
                 >
-                  <div className="flex items-center gap-2 text-xs">
-                    <Shield className="w-4 h-4 text-cyan-400" />
-                    <span className="text-cyan-400 font-mono font-bold">CONTAINMENT STATUS</span>
+                  {/* Header */}
+                  <div className="flex items-center gap-2 text-xs text-slate-400 border-b border-slate-700/50 pb-2">
+                    <span className="font-mono tracking-wider">GRAPH CONSTRAINTS</span>
                   </div>
-                  
-                  {/* Total Recoverable Funds - Ticking Animation */}
-                  <motion.div
-                    initial={{ scale: 0.95 }}
-                    animate={{ scale: 1 }}
-                    className="p-2 rounded-lg bg-gradient-to-r from-emerald-950/50 to-cyan-950/50 border border-emerald-500/30"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] text-slate-400 font-mono">TOTAL SECURED</span>
-                      <TrendingUp className="w-3 h-3 text-emerald-400" />
-                    </div>
-                    <motion.div
-                      key={recoverableFunds}
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-lg font-bold text-gradient-ice"
-                    >
-                      {formatCurrency(recoverableFunds)}
-                    </motion.div>
-                    <div className="flex items-center gap-1 mt-1">
-                      <CheckCircle className="w-2.5 h-2.5 text-emerald-400" />
-                      <span className="text-[8px] text-emerald-400 font-mono">FUNDS SECURED</span>
-                    </div>
-                  </motion.div>
 
-                  {/* Nodes Contained */}
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50">
-                    <span className="text-[9px] text-slate-400 font-mono">NODES CONTAINED</span>
-                    <span className="text-sm font-bold text-cyan-400">{frozenCount}</span>
+                  {/* Constraints */}
+                  <div className="space-y-2 text-xs font-mono">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50">
+                      <div className="flex items-center gap-2">
+                        <GitBranch className="w-3.5 h-3.5 text-cyan-400" />
+                        <span className="text-slate-400">DEPTH:</span>
+                      </div>
+                      <span className="text-cyan-400 font-bold">3 HOPS</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-slate-400">WINDOW:</span>
+                      </div>
+                      <span className="text-amber-400 font-bold">15 MINS</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-slate-400">NODES:</span>
+                      </div>
+                      <span className="text-emerald-400 font-bold">{nodeCount}</span>
+                    </div>
                   </div>
+
+                  {/* Legend */}
+                  {showGraph && (
+                    <div className="pt-2 border-t border-slate-700/50 space-y-2">
+                      <div className="text-xs text-slate-400 font-mono mb-2">LEGEND</div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#3b82f6' }} />
+                          Fraud Victim
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#f59e0b' }} />
+                          Compromised (Innocent)
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#ef4444' }} />
+                          Active Participant
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#a855f7' }} />
+                          Exit Point
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#10b981' }} />
+                          Merchant (Innocent)
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              {/* Frozen Status (when investigating) */}
-              {frozenCount > 0 && !showContainmentStatus && (
-                <div className="pt-2 border-t border-slate-700/50">
-                  <div className="flex items-center gap-2 text-xs">
-                    <motion.span
-                      className="w-2 h-2 rounded-full bg-cyan-400"
-                      animate={{ opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
-                    <span className="text-cyan-400 font-mono">
-                      {frozenCount} NODE{frozenCount > 1 ? 'S' : ''} CONTAINED
-                    </span>
-                  </div>
+      {/* Containment Status - Top Right (when contained) */}
+      <AnimatePresence>
+        {!isForensicPlaybackActive && showContainmentStatus && (
+          <motion.div
+            key="containment-status"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="absolute top-20 right-4 z-10"
+          >
+            <div className="glass-panel-dark rounded-xl px-4 py-3 space-y-3 w-64 border border-cyan-500/30">
+              <div className="flex items-center gap-2 text-xs">
+                <Shield className="w-4 h-4 text-cyan-400" />
+                <span className="text-cyan-400 font-mono font-bold">CONTAINMENT STATUS</span>
+              </div>
+              
+              {/* Total Recoverable Funds */}
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                className="p-3 rounded-lg bg-gradient-to-r from-emerald-950/50 to-cyan-950/50 border border-emerald-500/30"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[9px] text-slate-400 font-mono">TOTAL SECURED</span>
+                  <TrendingUp className="w-3 h-3 text-emerald-400" />
                 </div>
-              )}
+                <motion.div
+                  key={recoverableFunds}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-xl font-bold text-gradient-ice"
+                >
+                  {formatCurrency(recoverableFunds)}
+                </motion.div>
+                <div className="flex items-center gap-1 mt-1">
+                  <CheckCircle className="w-2.5 h-2.5 text-emerald-400" />
+                  <span className="text-[8px] text-emerald-400 font-mono">FUNDS SECURED</span>
+                </div>
+              </motion.div>
 
-              {/* Legend */}
-              {showGraph && (
-                <div className="pt-2 border-t border-slate-700/50 space-y-1.5">
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#3b82f6' }} />
-                    Fraud Victim
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#f59e0b' }} />
-                    Compromised Account (Innocent)
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#ef4444' }} />
-                    Active Participant
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#a855f7' }} />
-                    Exit Point
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
-                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#10b981' }} />
-                    Merchant (Innocent)
-                  </div>
-                </div>
-              )}
+              {/* Nodes Contained */}
+              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50">
+                <span className="text-[9px] text-slate-400 font-mono">NODES CONTAINED</span>
+                <span className="text-sm font-bold text-cyan-400">{frozenCount}</span>
+              </div>
             </div>
           </motion.div>
         )}

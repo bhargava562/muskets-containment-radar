@@ -11,7 +11,7 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-const BranchWorkspace = () => {
+const BranchWorkspace = ({ activeView }) => {
   const { appState, frozenNodes, graphData, caseMetadata } = useApp()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState(null)

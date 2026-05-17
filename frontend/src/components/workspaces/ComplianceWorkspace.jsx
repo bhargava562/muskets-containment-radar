@@ -14,7 +14,7 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-const ComplianceWorkspace = () => {
+const ComplianceWorkspace = ({ activeView }) => {
   const { appState, graphData, frozenNodes, caseMetadata, auditHash } = useApp()
   const [selectedCase, setSelectedCase] = useState(null)
   const [exportStatus, setExportStatus] = useState(null)
