@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Shield } from 'lucide-react'
+import { Shield, RotateCcw } from 'lucide-react'
 
 const LoginPage = ({ onLogin }) => {
   const [employeeId, setEmployeeId] = useState('')
@@ -12,7 +12,15 @@ const LoginPage = ({ onLogin }) => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center px-6">
+    <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center px-6 relative">
+      <button 
+        onClick={() => { localStorage.clear(); window.location.reload(); }}
+        className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/10 transition-colors"
+      >
+        <RotateCcw className="w-3.5 h-3.5" />
+        <span className="text-[11px] font-bold tracking-wide">RESET DEMO</span>
+      </button>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
