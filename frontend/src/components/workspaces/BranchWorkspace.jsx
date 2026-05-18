@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, Send, AlertTriangle, CheckCircle, Users, ShieldAlert, FileText, ArrowUpRight } from 'lucide-react'
+import { Upload, Send, AlertTriangle, CheckCircle, Users, ShieldAlert, FileText, ArrowUpRight, PhoneCall } from 'lucide-react'
 import { useApp, CASE_STATUS } from '../../context/AppContextSimplified'
 
 const formatCurrency = (amount) => {
@@ -12,18 +12,44 @@ const formatCurrency = (amount) => {
 }
 
 const BranchWorkspace = () => {
-  const { getCasesByStatus } = useApp()
+  const { getCasesByStatus, appendAuditLog } = useApp()
   const [selectedCustomerCase, setSelectedCustomerCase] = useState(null)
   const [escalationNote, setEscalationNote] = useState('')
   const [escalationSubmitted, setEscalationSubmitted] = useState(false)
+  const [customerContacted, setCustomerContacted] = useState(false)
   const [uploadedDocs, setUploadedDocs] = useState([])
 
   const activeCases = getCasesByStatus(CASE_STATUS.RESTRICTION_ACTIVE)
 
-  const handleEscalation = () => {
-    setEscalationSubmitted(true)
-    setTimeout(() => setEscalationSubmitted(false), 3000)
+  // Reset states when changing selected case
+  const handleSelectCase = (caseItem) => {
+    setSelectedCustomerCase(caseItem)
     setEscalationNote('')
+    setEscalationSubmitted(false)
+    setCustomerContacted(false)
+    setUploadedDocs([])
+  }
+
+  const handleEscalation = () => {
+    if (!escalationNote.trim() || escalationSubmitted) return
+    appendAuditLog(
+      selectedCustomerCase.id, 
+      'Branch Manager', 
+      'Escalated to Central AML Review', 
+      `Reason: ${escalationNote}`
+    )
+    setEscalationSubmitted(true)
+    // Keep it submitted for the demo context, don't reset automatically
+  }
+
+  const handleCustomerContacted = () => {
+    if (customerContacted) return
+    appendAuditLog(
+      selectedCustomerCase.id,
+      'Branch Manager',
+      'Customer contacted regarding restriction'
+    )
+    setCustomerContacted(true)
   }
 
   const handleDragOver = (e) => {
@@ -36,11 +62,21 @@ const BranchWorkspace = () => {
     e.stopPropagation()
     const files = Array.from(e.dataTransfer.files)
     setUploadedDocs(prev => [...prev, ...files.map(f => f.name)])
+    appendAuditLog(
+      selectedCustomerCase.id,
+      'Branch Manager',
+      `Uploaded ${files.length} clarification document(s)`
+    )
   }
 
   const handleFileInput = (e) => {
     const files = Array.from(e.target.files)
     setUploadedDocs(prev => [...prev, ...files.map(f => f.name)])
+    appendAuditLog(
+      selectedCustomerCase.id,
+      'Branch Manager',
+      `Uploaded ${files.length} clarification document(s)`
+    )
   }
 
   return (
@@ -80,7 +116,7 @@ const BranchWorkspace = () => {
                     layout
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    onClick={() => setSelectedCustomerCase(caseItem)}
+                    onClick={() => handleSelectCase(caseItem)}
                     className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                       isSelected
                         ? 'border-amber-500/30 bg-amber-500/5 ring-1 ring-amber-500/20'
@@ -131,14 +167,39 @@ const BranchWorkspace = () => {
             className="p-6 space-y-5 max-w-2xl"
           >
             {/* Customer Header */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-amber-400">
-                {selectedCustomerCase.customerName.charAt(0)}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-amber-400">
+                  {selectedCustomerCase.customerName.charAt(0)}
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-200">{selectedCustomerCase.customerName}</h2>
+                  <p className="text-[11px] text-slate-500 font-mono">{selectedCustomerCase.id}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-200">{selectedCustomerCase.customerName}</h2>
-                <p className="text-[11px] text-slate-500 font-mono">{selectedCustomerCase.id}</p>
-              </div>
+              <motion.button
+                onClick={handleCustomerContacted}
+                disabled={customerContacted}
+                whileHover={!customerContacted ? { scale: 1.05 } : {}}
+                whileTap={!customerContacted ? { scale: 0.95 } : {}}
+                className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 border transition-all ${
+                  customerContacted
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 cursor-not-allowed'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                {customerContacted ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Customer Contacted
+                  </>
+                ) : (
+                  <>
+                    <PhoneCall className="w-4 h-4" />
+                    Mark Contacted
+                  </>
+                )}
+              </motion.button>
             </div>
 
             {/* Restriction Explanation Card */}
@@ -251,16 +312,19 @@ const BranchWorkspace = () => {
                 placeholder="Customer claims legitimate payment from known supplier. Requesting analyst re-review..."
                 className="w-full px-3 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 resize-none"
                 rows={3}
+                disabled={escalationSubmitted}
               />
               <motion.button
                 onClick={handleEscalation}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={escalationSubmitted}
+                whileHover={!escalationSubmitted && escalationNote.trim() ? { scale: 1.01 } : {}}
+                whileTap={!escalationSubmitted && escalationNote.trim() ? { scale: 0.98 } : {}}
+                disabled={escalationSubmitted || !escalationNote.trim()}
                 className={`w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
                   escalationSubmitted
                     ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                    : !escalationNote.trim()
+                      ? 'bg-slate-800/50 text-slate-600 border border-slate-700/50 cursor-not-allowed'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
                 }`}
               >
                 {escalationSubmitted ? (

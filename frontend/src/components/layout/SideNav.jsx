@@ -6,11 +6,11 @@ import { useAuth } from '../auth/AuthContext'
 
 const SideNav = ({ activeView, onViewChange, role }) => {
   const [isExpanded, setIsExpanded] = useState(false)
-  const { getCasesByStatus, resetDatabase } = useApp()
+  const { getCasesByStatus, getCasesByStatuses, resetDatabase } = useApp()
   const { logout } = useAuth()
 
   // Live case counts for badges
-  const pendingCount = getCasesByStatus(CASE_STATUS.PENDING_TRIAGE).length
+  const pendingCount = getCasesByStatuses([CASE_STATUS.PENDING_TRIAGE, CASE_STATUS.RETURNED_TO_AML]).length
   const reviewCount = getCasesByStatus(CASE_STATUS.AWAITING_LEGAL_REVIEW).length
   const activeCount = getCasesByStatus(CASE_STATUS.RESTRICTION_ACTIVE).length
 
