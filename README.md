@@ -214,6 +214,15 @@ stateDiagram-v2
 
 ## 8. Setup & Demo Walkthrough (Live Transaction Ingestion)
 
+### Docker-first setup
+The native `npm install` workflow is no longer required for day-to-day use. Run the stack with Docker Compose from the repository root:
+
+```bash
+docker compose up --build
+```
+
+This starts the backend on `http://localhost:3001` and the frontend on `http://localhost:5173`. The frontend is configured to call the local backend through `VITE_BACKEND_URL=http://localhost:3001`.
+
 ### 1. Start the Mock Backend
 Navigate to the `backend` folder, install the express dependency, and start the node server.
 ```bash
