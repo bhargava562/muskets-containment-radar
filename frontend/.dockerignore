@@ -3,3 +3,7 @@ dist
 npm-debug.log
 Dockerfile
 .dockerignore
+**/*sample_mule_account_data.csv
+
+:Zone.Identifier
+

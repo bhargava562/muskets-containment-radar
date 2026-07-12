@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build and Test in Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Test Docker Image
+        run: |
+          docker build --target backend-build -t muskets-test .
+
+      - name: Run Maven Tests in Docker
+        run: |
+          docker run --rm muskets-test ./mvnw test -Dspring.profiles.active=test

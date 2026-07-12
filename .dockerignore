@@ -1,0 +1,15 @@
+.git
+.idea
+.mvn
+node_modules
+**/node_modules
+dist
+**/dist
+target
+**/target
+**/*.log
+**/*.Identifier
+.env*
+Dockerfile
+docker-compose.yml
+**/*sample_mule_account_data.csv

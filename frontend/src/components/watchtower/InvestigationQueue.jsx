@@ -88,17 +88,30 @@ const CountdownTimer = ({ timestamp, priority }) => {
 }
 
 const InvestigationQueue = () => {
-  const { getCasesByStatus, getCasesByStatuses, setSelectedCaseId, selectedCaseId } = useApp()
-  const [activeTab, setActiveTab] = useState('active')
+  const { getCasesByStatuses, setSelectedCaseId, selectedCaseId } = useApp()
+  const [activeTab, setActiveTab] = useState('triage')
 
-  // Active Queue: PENDING_TRIAGE + RETURNED_TO_AML
-  const activeCases = getCasesByStatuses([CASE_STATUS.PENDING_TRIAGE, CASE_STATUS.RETURNED_TO_AML])
-  // Processed: AWAITING_LEGAL_REVIEW + CLOSED_FALSE_POSITIVE
-  const processedCases = getCasesByStatuses([CASE_STATUS.AWAITING_LEGAL_REVIEW, CASE_STATUS.CLOSED_FALSE_POSITIVE])
+  // 1. Triage Queue (Fresh Alerts): PENDING_TRIAGE
+  const triageCases = getCasesByStatuses([CASE_STATUS.PENDING_TRIAGE])
+  
+  // 2. Drafts (Active investigations): UNDER_INVESTIGATION, RETURNED_TO_AML
+  const draftCases = getCasesByStatuses([CASE_STATUS.UNDER_INVESTIGATION, CASE_STATUS.RETURNED_TO_AML])
+  
+  // 3. Escalated (Awaiting Legal Review): AWAITING_LEGAL_REVIEW
+  const escalatedCases = getCasesByStatuses([CASE_STATUS.AWAITING_LEGAL_REVIEW])
+  
+  // 4. Archived (Closed/Resolved): CLOSED_FALSE_POSITIVE, RESTRICTION_ACTIVE, RESOLVED
+  const archivedCases = getCasesByStatuses([CASE_STATUS.CLOSED_FALSE_POSITIVE, CASE_STATUS.RESTRICTION_ACTIVE, CASE_STATUS.RESOLVED])
 
-  const displayCases = activeTab === 'active' ? activeCases : processedCases
+  let displayCases = []
+  if (activeTab === 'triage') displayCases = triageCases
+  else if (activeTab === 'draft') displayCases = draftCases
+  else if (activeTab === 'escalated') displayCases = escalatedCases
+  else if (activeTab === 'archived') displayCases = archivedCases
 
-  // Group active by priority
+  const isCountdownTab = activeTab === 'triage' || activeTab === 'draft'
+
+  // Group by priority
   const p1Cases = displayCases.filter(c => c.priority === 'P1')
   const p2Cases = displayCases.filter(c => c.priority === 'P2')
   const p3Cases = displayCases.filter(c => c.priority === 'P3')
@@ -108,8 +121,7 @@ const InvestigationQueue = () => {
     const Icon = config.icon
     const isSelected = selectedCaseId === caseData.id
     const isReturned = caseData.status === CASE_STATUS.RETURNED_TO_AML
-    const isProcessed = activeTab === 'processed'
-    const statusBadge = isProcessed ? getStatusBadge(caseData.status) : null
+    const statusBadge = getStatusBadge(caseData.status)
 
     return (
       <motion.button
@@ -120,7 +132,7 @@ const InvestigationQueue = () => {
         exit={{ opacity: 0, x: -200, transition: { duration: 0.4, ease: 'easeInOut' } }}
         className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 ${
           isReturned ? 'border-amber-500/30 bg-amber-500/5' :
-          isProcessed ? 'border-slate-700/30 bg-slate-900/30' :
+          !isCountdownTab ? 'border-slate-800 bg-slate-900/30' :
           `${config.border} ${config.bg}`
         } ${
           isSelected
@@ -146,13 +158,13 @@ const InvestigationQueue = () => {
                     RETURNED
                   </span>
                 )}
-                {statusBadge && (
+                {!isCountdownTab && statusBadge && (
                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${statusBadge.color}`}>
                     {statusBadge.text}
                   </span>
                 )}
               </div>
-              {!isProcessed && (
+              {isCountdownTab && (
                 <CountdownTimer timestamp={caseData.timestamp} priority={caseData.priority} />
               )}
             </div>
@@ -191,48 +203,39 @@ const InvestigationQueue = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-slate-950">
       {/* Header */}
-      <div className="px-4 py-4 border-b border-slate-800/50">
+      <div className="px-4 py-4 border-b border-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-slate-200 tracking-wide">INVESTIGATION</h2>
-          <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
-            activeCases.length > 0 ? 'bg-red-500/15 text-red-400' : 'bg-slate-800 text-slate-500'
-          }`}>
-            {activeCases.length} active
+          <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-850 text-slate-400`}>
+            {triageCases.length + draftCases.length} active
           </span>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 p-0.5 rounded-lg bg-slate-900/50 border border-slate-800/30">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`flex-1 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
-              activeTab === 'active'
-                ? 'bg-slate-800 text-slate-200 shadow-sm'
-                : 'text-slate-500 hover:text-slate-400'
-            }`}
-          >
-            Active Queue
-            {activeCases.length > 0 && (
-              <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-red-500/20 text-red-400">
-                {activeCases.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('processed')}
-            className={`flex-1 px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
-              activeTab === 'processed'
-                ? 'bg-slate-800 text-slate-200 shadow-sm'
-                : 'text-slate-500 hover:text-slate-400'
-            }`}
-          >
-            Processed
-            {processedCases.length > 0 && (
-              <span className="ml-1.5 text-[9px] px-1 py-0.5 rounded bg-slate-700 text-slate-400">
-                {processedCases.length}
-              </span>
-            )}
-          </button>
+        <div className="grid grid-cols-4 gap-1 p-0.5 rounded-lg bg-slate-900/50 border border-slate-800/30">
+          {[
+            { id: 'triage', label: 'Triage', count: triageCases.length, color: 'bg-red-500/20 text-red-400' },
+            { id: 'draft', label: 'Drafts', count: draftCases.length, color: 'bg-amber-500/20 text-amber-400' },
+            { id: 'escalated', label: 'Escalated', count: escalatedCases.length, color: 'bg-cyan-500/20 text-cyan-400' },
+            { id: 'archived', label: 'Archived', count: archivedCases.length, color: 'bg-slate-700 text-slate-400' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`py-1.5 rounded-md text-[10px] font-bold transition-all text-center flex flex-col items-center justify-center ${
+                activeTab === tab.id
+                  ? 'bg-slate-800 text-slate-200 shadow-sm border border-slate-700/50'
+                  : 'text-slate-500 hover:text-slate-400'
+              }`}
+            >
+              <span>{tab.label}</span>
+              {tab.count > 0 && (
+                <span className={`text-[8px] px-1 rounded-full mt-0.5 ${tab.color}`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -241,29 +244,20 @@ const InvestigationQueue = () => {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, x: activeTab === 'active' ? -10 : 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: activeTab === 'active' ? 10 : -10 }}
-            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.1 }}
             className="space-y-4"
           >
             {displayCases.length === 0 ? (
               <div className="h-48 flex items-center justify-center text-slate-600">
                 <div className="text-center">
-                  {activeTab === 'active' ? (
-                    <>
-                      <CheckCircle2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                      <p className="text-xs font-mono">Queue Clear</p>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                      <p className="text-xs font-mono">No processed cases</p>
-                    </>
-                  )}
+                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-xs font-mono">Queue Clean</p>
                 </div>
               </div>
-            ) : activeTab === 'active' ? (
+            ) : isCountdownTab ? (
               <>
                 <PriorityGroup label="Critical" cases={p1Cases} colorClass="text-red-400" />
                 <PriorityGroup label="High" cases={p2Cases} colorClass="text-amber-400" />

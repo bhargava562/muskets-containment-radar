@@ -1,0 +1,527 @@
+{
+  "caseId": "case-FRA-2026-IOB-00847",
+  "caseStatus": "PENDING_TRIAGE",
+  "contextVersion": 1,
+  "snapshot": {
+    "caseId": "case-FRA-2026-IOB-00847",
+    "accountId": "185502000087321",
+    "customerName": "Rajesh Chandra Sekhar",
+    "priority": "P1",
+    "riskAmount": 150000.0,
+    "tracedAmount": 112500.0,
+    "totalBalance": 270000.0,
+    "triggerReason": "Z_SCORE_ANOMALY | HIGH_VELOCITY",
+    "generatedAt": "2026-07-12T10:00:00Z",
+    "status": "PENDING_TRIAGE"
+  },
+  "nodes": [
+    {
+      "nodeId": "V1",
+      "accountId": "185501000012847",
+      "label": "V1 — Sunil Kumar (Victim)",
+      "nodeType": "VICTIM",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Sunil Kumar",
+        "idType": "PAN",
+        "idNumber": "XXXXX6784D",
+        "dateOfBirth": "14/08/1982",
+        "address": "Flat 402, Sector 12, Dwarka, New Delhi",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "12/01/2026",
+        "riskCategory": "LOW"
+      },
+      "cbs": {
+        "accountNumber": "185501000012847",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Dwarka Branch",
+        "currentBalance": 45000.0,
+        "averageMonthlyBalance": 85000.0,
+        "accountOpenDate": "03/11/2018",
+        "totalTransactionsLast30Days": 12,
+        "totalDebitLast30Days": 150000.0,
+        "totalCreditLast30Days": 110000.0,
+        "accountStatus": "ACTIVE"
+      },
+      "device": {
+        "lastLoginDevice": "Samsung Galaxy S22",
+        "lastLoginIp": "192.168.1.45",
+        "lastLoginLocation": "New Delhi, India",
+        "lastLoginTimestamp": "2026-07-12T08:15:22Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 2,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false
+      },
+      "aiAnalysis": {
+        "aiClassification": "CONFIRMED_VICTIM",
+        "confidence": 0.98,
+        "evidence": [
+          {
+            "source": "KYC_VERIFICATION",
+            "derivedFrom": "Long-standing active salary account with regular utility payments.",
+            "weight": 0.95
+          },
+          {
+            "source": "TRANSACTION_PATTERN",
+            "derivedFrom": "Sudden anomalous high-value transfer out of pattern to suspected mule account.",
+            "weight": 0.9
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Sunil Kumar's account shows standard salary and consumption patterns. The ₹1,50,000 debit was sent under duress/social engineering to Rajesh Chandra's account."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN87321001",
+          "fromAccount": "185501000012847",
+          "toAccount": "185502000087321",
+          "amount": 150000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-07-12T09:30:00Z",
+          "narration": "UPI/Sunil/Transfer"
+        }
+      ]
+    },
+    {
+      "nodeId": "M1",
+      "accountId": "185502000087321",
+      "label": "M1 — Rajesh Chandra Sekhar (Suspect)",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Rajesh Chandra Sekhar",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-8921",
+        "dateOfBirth": "22/11/1999",
+        "address": "No. 15, 3rd Cross, Malleshwaram, Bangalore",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "14/05/2026",
+        "riskCategory": "HIGH"
+      },
+      "cbs": {
+        "accountNumber": "185502000087321",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Malleshwaram Branch",
+        "currentBalance": 5200.0,
+        "averageMonthlyBalance": 800.0,
+        "accountOpenDate": "14/05/2026",
+        "totalTransactionsLast30Days": 45,
+        "totalDebitLast30Days": 240000.0,
+        "totalCreditLast30Days": 245200.0,
+        "accountStatus": "ACTIVE"
+      },
+      "device": {
+        "lastLoginDevice": "Xiaomi Redmi Note 11",
+        "lastLoginIp": "103.88.24.112",
+        "lastLoginLocation": "Chennai, India",
+        "lastLoginTimestamp": "2026-07-12T09:32:00Z",
+        "uniqueDevicesLast30Days": 4,
+        "uniqueIpsLast30Days": 6,
+        "vpnDetected": true,
+        "rootedDeviceDetected": true
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.95,
+        "evidence": [
+          {
+            "source": "CBS_SUMMARY",
+            "derivedFrom": "Account is newly opened (< 60 days) and exhibits extremely low average balance before layering burst.",
+            "weight": 0.95
+          },
+          {
+            "source": "DEVICE_METRICS",
+            "derivedFrom": "IP location mismatch (Chennai vs Bangalore address) and VPN/rooted device usage detected.",
+            "weight": 0.9
+          },
+          {
+            "source": "TRANSACTION_PATTERN",
+            "derivedFrom": "High velocity pass-through transfer: ₹1.5L credited and layered out in under 5 minutes.",
+            "weight": 0.95
+          }
+        ],
+        "recommendedAction": "FULL_FREEZE",
+        "summary": "This account shows all hallmarks of a classic mule relay. Rapid credit from V1 was immediately dispersed to merchant MR1 and suspect account M2."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN87321001",
+          "fromAccount": "185501000012847",
+          "toAccount": "185502000087321",
+          "amount": 150000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-07-12T09:30:00Z",
+          "narration": "UPI/Sunil/Transfer"
+        },
+        {
+          "txnId": "TXN87321002",
+          "fromAccount": "185502000087321",
+          "toAccount": "916010000045678",
+          "amount": 40000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-07-12T09:33:00Z",
+          "narration": "IMPS/PaytmMerchant/Layer"
+        },
+        {
+          "txnId": "TXN87321003",
+          "fromAccount": "185502000087321",
+          "toAccount": "185502000099412",
+          "amount": 105000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-07-12T09:34:00Z",
+          "narration": "UPI/ToPatil"
+        }
+      ]
+    },
+    {
+      "nodeId": "M2",
+      "accountId": "185502000099412",
+      "label": "M2 — Sunita Patil (Suspect)",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Sunita Patil",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-4567",
+        "dateOfBirth": "09/05/1995",
+        "address": "G-12, Sector 4, Vashi, Navi Mumbai",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "22/10/2025",
+        "riskCategory": "MEDIUM"
+      },
+      "cbs": {
+        "accountNumber": "185502000099412",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Vashi Branch",
+        "currentBalance": 107000.0,
+        "averageMonthlyBalance": 4500.0,
+        "accountOpenDate": "18/02/2024",
+        "totalTransactionsLast30Days": 8,
+        "totalDebitLast30Days": 12000.0,
+        "totalCreditLast30Days": 115000.0,
+        "accountStatus": "ACTIVE"
+      },
+      "device": {
+        "lastLoginDevice": "Oppo F19",
+        "lastLoginIp": "27.56.128.4",
+        "lastLoginLocation": "Mumbai, India",
+        "lastLoginTimestamp": "2026-07-12T09:33:30Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 2,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false
+      },
+      "aiAnalysis": {
+        "aiClassification": "UNDER_REVIEW",
+        "confidence": 0.72,
+        "evidence": [
+          {
+            "source": "TRANSACTION_PATTERN",
+            "derivedFrom": "Incoming transfer of ₹1,05,000 matches structured layered outbound transfers from M1.",
+            "weight": 0.85
+          }
+        ],
+        "recommendedAction": "PARTIAL_LIEN",
+        "summary": "Sunita Patil's account is a secondary hop. It received a large transfer from M1 which has not yet been routed out. Immediate lien recommended to prevent further leak."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN87321003",
+          "fromAccount": "185502000087321",
+          "toAccount": "185502000099412",
+          "amount": 105000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-07-12T09:34:00Z",
+          "narration": "UPI/ToPatil"
+        }
+      ]
+    },
+    {
+      "nodeId": "MR1",
+      "accountId": "916010000045678",
+      "label": "MR1 — Paytm Merchant Settlement",
+      "nodeType": "MERCHANT",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Paytm Merchant Settlement",
+        "idType": "PAN",
+        "idNumber": "XXXXX1234F",
+        "dateOfBirth": "N/A",
+        "address": "Paytm Headquarters, Noida, UP",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "01/01/2026",
+        "riskCategory": "LOW"
+      },
+      "cbs": {
+        "accountNumber": "916010000045678",
+        "ifscCode": "PYTM0123456",
+        "accountType": "CURRENT",
+        "branchName": "Noida settlement branch",
+        "currentBalance": 12845000.0,
+        "averageMonthlyBalance": 15000000.0,
+        "accountOpenDate": "12/03/2021",
+        "totalTransactionsLast30Days": 14500,
+        "totalDebitLast30Days": 95000000.0,
+        "totalCreditLast30Days": 94000000.0,
+        "accountStatus": "ACTIVE"
+      },
+      "device": {
+        "lastLoginDevice": "Merchant Server (API)",
+        "lastLoginIp": "13.233.14.99",
+        "lastLoginLocation": "Noida, India",
+        "lastLoginTimestamp": "2026-07-12T09:33:00Z",
+        "uniqueDevicesLast30Days": 2,
+        "uniqueIpsLast30Days": 2,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false
+      },
+      "aiAnalysis": {
+        "aiClassification": "LIKELY_INNOCENT",
+        "confidence": 0.88,
+        "evidence": [
+          {
+            "source": "CBS_SUMMARY",
+            "derivedFrom": "High transaction volume node representing a standard settlement escrow account.",
+            "weight": 0.95
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Paytm Merchant Settlement is a standard high-velocity escrow node. The funds have likely been used to buy physical goods/vouchers, making recovery from this end difficult."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN87321002",
+          "fromAccount": "185502000087321",
+          "toAccount": "916010000045678",
+          "amount": 40000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-07-12T09:33:00Z",
+          "narration": "IMPS/PaytmMerchant/Layer"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M1",
+      "amount": 150000.0,
+      "timestampMillis": 1783858200000,
+      "type": "UPI"
+    },
+    {
+      "fromNodeId": "M1",
+      "toNodeId": "MR1",
+      "amount": 40000.0,
+      "timestampMillis": 1783858380000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "M1",
+      "toNodeId": "M2",
+      "amount": 105000.0,
+      "timestampMillis": 1783858440000,
+      "type": "UPI"
+    }
+  ],
+  "timeline": [
+    {
+      "eventId": "evt_init_01",
+      "timestamp": "2026-07-12T09:30:00Z",
+      "title": "Alert Triggered by MuleHunter",
+      "description": "Composite risk score crossed P1 threshold on account 185502000087321.",
+      "category": "SYSTEM_ALERT",
+      "actor": "System"
+    },
+    {
+      "eventId": "evt_init_02",
+      "timestamp": "2026-07-12T09:35:00Z",
+      "title": "Initial AI Copilot Evaluation",
+      "description": "AI classified M1 as Suspected Mule, V1 as Victim, M2 as Under Review.",
+      "category": "AI_REANALYSIS",
+      "actor": "AI Copilot"
+    }
+  ],
+  "caseNotes": [
+    {
+      "noteId": "note_01",
+      "author": "EMP-902",
+      "content": "Initial triage indicates high correlation with Coimbatore phishing ring. Sunil Kumar confirmed transaction was done via spoofed call.",
+      "timestamp": "2026-07-12T10:15:00Z"
+    }
+  ],
+  "evidenceRepository": [],
+  "aiRevisionHistory": [],
+  "investigationCoverage": {
+    "totalNodes": 4,
+    "reviewedNodes": 0,
+    "unreviewedNodeIds": ["V1", "M1", "M2", "MR1"],
+    "expandableNodeIds": ["M2"]
+  },
+  "expandPreview": {
+    "nodes": [
+      {
+        "nodeId": "M3",
+        "accountId": "185502000011234",
+        "label": "M3 — Sanjay Deshmukh (Suspect Preview)",
+        "nodeType": "MULE",
+        "officerVerdict": "UNREVIEWED",
+        "nodeAction": "NO_ACTION",
+        "kyc": {
+          "customerName": "Sanjay Deshmukh",
+          "idType": "PAN",
+          "idNumber": "XXXXX9876A",
+          "dateOfBirth": "01/01/1990",
+          "address": "45, Shivaji Nagar, Pune",
+          "kycStatus": "VERIFIED",
+          "lastVerifiedDate": "15/02/2026",
+          "riskCategory": "HIGH"
+        },
+        "cbs": {
+          "accountNumber": "185502000011234",
+          "ifscCode": "IOBA0001855",
+          "accountType": "SAVINGS",
+          "branchName": "Pune Branch",
+          "currentBalance": 95000.0,
+          "averageMonthlyBalance": 2000.0,
+          "accountOpenDate": "01/01/2025",
+          "totalTransactionsLast30Days": 14,
+          "totalDebitLast30Days": 5000.0,
+          "totalCreditLast30Days": 100000.0,
+          "accountStatus": "ACTIVE"
+        },
+        "device": {
+          "lastLoginDevice": "Samsung M31",
+          "lastLoginIp": "49.36.192.12",
+          "lastLoginLocation": "Pune, India",
+          "lastLoginTimestamp": "2026-07-12T09:40:00Z",
+          "uniqueDevicesLast30Days": 1,
+          "uniqueIpsLast30Days": 2,
+          "vpnDetected": false,
+          "rootedDeviceDetected": false
+        },
+        "aiAnalysis": {
+          "aiClassification": "SUSPECTED_MULE",
+          "confidence": 0.82,
+          "evidence": [
+            {
+              "source": "TRANSACTION_PATTERN",
+              "derivedFrom": "Incoming transfer of ₹90,000 layered from M2 preview flow.",
+              "weight": 0.8
+            }
+          ],
+          "recommendedAction": "FULL_FREEZE",
+          "summary": "Sanjay Deshmukh's account acts as a third-tier layering node. Immediate freeze recommended upon actual scope expansion."
+        },
+        "recentTransactions": [
+          {
+            "txnId": "TXN87321004",
+            "fromAccount": "185502000099412",
+            "toAccount": "185502000011234",
+            "amount": 90000.0,
+            "currency": "INR",
+            "type": "UPI",
+            "timestamp": "2026-07-12T09:39:00Z",
+            "narration": "UPI/ToDeshmukh"
+          }
+        ]
+      },
+      {
+        "nodeId": "MR2",
+        "accountId": "916010000011223",
+        "label": "MR2 — BillDesk Escrow (Merchant Preview)",
+        "nodeType": "MERCHANT",
+        "officerVerdict": "UNREVIEWED",
+        "nodeAction": "NO_ACTION",
+        "kyc": {
+          "customerName": "BillDesk Settlements",
+          "idType": "PAN",
+          "idNumber": "XXXXX5544B",
+          "dateOfBirth": "N/A",
+          "address": "BillDesk Corporate, Mumbai",
+          "kycStatus": "VERIFIED",
+          "lastVerifiedDate": "10/01/2026",
+          "riskCategory": "LOW"
+        },
+        "cbs": {
+          "accountNumber": "916010000011223",
+          "ifscCode": "AXIS0000123",
+          "accountType": "CURRENT",
+          "branchName": "Mumbai Settlement Branch",
+          "currentBalance": 94850000.0,
+          "averageMonthlyBalance": 80000000.0,
+          "accountOpenDate": "05/05/2020",
+          "totalTransactionsLast30Days": 95000,
+          "totalDebitLast30Days": 450000000.0,
+          "totalCreditLast30Days": 460000000.0,
+          "accountStatus": "ACTIVE"
+        },
+        "device": {
+          "lastLoginDevice": "Settlement API",
+          "lastLoginIp": "20.198.56.12",
+          "lastLoginLocation": "Mumbai, India",
+          "lastLoginTimestamp": "2026-07-12T09:41:00Z",
+          "uniqueDevicesLast30Days": 1,
+          "uniqueIpsLast30Days": 1,
+          "vpnDetected": false,
+          "rootedDeviceDetected": false
+        },
+        "aiAnalysis": {
+          "aiClassification": "LIKELY_INNOCENT",
+          "confidence": 0.9,
+          "evidence": [
+            {
+              "source": "CBS_SUMMARY",
+              "derivedFrom": "Standard high-velocity settlement terminal endpoint.",
+              "weight": 0.95
+            }
+          ],
+          "recommendedAction": "NO_ACTION",
+          "summary": "BillDesk Settlement escrow is a utility endpoint. Funds used here represent checkout transitions."
+        },
+        "recentTransactions": [
+          {
+            "txnId": "TXN87321005",
+            "fromAccount": "185502000011234",
+            "toAccount": "916010000011223",
+            "amount": 5000.0,
+            "currency": "INR",
+            "type": "IMPS",
+            "timestamp": "2026-07-12T09:40:30Z",
+            "narration": "IMPS/BillDesk/Checkout"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "fromNodeId": "M2",
+        "toNodeId": "M3",
+        "amount": 90000.0,
+        "timestampMillis": 1783858740000,
+        "type": "UPI"
+      },
+      {
+        "fromNodeId": "M3",
+        "toNodeId": "MR2",
+        "amount": 5000.0,
+        "timestampMillis": 1783858830000,
+        "type": "IMPS"
+      }
+    ]
+  }
+}

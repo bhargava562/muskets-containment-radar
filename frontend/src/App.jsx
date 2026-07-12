@@ -1,4 +1,5 @@
 import { AppProvider } from './context/AppContextSimplified'
+import { InvestigationProvider } from './context/InvestigationContext'
 import MainLayout from './components/layout/MainLayout'
 import LoginPage from './components/auth/LoginPage'
 import { useAuth } from './components/auth/AuthContext'
@@ -13,7 +14,9 @@ const App = () => {
 
   return (
     <AppProvider>
-      <MainLayout />
+      <InvestigationProvider>
+        <MainLayout />
+      </InvestigationProvider>
     </AppProvider>
   )
 }

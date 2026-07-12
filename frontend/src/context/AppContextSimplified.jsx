@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
 
 export const CASE_STATUS = {
   PENDING_TRIAGE: 'PENDING_TRIAGE',
+  UNDER_INVESTIGATION: 'UNDER_INVESTIGATION',
   AWAITING_LEGAL_REVIEW: 'AWAITING_LEGAL_REVIEW',
   RESTRICTION_ACTIVE: 'RESTRICTION_ACTIVE',
   RETURNED_TO_AML: 'RETURNED_TO_AML',
@@ -22,11 +23,12 @@ export const CASE_STATUS = {
 // --- Workflow State Machine ---
 // Map of valid source → [valid targets]
 const VALID_TRANSITIONS = {
-  [CASE_STATUS.PENDING_TRIAGE]: [CASE_STATUS.AWAITING_LEGAL_REVIEW, CASE_STATUS.CLOSED_FALSE_POSITIVE],
+  [CASE_STATUS.PENDING_TRIAGE]: [CASE_STATUS.UNDER_INVESTIGATION, CASE_STATUS.AWAITING_LEGAL_REVIEW, CASE_STATUS.CLOSED_FALSE_POSITIVE],
+  [CASE_STATUS.UNDER_INVESTIGATION]: [CASE_STATUS.AWAITING_LEGAL_REVIEW, CASE_STATUS.CLOSED_FALSE_POSITIVE],
   [CASE_STATUS.AWAITING_LEGAL_REVIEW]: [CASE_STATUS.RESTRICTION_ACTIVE, CASE_STATUS.RETURNED_TO_AML, CASE_STATUS.CLOSED_FALSE_POSITIVE],
-  [CASE_STATUS.RETURNED_TO_AML]: [CASE_STATUS.AWAITING_LEGAL_REVIEW, CASE_STATUS.CLOSED_FALSE_POSITIVE],
+  [CASE_STATUS.RETURNED_TO_AML]: [CASE_STATUS.UNDER_INVESTIGATION, CASE_STATUS.AWAITING_LEGAL_REVIEW, CASE_STATUS.CLOSED_FALSE_POSITIVE],
   [CASE_STATUS.RESTRICTION_ACTIVE]: [CASE_STATUS.RESOLVED],
-  [CASE_STATUS.CLOSED_FALSE_POSITIVE]: [],
+  [CASE_STATUS.CLOSED_FALSE_POSITIVE]: [CASE_STATUS.UNDER_INVESTIGATION],
   [CASE_STATUS.RESOLVED]: []
 }
 
@@ -273,7 +275,16 @@ export function AppProvider({ children }) {
       'Legal Officer',
       'Case rejected and funds released',
       reason || 'No reason provided',
-      { closedAt: new Date().toISOString() }
+    )
+  }, [transitionCase])
+
+  const markUnderInvestigation = useCallback((caseId) => {
+    transitionCase(
+      caseId,
+      CASE_STATUS.UNDER_INVESTIGATION,
+      'AML Officer',
+      'Case opened — moved to active investigation drafts',
+      null
     )
   }, [transitionCase])
 
@@ -353,7 +364,7 @@ export function AppProvider({ children }) {
     approveContainment, finalizeRestriction, markFalsePositive,
     returnToAML, rejectCase,
     updateInvestigatorNotes, reanalyzeAI, appendAuditLog,
-    resetDatabase
+    resetDatabase, markUnderInvestigation
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
