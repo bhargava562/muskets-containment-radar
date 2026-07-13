@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { User, Landmark, ShieldAlert, Cpu, FileText, ArrowRightLeft, ShieldCheck, AlertTriangle } from 'lucide-react'
 import { useInvestigation } from '../../context/InvestigationContext'
@@ -22,6 +22,13 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
   const [activeTab, setActiveTab] = useState('ai')
 
   const node = getSelectedNode()
+
+  // Reset tab to AI Assessment when selected node changes
+  useEffect(() => {
+    if (node) {
+      setActiveTab('ai')
+    }
+  }, [node?.nodeId])
 
   // Checklist and Progress variables
   const totalNodes = context?.nodes?.length || 0
