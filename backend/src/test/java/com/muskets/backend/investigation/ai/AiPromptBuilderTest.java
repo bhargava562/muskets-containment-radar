@@ -51,13 +51,15 @@ public class AiPromptBuilderTest {
 
         KycData kyc = new KycData(
             "Sunil Kumar", "PAN", "ABCDE1234F", "14/08/1982",
-            "Vashi, Navi Mumbai", "VERIFIED", "2026-01-01", "HIGH"
+            "Vashi, Navi Mumbai", "VERIFIED", "2026-01-01", "HIGH",
+            "98XXXX1247", "Senior Manager", "2018"
         );
         node.setKyc(kyc);
 
         CbsData cbs = new CbsData(
             "185502000087321", "IOBA0001855", "SAVINGS", "Vashi",
-            50000.0, 1000.0, "2025-01-01", 12, 10000.0, 15000.0, "ACTIVE"
+            50000.0, 1000.0, "2025-01-01", 12, 10000.0, 15000.0, "ACTIVE",
+            "Priya Kumar", 0.0, "2026-07-12", "2026-07-10"
         );
         node.setCbs(cbs);
 

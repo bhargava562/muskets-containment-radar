@@ -22,8 +22,10 @@ public class NodeReviewService {
 
     /**
      * Updates the officer verdict on a specific node.
+     *
+     * @param officerNote mandatory when verdict is DISPUTED, null otherwise.
      */
-    public void updateVerdict(String caseId, String nodeId, OfficerVerdict verdict) {
+    public void updateVerdict(String caseId, String nodeId, OfficerVerdict verdict, String officerNote) {
         log.info("Updating verdict for case {}, node {} to {}", caseId, nodeId, verdict);
 
         InvestigationContext context = store.get(caseId)
@@ -35,11 +37,17 @@ public class NodeReviewService {
             .orElseThrow(() -> new IllegalArgumentException("Node not found: " + nodeId));
 
         node.setOfficerVerdict(verdict);
+        node.setOfficerNote(officerNote);
+
+        String description = "Officer marked node " + nodeId + " (" + node.getKyc().customerName() + ") as " + verdict;
+        if (officerNote != null && !officerNote.isBlank()) {
+            description += " — Note: " + officerNote;
+        }
         context.appendTimelineEntry(
             "OFFICER_REVIEW",
             "AML Officer",
             "Node Verdict Updated",
-            "Officer marked node " + nodeId + " (" + node.getKyc().customerName() + ") as " + verdict
+            description
         );
         context.bumpVersion();
         store.save(context);

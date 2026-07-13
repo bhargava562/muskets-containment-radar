@@ -10,6 +10,10 @@ import java.util.List;
  *   <li>{@code officerVerdict} — assessment: do they agree with the AI?</li>
  *   <li>{@code nodeAction} — containment recommendation: what to do about this node?</li>
  * </ul>
+ *
+ * <p>The optional {@code officerNote} is mandatory when verdict is DISPUTED,
+ * enforced via the blocking UI pattern (textarea must be filled before
+ * the verdict fires).</p>
  */
 public class InvestigationNode {
 
@@ -20,9 +24,11 @@ public class InvestigationNode {
     private KycData kyc;
     private CbsData cbs;
     private DeviceData device;
+    private ComplaintData complaint;
     private AiAnalysis aiAnalysis;
     private OfficerVerdict officerVerdict;
     private NodeAction nodeAction;
+    private String officerNote;     // mandatory when verdict is DISPUTED
     private List<TransactionSummary> recentTransactions;
 
     public InvestigationNode() {
@@ -53,6 +59,9 @@ public class InvestigationNode {
     public DeviceData getDevice() { return device; }
     public void setDevice(DeviceData device) { this.device = device; }
 
+    public ComplaintData getComplaint() { return complaint; }
+    public void setComplaint(ComplaintData complaint) { this.complaint = complaint; }
+
     public AiAnalysis getAiAnalysis() { return aiAnalysis; }
     public void setAiAnalysis(AiAnalysis aiAnalysis) { this.aiAnalysis = aiAnalysis; }
 
@@ -61,6 +70,9 @@ public class InvestigationNode {
 
     public NodeAction getNodeAction() { return nodeAction; }
     public void setNodeAction(NodeAction nodeAction) { this.nodeAction = nodeAction; }
+
+    public String getOfficerNote() { return officerNote; }
+    public void setOfficerNote(String officerNote) { this.officerNote = officerNote; }
 
     public List<TransactionSummary> getRecentTransactions() { return recentTransactions; }
     public void setRecentTransactions(List<TransactionSummary> recentTransactions) { this.recentTransactions = recentTransactions; }

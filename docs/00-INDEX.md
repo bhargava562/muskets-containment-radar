@@ -10,11 +10,11 @@ This `docs/` set exists to keep four things separated that kept getting blended 
 | [`02-SOLUTION.md`](./02-SOLUTION.md) | What Muskets/PFCE actually is, its design principles, roles, and business framing | Product concept — partially validated, partially still a hypothesis pending the bank-staff survey |
 | [`03-RESEARCH-EVIDENCE.md`](./03-RESEARCH-EVIDENCE.md) | Every legal, regulatory, and statistical claim used above, tiered by confidence, with an explicit exclusion list of fabricated/unverifiable citations | Source-tiered (🟢/🟡/🔴) |
 | [`04-DETECTION-MODULE-IMPLEMENTATION.md`](./04-DETECTION-MODULE-IMPLEMENTATION.md) | Full details of the implemented backend detection module, engine logic, and docker deployment | Code-implemented and verified |
-| [`04-PROTOTYPE-STATUS.md`](./04-PROTOTYPE-STATUS.md) | What's actually running in the `/frontend` repo today vs. what's still architecture-on-paper | Code-verified against the current repo snapshot |
+| [`05-AML-OFFICER-INVESTIGATION-WORKBENCH.md`](./05-AML-OFFICER-INVESTIGATION-WORKBENCH.md) | Re-architected investigation flow, tab ordering rationale, blocking DISPUTED reason, audit log, and enriched DTOs | Code-implemented and verified |
 
 ## Reading order
 
-If you're prepping for a judged Q&A, read in order: **01 → 02 → 04 → 03** (problem → solution → what's real → what backs it up, for spot-checking). If you're fact-checking a specific slide claim, go straight to **03** and search for the claim.
+If you're prepping for a judged Q&A, read in order: **01 → 02 → 04 → 05 → 03** (problem → solution → detection engine → investigation workbench → what backs it up, for spot-checking). If you're fact-checking a specific slide claim, go straight to **03** and search for the claim.
 
 ## Standing rules for updating these docs
 

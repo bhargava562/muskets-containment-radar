@@ -11,5 +11,8 @@ public record DeviceData(
     int uniqueDevicesLast30Days,
     int uniqueIpsLast30Days,
     boolean vpnDetected,
-    boolean rootedDeviceDetected
+    boolean rootedDeviceDetected,
+    boolean simChanged,            // SIM card recently changed
+    int failedLoginAttempts,       // failed logins in last 30 days
+    String geoVelocityFlag         // "NONE", "MODERATE", "HIGH"
 ) {}

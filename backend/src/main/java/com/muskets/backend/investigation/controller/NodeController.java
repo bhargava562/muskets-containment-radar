@@ -49,7 +49,7 @@ public class NodeController {
             @RequestBody NodeReviewStatusUpdateRequest request) {
         try {
             OfficerVerdict verdict = OfficerVerdict.valueOf(request.officerVerdict());
-            nodeReviewService.updateVerdict(caseId, nodeId, verdict);
+            nodeReviewService.updateVerdict(caseId, nodeId, verdict, request.officerNote());
             return ResponseEntity.ok(Map.of("message", "Verdict status updated successfully"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid verdict value: " + request.officerVerdict()));

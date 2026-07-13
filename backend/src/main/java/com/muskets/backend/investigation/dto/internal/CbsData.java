@@ -14,5 +14,9 @@ public record CbsData(
     int totalTransactionsLast30Days,
     double totalDebitLast30Days,
     double totalCreditLast30Days,
-    String accountStatus      // "ACTIVE", "DORMANT", "FROZEN", "CLOSED"
+    String accountStatus,     // "ACTIVE", "DORMANT", "FROZEN", "CLOSED"
+    String nominee,           // e.g., "Lakshmi", "Not Registered"
+    double lienAmount,        // current lien on account, default 0.0
+    String lastDebitDate,     // ISO date string
+    String lastCreditDate     // ISO date string
 ) {}

@@ -87,15 +87,15 @@ export function InvestigationProvider({ children }) {
     return context.nodes.find(n => n.nodeId === selectedNodeId) || null
   }, [context, selectedNodeId])
 
-  // Optimistic update of per-node review status (officerVerdict)
-  const updateNodeVerdict = useCallback(async (nodeId, verdict) => {
+  // Optimistic update of per-node review status (officerVerdict + optional officerNote)
+  const updateNodeVerdict = useCallback(async (nodeId, verdict, officerNote = null) => {
     if (!activeCaseId) return
     // Optimistic Update
     setContext(prev => {
       if (!prev) return null
       return {
         ...prev,
-        nodes: prev.nodes.map(n => n.nodeId === nodeId ? { ...n, officerVerdict: verdict } : n)
+        nodes: prev.nodes.map(n => n.nodeId === nodeId ? { ...n, officerVerdict: verdict, officerNote: officerNote } : n)
       }
     })
 
@@ -103,9 +103,11 @@ export function InvestigationProvider({ children }) {
       const res = await fetch(`${backendUrl}/api/investigation/${activeCaseId}/node/${nodeId}/review-status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ officerVerdict: verdict })
+        body: JSON.stringify({ officerVerdict: verdict, officerNote: officerNote })
       })
       if (!res.ok) throw new Error('Failed to update node review status.')
+      // Refresh to pick up timeline entries added by backend
+      await refreshContext()
     } catch (e) {
       setError(e.message)
       // Rollback optimistic update

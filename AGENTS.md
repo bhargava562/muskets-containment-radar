@@ -68,3 +68,15 @@ cd frontend && npm run build
 # Run Spring Boot backend packaging
 cd backend && .\mvnw.cmd clean package -DskipTests
 ```
+
+## InvestigationFlowAgent — 2026-07-13
+Fixed the core investigation workflow bug: NodeDetailDrawer default tab was `overview` (containing verdict/containment controls), meaning an officer could set a verdict before reviewing AI reasoning. Reordered tabs to `[AI Assessment, Transactions, Evidence, KYC, CBS, Decision]` with `ai` as default. Implemented blocking DISPUTED verdict pattern (textarea required before verdict fires). Split EvidenceRepository into SYSTEM-GENERATED and OFFICER-UPLOADED sections. Added investigation audit log panel surfacing the timeline[] array. Enriched backend DTOs: KycData (+mobile/occupation/customerSince), CbsData (+nominee/lienAmount/lastDebitDate/lastCreditDate), DeviceData (+simChanged/failedLoginAttempts/geoVelocityFlag), new ComplaintData record, and EvidenceClaim (+evidenceId/linkedRecordId for clickable evidence provenance). Upgraded seed data with all new fields including complaint linkage on victim node. Updated InvestigationContext.jsx to include officerNote in both optimistic state update and fetch body. Replaced hardcoded escalation checklist with dynamically computed items gated on real state.
+
+### How to test
+```bash
+# Backend
+cd backend && .\mvnw.cmd clean package -DskipTests
+
+# Frontend
+cd frontend && npm run build
+```
