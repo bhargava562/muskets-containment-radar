@@ -4,17 +4,18 @@ import { useApp } from '../../context/AppContextSimplified'
 import { useInvestigation } from '../../context/InvestigationContext'
 import InvestigationWorkspace from '../investigation/InvestigationWorkspace'
 import InvestigationQueue from '../watchtower/InvestigationQueue'
+import GlobalAuditLogs from '../watchtower/GlobalAuditLogs'
 
-const AnalystWorkspace = () => {
+const AnalystWorkspace = ({ activeView }) => {
   const { selectedCaseId, setSelectedCaseId } = useApp()
   const { activeCaseId, startInvestigation, exitWorkspace } = useInvestigation()
 
   // Sync selection from the watchtower queue into the active investigation context
   useEffect(() => {
-    if (selectedCaseId) {
+    if (selectedCaseId && activeView === 'queue') {
       startInvestigation(selectedCaseId)
     }
-  }, [selectedCaseId, startInvestigation])
+  }, [selectedCaseId, startInvestigation, activeView])
 
   // Sync cancellation back to main context
   useEffect(() => {
@@ -23,8 +24,19 @@ const AnalystWorkspace = () => {
     }
   }, [activeCaseId, selectedCaseId, setSelectedCaseId])
 
+  // Reset workspace state if navigating to other global sidebar items
+  useEffect(() => {
+    if (activeView !== 'queue' && activeCaseId) {
+      exitWorkspace()
+    }
+  }, [activeView, activeCaseId, exitWorkspace])
+
   if (activeCaseId) {
     return <InvestigationWorkspace />
+  }
+
+  if (activeView === 'logs') {
+    return <GlobalAuditLogs />
   }
 
   return (

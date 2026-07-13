@@ -19,7 +19,8 @@ export default function InvestigationWorkspace() {
     loading, 
     error, 
     exitWorkspace,
-    refreshContext
+    refreshContext,
+    selectedNodeId
   } = useInvestigation()
 
   const [showSummary, setShowSummary] = useState(false)
@@ -74,7 +75,15 @@ export default function InvestigationWorkspace() {
             {isPendingTriage ? (
               <CaseGateModal />
             ) : (
-              <SuspectGraphCanvas />
+              <>
+                <SuspectGraphCanvas />
+                {!selectedNodeId && (
+                  <div className="absolute top-4 right-4 bg-slate-950/80 backdrop-blur-md px-4 py-2 border border-slate-800 rounded-xl text-xs text-slate-400 font-mono flex items-center gap-2 pointer-events-none z-10 shadow-lg">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                    Select a node to inspect
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -83,9 +92,21 @@ export default function InvestigationWorkspace() {
         </main>
 
         {/* Right: Drawer Inspect tabs */}
-        <aside className="w-[340px] flex-shrink-0 p-4 border-l border-slate-900/60 bg-slate-950/20">
-          <NodeDetailDrawer onOpenSummary={() => setShowSummary(true)} />
-        </aside>
+        <AnimatePresence>
+          {selectedNodeId && (
+            <motion.aside
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 340, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="flex-shrink-0 border-l border-slate-900/60 bg-slate-950/20 overflow-hidden flex flex-col h-full"
+            >
+              <div className="w-[340px] p-4 h-full flex flex-col min-h-0">
+                <NodeDetailDrawer onOpenSummary={() => setShowSummary(true)} />
+              </div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Error Banners */}

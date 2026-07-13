@@ -54,10 +54,6 @@ export function InvestigationProvider({ children }) {
       if (!res.ok) throw new Error('Failed to build suspect graph.')
       const data = await res.json()
       setContext(data)
-      // Auto-select first node if available
-      if (data.nodes && data.nodes.length > 0) {
-        setSelectedNodeId(data.nodes[0].nodeId)
-      }
       if (markUnderInvestigation) {
         markUnderInvestigation(activeCaseId)
       }

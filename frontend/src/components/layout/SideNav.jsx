@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Inbox, Shield, FileText, Users, BarChart3, LogOut, Scale, RotateCcw } from 'lucide-react'
+import { Inbox, Shield, FileText, Users, BarChart3, LogOut, Scale, RotateCcw, Clock } from 'lucide-react'
 import { useState } from 'react'
 import { useApp, CASE_STATUS } from '../../context/AppContextSimplified'
 import { useAuth } from '../auth/AuthContext'
@@ -20,6 +20,7 @@ const SideNav = ({ activeView, onViewChange, role }) => {
       case 'AML Compliance Officer':
         return [
           { id: 'queue', icon: Inbox, label: 'Triage Queue', count: pendingCount, urgent: pendingCount > 0 },
+          { id: 'logs', icon: Clock, label: 'Audit Logs' }
         ]
       case 'Legal & Principal Officer':
         return [

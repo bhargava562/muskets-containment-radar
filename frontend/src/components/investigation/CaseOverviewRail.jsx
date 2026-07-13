@@ -75,23 +75,23 @@ export default function CaseOverviewRail() {
               </div>
             </div>
 
-            {/* Target Account Summary */}
+            {/* Case Status & Progress */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold text-slate-400 tracking-wider flex items-center gap-2">
-                <Landmark className="w-3.5 h-3.5 text-slate-500" /> Target Account Details
+                <Shield className="w-3.5 h-3.5 text-slate-500" /> Case Status & Progress
               </h3>
               <div className="p-3 bg-slate-900/10 border border-slate-900 rounded-xl space-y-2 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Account ID</span>
-                  <span className="font-mono text-slate-300 font-semibold">{snap.accountId}</span>
+                  <span className="text-slate-500">Workflow Phase</span>
+                  <span className="font-mono text-cyan-400 font-bold px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                    {context.caseStatus || 'UNDER_INVESTIGATION'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Holder Name</span>
-                  <span className="text-slate-300 font-semibold">{snap.customerName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Target Balance</span>
-                  <span className="font-mono text-slate-300">{formatCurrency(snap.totalBalance)}</span>
+                  <span className="text-slate-500">Triage Progress</span>
+                  <span className="font-mono text-slate-300 font-semibold">
+                    {context.nodes?.filter(n => n.officerVerdict !== 'UNREVIEWED').length || 0} / {context.nodes?.length || 0} Nodes
+                  </span>
                 </div>
               </div>
             </div>

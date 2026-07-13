@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { User, Landmark, ShieldAlert, Cpu, FileText, ArrowRightLeft, ShieldCheck, Clock, AlertTriangle } from 'lucide-react'
+import { User, Landmark, ShieldAlert, Cpu, FileText, ArrowRightLeft, ShieldCheck, AlertTriangle } from 'lucide-react'
 import { useInvestigation } from '../../context/InvestigationContext'
 import ReviewStatusControl from './ReviewStatusControl'
 import NodeActionControl from './NodeActionControl'
@@ -16,25 +16,9 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-/**
- * Derive a per-node investigation status from existing state.
- * This is computed client-side — no backend field needed.
- */
-const getNodeInvestigationStatus = (node) => {
-  if (!node) return { label: 'Unknown', color: 'text-slate-500', bg: 'bg-slate-800' }
-  const hasVerdict = node.officerVerdict && node.officerVerdict !== 'UNREVIEWED'
-  const hasAction = node.nodeAction && node.nodeAction !== 'NO_ACTION'
-  const hasEvidence = (node.evidenceRepository?.length || 0) > 0
-
-  if (hasVerdict && hasAction) return { label: 'Verdict + Action Recorded', color: 'text-emerald-400', bg: 'bg-emerald-500/10' }
-  if (hasVerdict) return { label: 'Verdict Recorded', color: 'text-cyan-400', bg: 'bg-cyan-500/10' }
-  if (hasEvidence) return { label: 'Evidence Attached', color: 'text-amber-400', bg: 'bg-amber-500/10' }
-  return { label: 'AI Generated — Awaiting Review', color: 'text-slate-400', bg: 'bg-slate-800' }
-}
-
 export default function NodeDetailDrawer({ onOpenSummary }) {
   const { getSelectedNode, context } = useInvestigation()
-  const [activeMainTab, setActiveMainTab] = useState('node') // 'node', 'case', or 'log'
+  const [activeMainTab, setActiveMainTab] = useState('node') // 'node' or 'case'
   const [activeTab, setActiveTab] = useState('ai')
 
   const node = getSelectedNode()
@@ -73,7 +57,7 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
     <div className="h-full flex flex-col bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
       
       {/* Main Tab Bar Selector */}
-      <div className="flex border-b border-slate-800 bg-slate-950 p-1 gap-1">
+      <div className="flex border-b border-slate-800 bg-slate-950 p-1 gap-1 flex-shrink-0">
         <button
           onClick={() => setActiveMainTab('node')}
           className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
@@ -96,17 +80,6 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
           <ShieldAlert className="w-3.5 h-3.5" />
           <span>Case Escalation</span>
         </button>
-        <button
-          onClick={() => setActiveMainTab('log')}
-          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-            activeMainTab === 'log'
-              ? 'bg-slate-800 text-cyan-400 border border-slate-700/50 shadow-sm'
-              : 'text-slate-500 hover:text-slate-400'
-          }`}
-        >
-          <Clock className="w-3.5 h-3.5" />
-          <span>Audit Log</span>
-        </button>
       </div>
 
       {/* Content Areas */}
@@ -122,29 +95,43 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
             </div>
           ) : (
             <div className="flex-1 flex flex-col min-h-0">
-              {/* Node Profile Header + Investigation Status */}
-              <div className="p-4 border-b border-slate-800 bg-slate-900/40">
-                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block mb-0.5">SUSPECT NODE INSPECTOR</span>
-                <h3 className="text-sm font-bold text-slate-200 truncate">{node.label}</h3>
-                <p className="text-[10px] font-mono text-slate-400 mt-1">ACID: {node.accountId}</p>
-                
-                {/* Per-Node Investigation Status */}
-                {(() => {
-                  const status = getNodeInvestigationStatus(node)
-                  return (
-                    <div className={`mt-2 flex items-center gap-1.5 px-2 py-1 rounded-md text-[9px] font-mono ${status.bg}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${status.color.replace('text-', 'bg-')} animate-pulse`} />
-                      <span className={status.color}>{status.label}</span>
+              {/* Compact Node Summary Panel */}
+              <div className="p-4 border-b border-slate-800 bg-slate-900/40 space-y-3 flex-shrink-0">
+                <div className="flex justify-between items-start">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block">Account Holder</span>
+                    <h3 className="text-sm font-bold text-slate-200 truncate mt-0.5">{node.kyc?.customerName || node.label.split('—')[1]?.trim() || node.label}</h3>
+                    <p className="text-[9px] font-mono text-slate-400 mt-0.5">ACID: {node.accountId}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase flex-shrink-0 ${
+                    node.nodeType === 'VICTIM' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                    node.nodeType === 'MULE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                    node.nodeType === 'MERCHANT' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                    'bg-slate-800 text-slate-400 border border-slate-700'
+                  }`}>
+                    {node.nodeType}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-850 text-xs">
+                  <div>
+                    <span className="text-[9px] font-mono text-slate-500 uppercase">Triage Status</span>
+                    <p className="font-mono font-bold text-slate-300 mt-0.5">{node.officerVerdict || 'UNREVIEWED'}</p>
+                  </div>
+                  {node.aiAnalysis && (
+                    <div>
+                      <span className="text-[9px] font-mono text-slate-500 uppercase">AI Confidence</span>
+                      <p className="font-mono font-bold text-cyan-400 mt-0.5">{(node.aiAnalysis.confidence * 100).toFixed(0)}%</p>
                     </div>
-                  )
-                })()}
+                  )}
+                </div>
               </div>
 
               {/* Tabs — AI first, Decision last */}
               <div className="flex border-b border-slate-800 bg-slate-900/20 p-1 gap-1 flex-shrink-0">
                 {[
-                  { id: 'ai', label: 'AI Assessment', icon: Cpu },
-                  { id: 'transactions', label: 'Transactions', icon: ArrowRightLeft },
+                  { id: 'ai', label: 'AI', icon: Cpu },
+                  { id: 'transactions', label: 'Txns', icon: ArrowRightLeft },
                   { id: 'evidence', label: 'Evidence', icon: FileText },
                   { id: 'kyc', label: 'KYC', icon: User },
                   { id: 'cbs', label: 'CBS', icon: Landmark },
@@ -156,7 +143,7 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex-1 py-2 rounded-lg text-[10px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold flex flex-col items-center gap-0.5 transition-all ${
                         isActive
                           ? 'bg-slate-800 text-cyan-400 border border-slate-700/50 shadow-sm'
                           : 'text-slate-500 hover:text-slate-400 hover:bg-slate-900/30'
@@ -264,7 +251,7 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
 
                 {activeTab === 'decision' && (
                   <div className="space-y-5">
-                    <p className="text-xs text-slate-500 mb-3 italic">
+                    <p className="text-xs text-slate-500 mb-3 italic text-center">
                       Set only after reviewing AI Assessment, Evidence, and account data.
                     </p>
 
@@ -284,51 +271,6 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
               </div>
             </div>
           )
-        ) : activeMainTab === 'log' ? (
-          /* INVESTIGATION AUDIT LOG */
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            <div className="p-4 border-b border-slate-800 bg-slate-900/40 -mx-4 -mt-4 mb-3">
-              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block mb-0.5">INVESTIGATION AUDIT TRAIL</span>
-              <h3 className="text-sm font-bold text-slate-200">Automatic Event Log</h3>
-              <p className="text-[10px] text-slate-500 mt-1">Every system action and officer decision is recorded automatically.</p>
-            </div>
-
-            {(!context?.timeline || context.timeline.length === 0) ? (
-              <div className="text-center py-10 text-slate-600 text-xs font-mono">
-                No audit events recorded yet.
-              </div>
-            ) : (
-              <div className="relative pl-4 border-l border-slate-800 space-y-4">
-                {[...context.timeline].reverse().map((event, idx) => {
-                  const categoryColor =
-                    event.category === 'SYSTEM_ALERT' ? 'bg-violet-500' :
-                    event.category === 'AI_REANALYSIS' ? 'bg-cyan-500' :
-                    event.category === 'OFFICER_REVIEW' ? 'bg-emerald-500' :
-                    event.category === 'EVIDENCE_UPLOAD' ? 'bg-amber-500' :
-                    'bg-slate-500'
-                  return (
-                    <div key={event.eventId || idx} className="relative">
-                      {/* Timeline dot */}
-                      <div className={`absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full ${categoryColor} ring-2 ring-slate-900`} />
-                      <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/40 text-xs">
-                        <div className="flex justify-between items-start mb-1">
-                          <span className="font-bold text-slate-200 text-[11px]">{event.title}</span>
-                          <span className="text-[9px] font-mono text-slate-500 flex-shrink-0 ml-2">
-                            {new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                        <p className="text-slate-400 leading-relaxed">{event.description}</p>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full ${categoryColor}`} />
-                          <span className="text-[9px] text-slate-500 font-mono">{event.actor} · {event.category}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
         ) : (
           /* CASE ESCALATION TAB */
           <div className="flex-1 overflow-y-auto p-4 space-y-5">
