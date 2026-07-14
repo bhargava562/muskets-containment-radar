@@ -3,6 +3,7 @@ package com.muskets.backend.investigation.ai;
 import com.muskets.backend.investigation.InvestigationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -19,15 +20,18 @@ import java.time.Duration;
  * offline/hackathon reliability.</p>
  */
 @Component
+@ConditionalOnProperty(prefix = "app.ai", name = "provider", havingValue = "anthropic")
 public class AnthropicAiClientImpl implements AiClient {
 
     private static final Logger log = LoggerFactory.getLogger(AnthropicAiClientImpl.class);
 
     private final InvestigationConfig config;
+    private final MockAiEvaluator mockAiEvaluator;
     private final HttpClient httpClient;
 
-    public AnthropicAiClientImpl(InvestigationConfig config) {
+    public AnthropicAiClientImpl(InvestigationConfig config, MockAiEvaluator mockAiEvaluator) {
         this.config = config;
+        this.mockAiEvaluator = mockAiEvaluator;
         this.httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -38,7 +42,7 @@ public class AnthropicAiClientImpl implements AiClient {
         String apiKey = config.getAi().getApiKey();
         if (apiKey == null || apiKey.isBlank() || "MOCK_KEY".equals(apiKey)) {
             log.info("No AI_API_KEY found. Executing mock Copilot evaluator fallback.");
-            return generateMockResponse(userPrompt);
+            return mockAiEvaluator.generateMockResponse(userPrompt);
         }
 
         log.info("Sending reanalysis payload to Anthropic (model: {})", config.getAi().getModel());
@@ -74,93 +78,11 @@ public class AnthropicAiClientImpl implements AiClient {
             throw new RuntimeException("Anthropic API error: " + response.statusCode());
         }
 
-        // Standard parsing for Anthropic message content
         return extractContentFromResponse(response.body());
-    }
-
-    private String generateMockResponse(String userPrompt) {
-        // Deterministic response simulator based on comments
-        String lowerPrompt = userPrompt.toLowerCase();
-        log.info("Simulating AI re-evaluation for comment query: {}", userPrompt);
-
-        // If officer challenges M1 to be cleared
-        if (lowerPrompt.contains("cleared") || lowerPrompt.contains("innocent") || lowerPrompt.contains("sunil")) {
-            return """
-                [
-                  {
-                    "nodeId": "M1",
-                    "aiClassification": "CLEARED",
-                    "confidence": 0.92,
-                    "evidence": [
-                      {
-                        "source": "OFFICER_CHALLENGE",
-                        "derivedFrom": "Officer verified branch records: account opened as valid secondary salary link.",
-                        "weight": 0.98
-                      }
-                    ],
-                    "recommendedAction": "NO_ACTION"
-                  },
-                  {
-                    "nodeId": "M2",
-                    "aiClassification": "UNDER_REVIEW",
-                    "confidence": 0.65,
-                    "evidence": [
-                      {
-                        "source": "TRANSACTION_PATTERN",
-                        "derivedFrom": "Remains suspicious secondary layering link.",
-                        "weight": 0.7
-                      }
-                    ],
-                    "recommendedAction": "PARTIAL_LIEN"
-                  }
-                ]
-                """;
-        }
-
-        // If they ask about M2 needing evidence/verification
-        if (lowerPrompt.contains("kyc") || lowerPrompt.contains("m2") || lowerPrompt.contains("patil")) {
-            return """
-                [
-                  {
-                    "nodeId": "M2",
-                    "aiClassification": "LIKELY_INNOCENT",
-                    "confidence": 0.85,
-                    "evidence": [
-                      {
-                        "source": "OFFICER_CHALLENGE",
-                        "derivedFrom": "KYC matches valid profile under Vashi branch inspection.",
-                        "weight": 0.95
-                      }
-                    ],
-                    "recommendedAction": "NO_ACTION"
-                  }
-                ]
-                """;
-        }
-
-        // Default update
-        return """
-            [
-              {
-                "nodeId": "M1",
-                "aiClassification": "SUSPECTED_MULE",
-                "confidence": 0.95,
-                "evidence": [
-                  {
-                    "source": "TRANSACTION_PATTERN",
-                    "derivedFrom": "Persistent high velocity layering burst remains unresolved.",
-                    "weight": 0.9
-                  }
-                ],
-                "recommendedAction": "FULL_FREEZE"
-              }
-            ]
-            """;
     }
 
     private String extractContentFromResponse(String responseBody) {
         try {
-            // Extraction of text from "content": [{"type": "text", "text": "..."}]
             int contentIdx = responseBody.indexOf("\"text\": \"");
             if (contentIdx == -1) return responseBody;
             int start = contentIdx + 9;

@@ -22,10 +22,10 @@ const SideNav = ({ activeView, onViewChange, role }) => {
           { id: 'queue', icon: Inbox, label: 'Triage Queue', count: pendingCount, urgent: pendingCount > 0 },
           { id: 'logs', icon: Clock, label: 'Audit Logs' }
         ]
-      case 'Legal & Principal Officer':
+      case 'Principal Officer (Compliance)':
         return [
-          { id: 'pending', icon: Scale, label: 'Pending Reviews', count: reviewCount, urgent: reviewCount > 0 },
-          { id: 'export', icon: FileText, label: 'Export Center' },
+          { id: 'pending', icon: Scale, label: 'Review Queue', count: reviewCount, urgent: reviewCount > 0 },
+          { id: 'export', icon: FileText, label: 'Evidence Package' },
         ]
       case 'Branch Manager':
         return [
@@ -42,7 +42,7 @@ const SideNav = ({ activeView, onViewChange, role }) => {
   const getRoleShort = () => {
     switch (role) {
       case 'AML Compliance Officer': return 'AML Officer'
-      case 'Legal & Principal Officer': return 'Legal Officer'
+      case 'Principal Officer (Compliance)': return 'Principal Officer'
       case 'Branch Manager': return 'Branch Mgr'
       default: return role
     }

@@ -24,6 +24,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - ./backend/.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/muskets
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver

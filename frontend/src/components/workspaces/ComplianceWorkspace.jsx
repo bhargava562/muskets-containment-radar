@@ -1,415 +1,482 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FileText, Download, CheckCircle2, AlertTriangle, Clock, Scale, Shield, ShieldCheck, Loader2, RotateCcw, XOctagon } from 'lucide-react'
+import { Scale, CheckCircle2, RotateCcw, XOctagon, FileText, Download, Loader2, Clock, ChevronRight, AlertTriangle } from 'lucide-react'
 import { useApp, CASE_STATUS } from '../../context/AppContextSimplified'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-const formatCurrency = (amount) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount)
-const formatTime = (iso) => new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-const formatDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+const fmt = (amount) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount)
+const fmtTime = (iso) => new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
-const ComplianceWorkspace = () => {
-  const { getCasesByStatuses, finalizeRestriction, returnToAML, rejectCase } = useApp()
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+
+// Checklist derived entirely client-side from fetched context — no new backend field needed
+function useReviewChecklist(ctx) {
+  if (!ctx) return { allPassed: false, checks: [] }
+  const checks = [
+    { label: 'All nodes reviewed', pass: ctx.nodes?.every(n => n.officerVerdict !== 'UNREVIEWED') ?? false },
+    { label: 'Evidence attached', pass: (ctx.evidenceCount ?? 0) > 0 },
+    { label: 'Recommendation present', pass: !!ctx.recommendation?.selectedAction },
+    { label: 'Timeline verified', pass: (ctx.timeline?.length ?? 0) > 0 },
+  ]
+  return { allPassed: checks.every(c => c.pass), checks }
+}
+
+const StatusBadge = ({ status }) => {
+  const map = {
+    AWAITING_LEGAL_REVIEW: 'bg-cyan-500/10 text-cyan-400',
+    RESTRICTION_ACTIVE: 'bg-emerald-500/10 text-emerald-400',
+    RETURNED_TO_AML: 'bg-amber-500/10 text-amber-400',
+    CLOSED_FALSE_POSITIVE: 'bg-slate-700/50 text-slate-400',
+    RESOLVED: 'bg-emerald-500/10 text-emerald-400',
+  }
+  return (
+    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${map[status] ?? 'bg-slate-700/50 text-slate-400'}`}>
+      {status?.replace(/_/g, ' ')}
+    </span>
+  )
+}
+
+export default function ComplianceWorkspace() {
+  const { getCasesByStatuses, CASE_STATUS: _ } = useApp()
+  const pendingCases = getCasesByStatuses([CASE_STATUS.AWAITING_LEGAL_REVIEW])
+  const closedCases = getCasesByStatuses([CASE_STATUS.RESTRICTION_ACTIVE, CASE_STATUS.RETURNED_TO_AML, CASE_STATUS.CLOSED_FALSE_POSITIVE, CASE_STATUS.RESOLVED])
+
   const [activeTab, setActiveTab] = useState('pending')
-  const [selectedReviewCase, setSelectedReviewCase] = useState(null)
-  
-  // Action states
-  const [actionState, setActionState] = useState({ type: null, id: null }) // type: 'finalize', 'return', 'reject'
-  const [toastMessage, setToastMessage] = useState('')
+  const [selectedCaseId, setSelectedCaseId] = useState(null)
+  const [reviewCtx, setReviewCtx] = useState(null)
+  const [loadingCtx, setLoadingCtx] = useState(false)
 
-  // Export states
-  const [isGeneratingSAR, setIsGeneratingSAR] = useState(false)
-  const [sarGenerated, setSarGenerated] = useState(false)
-  const [isGeneratingDPIP, setIsGeneratingDPIP] = useState(false)
-  const [dpipGenerated, setDpipGenerated] = useState(false)
+  // STR draft state
+  const [strLoading, setStrLoading] = useState(false)
+  const [strError, setStrError] = useState(null)
+  const [strNarrative, setStrNarrative] = useState('')
+  const [strSaved, setStrSaved] = useState(false)
 
-  // Data fetching based on tabs
-  const pendingReview = getCasesByStatuses([CASE_STATUS.AWAITING_LEGAL_REVIEW])
-  const finalizedCases = getCasesByStatuses([CASE_STATUS.RESTRICTION_ACTIVE, CASE_STATUS.RETURNED_TO_AML, CASE_STATUS.CLOSED_FALSE_POSITIVE, CASE_STATUS.RESOLVED])
-  
-  const displayCases = activeTab === 'pending' ? pendingReview : finalizedCases
+  // Decision state
+  const [deciding, setDeciding] = useState(false)
+  const [returnComment, setReturnComment] = useState('')
+  const [showReturnInput, setShowReturnInput] = useState(false)
+  const [toast, setToast] = useState('')
 
-  // Reset export states when selected case changes
-  useEffect(() => {
-    setSarGenerated(false)
-    setDpipGenerated(false)
-    setIsGeneratingSAR(false)
-    setIsGeneratingDPIP(false)
-  }, [selectedReviewCase?.id])
+  const displayCases = activeTab === 'pending' ? pendingCases : closedCases
 
-  // Auto-deselect if the selected case leaves the current view
-  useEffect(() => {
-    if (selectedReviewCase) {
-      const stillInView = displayCases.find(c => c.id === selectedReviewCase.id)
-      if (!stillInView) setSelectedReviewCase(null)
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
+
+  // Fetch review summary from real backend when a case is selected
+  const fetchReviewSummary = useCallback(async (caseId) => {
+    setLoadingCtx(true)
+    setReviewCtx(null)
+    setStrNarrative('')
+    setStrSaved(false)
+    setStrError(null)
+    setShowReturnInput(false)
+    setReturnComment('')
+    try {
+      const res = await fetch(`${BACKEND}/api/investigation/${caseId}/review-summary`)
+      if (!res.ok) throw new Error('Backend unavailable')
+      const data = await res.json()
+      setReviewCtx(data)
+      if (data.strDraft?.narrative) setStrNarrative(data.strDraft.narrative)
+    } catch {
+      setReviewCtx(null)
+    } finally {
+      setLoadingCtx(false)
     }
-  }, [displayCases, selectedReviewCase])
+  }, [])
 
-  const showToast = (msg) => {
-    setToastMessage(msg)
-    setTimeout(() => setToastMessage(''), 3000)
-  }
+  useEffect(() => {
+    if (selectedCaseId) fetchReviewSummary(selectedCaseId)
+  }, [selectedCaseId, fetchReviewSummary])
 
-  const isAnyActionProcessing = isGeneratingSAR || isGeneratingDPIP || actionState.id !== null
+  // Auto-deselect if case leaves current tab view
+  useEffect(() => {
+    if (selectedCaseId && !displayCases.find(c => c.id === selectedCaseId)) {
+      setSelectedCaseId(null)
+    }
+  }, [displayCases, selectedCaseId])
 
-  // --- Actions ---
-  const handleAction = (type, caseId) => {
-    if (isAnyActionProcessing) return
-    setActionState({ type, id: caseId })
-    setTimeout(() => {
-      if (type === 'finalize') {
-        finalizeRestriction(caseId)
-        showToast('Restriction authorized and active')
-      } else if (type === 'return') {
-        returnToAML(caseId, 'Returned by legal for further review')
-        showToast('Case returned to AML Queue')
-      } else if (type === 'reject') {
-        rejectCase(caseId, 'Rejected by legal')
-        showToast('Case rejected, marked as False Positive')
+  const handleGenerateStr = async () => {
+    if (!selectedCaseId || strLoading) return
+    setStrLoading(true)
+    setStrError(null)
+    try {
+      const res = await fetch(`${BACKEND}/api/investigation/${selectedCaseId}/str-draft`, { method: 'POST' })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'STR generation failed')
       }
-      setActionState({ type: null, id: null })
-    }, 800)
+      const draft = await res.json()
+      setStrNarrative(draft.narrative)
+      setStrSaved(false)
+      showToast('STR draft generated')
+    } catch (e) {
+      setStrError(e.message)
+    } finally {
+      setStrLoading(false)
+    }
   }
 
-  // SAR generation
-  const handleGenerateSAR = (caseItem) => {
-    if (isAnyActionProcessing || !caseItem) return
-    setIsGeneratingSAR(true)
-    setTimeout(() => {
-      generateSARPdf(caseItem)
-      setIsGeneratingSAR(false)
-      setSarGenerated(true)
-      showToast('SAR PDF generated successfully')
-    }, 1000)
+  const handleSaveStr = async () => {
+    if (!selectedCaseId || !strNarrative.trim()) return
+    try {
+      await fetch(`${BACKEND}/api/investigation/${selectedCaseId}/str-draft`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ narrative: strNarrative })
+      })
+      setStrSaved(true)
+      showToast('STR draft saved')
+    } catch {
+      showToast('Save failed — try again')
+    }
   }
 
-  // DPIP generation
-  const handleGenerateDPIP = (caseItem) => {
-    if (isAnyActionProcessing || !caseItem) return
-    setIsGeneratingDPIP(true)
-    setTimeout(() => {
-      generateDPIPPdf(caseItem)
-      setIsGeneratingDPIP(false)
-      setDpipGenerated(true)
-      showToast('DPIP interbank packet exported')
-    }, 1000)
+  const handleDecision = async (decision) => {
+    if (deciding || !selectedCaseId) return
+    if ((decision === 'RETURN' || decision === 'NEED_MORE_EVIDENCE') && !returnComment.trim()) {
+      setShowReturnInput(true)
+      return
+    }
+    setDeciding(true)
+    try {
+      const res = await fetch(`${BACKEND}/api/investigation/${selectedCaseId}/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision, comment: returnComment })
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || 'Decision failed')
+      }
+      const labels = { APPROVE: 'Restriction approved', RETURN: 'Case returned to AML', NEED_MORE_EVIDENCE: 'Returned — more evidence requested', REJECT: 'Case rejected as false positive' }
+      showToast(labels[decision] || decision)
+      setSelectedCaseId(null)
+      setReviewCtx(null)
+    } catch (e) {
+      showToast(e.message)
+    } finally {
+      setDeciding(false)
+    }
   }
 
-  // --- PDF Generation ---
-  const generateSARPdf = (c) => {
+  const handleExportEvidencePackage = (caseItem) => {
+    if (!caseItem) return
     const doc = new jsPDF()
     let y = 20
-    doc.setFontSize(16); doc.setFont('helvetica', 'bold')
-    doc.text('SUSPICIOUS ACTIVITY REPORT (SAR)', 20, y); y += 12
+    doc.setFontSize(15); doc.setFont('helvetica', 'bold')
+    doc.text('CASE EVIDENCE PACKAGE', 20, y); y += 10
     doc.setFontSize(9); doc.setFont('helvetica', 'normal')
-    doc.text(`Generated: ${new Date().toISOString()}`, 20, y); y += 6
-    doc.text(`Case ID: ${c.id}`, 20, y); y += 6
-    doc.text(`Priority: ${c.priority}`, 20, y); y += 12
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
-    doc.text('Case Summary', 20, y); y += 8
-    doc.setFontSize(10); doc.setFont('helvetica', 'normal')
-    const lines = doc.splitTextToSize(c.aiSummary, 170)
-    doc.text(lines, 20, y); y += lines.length * 5 + 8
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
-    doc.text('Containment Action', 20, y); y += 8
-    autoTable(doc, { startY: y, head: [['Field', 'Value']], body: [
-      ['Customer', c.customerName],
-      ['Risk Amount', formatCurrency(c.riskAmount)],
-      ['Traced Amount', formatCurrency(c.tracedAmount)],
-      ['Action', 'Partial Lien (Proportional Hold)'],
-      ['Approved By', c.analystName || 'Analyst'],
-      ['Analyst Approved At', c.analystApprovedAt ? new Date(c.analystApprovedAt).toLocaleString('en-IN') : 'N/A'],
-      ['Mule Accounts', c.muleAccounts.join(', ')],
-      ['Merchant Accounts', c.merchantAccounts.join(', ')]
-    ], margin: { left: 20, right: 20 }, styles: { fontSize: 9 } })
-    
-    // Add Audit Log to PDF
-    y = doc.lastAutoTable.finalY + 12
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
-    doc.text('Audit Timeline', 20, y); y += 8
-    const auditData = (c.auditLog || []).map(entry => [
-      formatDate(entry.timestamp) + ' ' + formatTime(entry.timestamp),
-      entry.actor,
-      entry.action
-    ])
-    autoTable(doc, { startY: y, head: [['Time', 'Actor', 'Action']], body: auditData, margin: { left: 20, right: 20 }, styles: { fontSize: 9 } })
-    
-    y = doc.lastAutoTable.finalY + 12
-    doc.setFontSize(8); doc.setFont('helvetica', 'normal')
-    const hash = Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
-    doc.text(`Integrity Hash (SHA-256): ${hash}`, 20, y)
-    doc.save(`SAR-${c.id}.pdf`)
-  }
+    doc.text(`Generated: ${new Date().toISOString()}`, 20, y); y += 5
+    doc.text(`Case ID: ${caseItem.id}  |  Priority: ${caseItem.priority}`, 20, y); y += 10
 
-  const generateDPIPPdf = (c) => {
-    const doc = new jsPDF()
-    let y = 20
-    doc.setFontSize(16); doc.setFont('helvetica', 'bold')
-    doc.text('DPIP INTERBANK CONTAINMENT PACKET', 20, y); y += 12
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal')
-    doc.text(`Generated: ${new Date().toISOString()}`, 20, y); y += 6
-    doc.text(`Case Reference: ${c.id}`, 20, y); y += 6
-    doc.text('Status: DPIP Coordinated', 20, y); y += 12
-    autoTable(doc, { startY: y, head: [['Field', 'Value']], body: [
-      ['Case ID', c.id],
-      ['Traced Amount', formatCurrency(c.tracedAmount)],
-      ['Affected Accounts', String(c.muleAccounts.length + c.merchantAccounts.length)],
-      ['Recommended Action', 'Partial Restriction'],
-      ['Analyst Approved At', c.analystApprovedAt ? new Date(c.analystApprovedAt).toLocaleString('en-IN') : 'N/A'],
-      ['Legal Authorized At', c.legalAuthorizedAt ? new Date(c.legalAuthorizedAt).toLocaleString('en-IN') : 'Pending'],
-      ['Summary', c.aiSummary]
-    ], margin: { left: 20, right: 20 }, styles: { fontSize: 9 } })
+    autoTable(doc, {
+      startY: y,
+      head: [['Field', 'Value']],
+      body: [
+        ['Customer', caseItem.customerName],
+        ['Risk Amount', fmt(caseItem.riskAmount)],
+        ['Traced Amount', fmt(caseItem.tracedAmount)],
+        ['Recommended Action', 'Proportional Lien'],
+        ['Status', caseItem.status],
+      ],
+      margin: { left: 20, right: 20 }, styles: { fontSize: 9 }
+    })
+
     y = doc.lastAutoTable.finalY + 10
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold')
-    doc.text('Freeze Instructions', 20, y); y += 8
-    const freezeData = c.muleAccounts.map(acc => [acc, formatCurrency(c.tracedAmount / c.muleAccounts.length), 'Proportional Lien'])
-    autoTable(doc, { startY: y, head: [['Account Number', 'Amount', 'Hold Type']], body: freezeData, margin: { left: 20, right: 20 }, styles: { fontSize: 9 } })
-    doc.save(`DPIP-${c.id}.pdf`)
+    if (reviewCtx?.timeline?.length) {
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold')
+      doc.text('Investigation Timeline', 20, y); y += 6
+      autoTable(doc, {
+        startY: y,
+        head: [['Time', 'Actor', 'Event']],
+        body: reviewCtx.timeline.map(e => [fmtTime(e.timestamp), e.actor, e.title]),
+        margin: { left: 20, right: 20 }, styles: { fontSize: 8 }
+      })
+      y = doc.lastAutoTable.finalY + 10
+    }
+
+    if (strNarrative) {
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold')
+      doc.text('STR Narrative (FIU-IND)', 20, y); y += 6
+      doc.setFontSize(9); doc.setFont('helvetica', 'normal')
+      const lines = doc.splitTextToSize(strNarrative, 170)
+      doc.text(lines, 20, y); y += lines.length * 5 + 8
+    }
+
+    const hash = Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
+    doc.setFontSize(7)
+    doc.text(`Integrity Hash (SHA-256): ${hash}`, 20, doc.internal.pageSize.height - 10)
+    doc.save(`EvidencePackage-${caseItem.id}.pdf`)
+    showToast('Evidence package exported')
   }
 
-  // --- RENDER ---
+  const { allPassed, checks } = useReviewChecklist(reviewCtx)
+  const selectedCase = displayCases.find(c => c.id === selectedCaseId)
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden bg-slate-950">
       {/* Toast */}
       <AnimatePresence>
-        {toastMessage && (
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="fixed top-4 right-4 z-50 px-4 py-2.5 bg-emerald-500/90 text-white text-sm font-semibold rounded-xl shadow-lg shadow-emerald-500/20 backdrop-blur">
-            <div className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />{toastMessage}</div>
+        {toast && (
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 right-4 z-50 px-4 py-2.5 bg-emerald-500/90 text-white text-sm font-semibold rounded-xl shadow-lg backdrop-blur flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />{toast}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-800/50 bg-slate-900/30">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Scale className="w-5 h-5 text-slate-400" />
-            <div>
-              <h1 className="text-sm font-bold text-slate-200 tracking-wide">COMPLIANCE REVIEW</h1>
-              <p className="text-[11px] text-slate-500 mt-0.5">{pendingReview.length} case{pendingReview.length !== 1 ? 's' : ''} awaiting legal authorization</p>
-            </div>
+        <div className="flex items-center gap-3 mb-4">
+          <Scale className="w-5 h-5 text-slate-400" />
+          <div>
+            <h1 className="text-sm font-bold text-slate-200 tracking-wide">PRINCIPAL OFFICER — REVIEW</h1>
+            <p className="text-[11px] text-slate-500 mt-0.5">{pendingCases.length} case{pendingCases.length !== 1 ? 's' : ''} awaiting authorization</p>
           </div>
         </div>
-
-        {/* Tabs */}
         <div className="flex gap-1 p-0.5 rounded-lg bg-slate-900/50 border border-slate-800/30 w-fit">
-          <button
-            onClick={() => setActiveTab('pending')}
-            className={`px-4 py-1.5 rounded-md text-[11px] font-bold transition-all ${
-              activeTab === 'pending'
-                ? 'bg-slate-800 text-slate-200 shadow-sm'
-                : 'text-slate-500 hover:text-slate-400'
-            }`}
-          >
-            Pending Authorization
-            {pendingReview.length > 0 && (
-              <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">
-                {pendingReview.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('finalized')}
-            className={`px-4 py-1.5 rounded-md text-[11px] font-bold transition-all ${
-              activeTab === 'finalized'
-                ? 'bg-slate-800 text-slate-200 shadow-sm'
-                : 'text-slate-500 hover:text-slate-400'
-            }`}
-          >
-            Finalized & Closed
-          </button>
+          {[['pending', 'Review Queue', pendingCases.length], ['closed', 'Processed']].map(([id, label, count]) => (
+            <button key={id} onClick={() => setActiveTab(id)}
+              className={`px-4 py-1.5 rounded-md text-[11px] font-bold transition-all ${activeTab === id ? 'bg-slate-800 text-slate-200' : 'text-slate-500 hover:text-slate-400'}`}>
+              {label}
+              {count > 0 && <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">{count}</span>}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left — Table */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5 border-r border-slate-800/30">
-          <div className="space-y-3">
-            <h2 className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">
-              {activeTab === 'pending' ? 'CASES AWAITING REVIEW' : 'PROCESSED CASES'}
-            </h2>
-            <AnimatePresence mode="wait">
-              {displayCases.length === 0 ? (
-                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-12 text-slate-600">
-                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                  <p className="text-xs">No cases found in this view</p>
-                </motion.div>
-              ) : (
-                <motion.div key="table" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="rounded-xl border border-slate-800/50 overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-slate-900/50 border-b border-slate-800/50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 tracking-wider">Case ID</th>
-                        <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 tracking-wider">Customer</th>
-                        <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 tracking-wider">Amount</th>
-                        <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 tracking-wider">Status</th>
-                        <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 tracking-wider">Time</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/30">
-                      {displayCases.map(caseItem => (
-                        <tr key={caseItem.id} onClick={() => setSelectedReviewCase(caseItem)} className={`cursor-pointer transition-colors ${selectedReviewCase?.id === caseItem.id ? 'bg-cyan-500/5' : 'hover:bg-slate-900/50'}`}>
-                          <td className="px-4 py-3 font-mono text-[11px] text-slate-400">{caseItem.id}</td>
-                          <td className="px-4 py-3 text-xs font-semibold text-slate-300">{caseItem.customerName}</td>
-                          <td className="px-4 py-3 font-mono text-xs font-bold text-slate-200">{formatCurrency(caseItem.tracedAmount)}</td>
-                          <td className="px-4 py-3 text-[10px] font-bold">
-                            <span className={`px-2 py-1 rounded ${
-                               caseItem.status === CASE_STATUS.AWAITING_LEGAL_REVIEW ? 'bg-cyan-500/10 text-cyan-400' :
-                               caseItem.status === CASE_STATUS.RESTRICTION_ACTIVE ? 'bg-emerald-500/10 text-emerald-400' :
-                               caseItem.status === CASE_STATUS.RETURNED_TO_AML ? 'bg-amber-500/10 text-amber-400' :
-                               'bg-slate-700/50 text-slate-400'
-                            }`}>
-                              {caseItem.status.replace(/_/g, ' ')}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-[11px] text-slate-500">{formatDate(caseItem.timestamp)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        {/* Case list */}
+        <div className="flex-1 overflow-y-auto p-5 border-r border-slate-800/30">
+          <h2 className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-3">
+            {activeTab === 'pending' ? 'AWAITING REVIEW' : 'PROCESSED CASES'}
+          </h2>
+          {displayCases.length === 0 ? (
+            <div className="text-center py-12 text-slate-600">
+              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              <p className="text-xs">No cases in this view</p>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-slate-800/50 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-900/50 border-b border-slate-800/50">
+                  <tr>
+                    {['Case ID', 'Customer', 'Traced Amount', 'Status', 'Date'].map(h => (
+                      <th key={h} className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 tracking-wider">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/30">
+                  {displayCases.map(c => (
+                    <tr key={c.id} onClick={() => setSelectedCaseId(c.id)}
+                      className={`cursor-pointer transition-colors ${selectedCaseId === c.id ? 'bg-cyan-500/5' : 'hover:bg-slate-900/50'}`}>
+                      <td className="px-4 py-3 font-mono text-[11px] text-slate-400">{c.id}</td>
+                      <td className="px-4 py-3 text-xs font-semibold text-slate-300">{c.customerName}</td>
+                      <td className="px-4 py-3 font-mono text-xs font-bold text-amber-400">{fmt(c.tracedAmount)}</td>
+                      <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
+                      <td className="px-4 py-3 text-[11px] text-slate-500">{fmtTime(c.timestamp)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        {/* Right — Case Governance Panel */}
-        <div className="w-[360px] flex-shrink-0 overflow-y-auto p-5 hidden lg:block">
-          {selectedReviewCase ? (
-            <motion.div key={selectedReviewCase.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
-              <div>
-                <h3 className="text-xs font-bold text-slate-300 mb-1">{selectedReviewCase.customerName}</h3>
-                <p className="text-[10px] text-slate-500 font-mono">{selectedReviewCase.id}</p>
-              </div>
-              
-              <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/30">
-                <p className="text-xs text-slate-400 leading-relaxed">{selectedReviewCase.aiSummary}</p>
-              </div>
-              
-              {selectedReviewCase.investigatorNotes && (
-                <div className="p-3 rounded-xl bg-cyan-900/10 border border-cyan-800/30">
-                   <h4 className="text-[10px] font-bold text-cyan-500 mb-1">INVESTIGATOR NOTES</h4>
-                   <p className="text-[11px] text-slate-300 italic">"{selectedReviewCase.investigatorNotes}"</p>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs"><span className="text-slate-500">Risk Amount</span><span className="font-mono font-bold text-slate-300">{formatCurrency(selectedReviewCase.riskAmount)}</span></div>
-                <div className="flex justify-between text-xs"><span className="text-slate-500">Traced (Lien)</span><span className="font-mono font-bold text-amber-400">{formatCurrency(selectedReviewCase.tracedAmount)}</span></div>
-                <div className="flex justify-between text-xs border-t border-slate-800/50 pt-2"><span className="text-slate-500">Action</span><span className="text-xs font-semibold text-emerald-400">Partial Lien (Recommended)</span></div>
-              </div>
-
-              {/* Dynamic Audit Timeline */}
-              <div className="space-y-3">
-                <h3 className="text-[10px] font-bold text-slate-400 tracking-widest">AUDIT TIMELINE</h3>
-                <div className="space-y-0">
-                  {(selectedReviewCase.auditLog || []).map((entry, idx, arr) => {
-                    const isLast = idx === arr.length - 1
-                    return (
-                      <div key={idx} className="flex gap-3">
-                        <div className="flex flex-col items-center">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-slate-800`}>
-                            <Clock className={`w-3 h-3 text-slate-400`} />
-                          </div>
-                          {!isLast && <div className={`w-px h-8 bg-slate-800`} />}
-                        </div>
-                        <div className="pb-3 pt-0.5">
-                          <p className="text-[10px] font-mono text-slate-500">{formatTime(entry.timestamp)} - {entry.actor}</p>
-                          <p className={`text-[11px] mt-0.5 text-slate-300`}>{entry.action}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Export Center */}
-              <div className="space-y-3 pt-2 border-t border-slate-800/50">
-                <h2 className="text-[10px] font-bold text-slate-400 tracking-widest">EXPORT CENTER</h2>
-                <div className="flex gap-2">
-                  {/* SAR Button */}
-                  <motion.button
-                    onClick={() => handleGenerateSAR(selectedReviewCase)}
-                    whileHover={!isAnyActionProcessing && !sarGenerated ? { scale: 1.02 } : {}}
-                    whileTap={!isAnyActionProcessing && !sarGenerated ? { scale: 0.98 } : {}}
-                    disabled={isAnyActionProcessing || sarGenerated}
-                    className={`flex-1 px-3 py-2.5 rounded-xl border transition-all ${sarGenerated ? 'border-emerald-500/30 bg-emerald-500/5' : isGeneratingSAR ? 'border-slate-700/50 bg-slate-900/50 opacity-50 cursor-not-allowed' : 'border-slate-700/50 bg-slate-900/50 hover:bg-slate-800/50'}`}
-                  >
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      {isGeneratingSAR ? <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin" /> : sarGenerated ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <FileText className="w-3.5 h-3.5 text-cyan-400" />}
-                      <span className={`text-[11px] font-bold ${sarGenerated ? 'text-emerald-400' : 'text-slate-300'}`}>{isGeneratingSAR ? 'Generating...' : sarGenerated ? 'SAR ✓' : 'SAR PDF'}</span>
-                    </div>
-                  </motion.button>
-
-                  {/* DPIP Button */}
-                  <motion.button
-                    onClick={() => handleGenerateDPIP(selectedReviewCase)}
-                    whileHover={!isAnyActionProcessing && !dpipGenerated ? { scale: 1.02 } : {}}
-                    whileTap={!isAnyActionProcessing && !dpipGenerated ? { scale: 0.98 } : {}}
-                    disabled={isAnyActionProcessing || dpipGenerated}
-                    className={`flex-1 px-3 py-2.5 rounded-xl border transition-all ${dpipGenerated ? 'border-emerald-500/30 bg-emerald-500/5' : isGeneratingDPIP ? 'border-slate-700/50 bg-slate-900/50 opacity-50 cursor-not-allowed' : 'border-slate-700/50 bg-slate-900/50 hover:bg-slate-800/50'}`}
-                  >
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      {isGeneratingDPIP ? <Loader2 className="w-3.5 h-3.5 text-amber-400 animate-spin" /> : dpipGenerated ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Download className="w-3.5 h-3.5 text-amber-400" />}
-                      <span className={`text-[11px] font-bold ${dpipGenerated ? 'text-emerald-400' : 'text-slate-300'}`}>{isGeneratingDPIP ? 'Exporting...' : dpipGenerated ? 'DPIP ✓' : 'DPIP Packet'}</span>
-                    </div>
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* Governance Actions (Only for pending) */}
-              {activeTab === 'pending' && selectedReviewCase.status === CASE_STATUS.AWAITING_LEGAL_REVIEW && (
-                <div className="pt-4 border-t border-slate-800/50 space-y-2">
-                  <div className="flex gap-2">
-                    <motion.button
-                      onClick={() => handleAction('return', selectedReviewCase.id)}
-                      disabled={isAnyActionProcessing}
-                      className={`flex-1 py-2 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 border border-amber-500/20 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 transition-all ${isAnyActionProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      {actionState.type === 'return' ? 'Returning...' : 'Return to AML'}
-                    </motion.button>
-                    
-                    <motion.button
-                      onClick={() => handleAction('reject', selectedReviewCase.id)}
-                      disabled={isAnyActionProcessing}
-                      className={`flex-1 py-2 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all ${isAnyActionProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <XOctagon className="w-3.5 h-3.5" />
-                      {actionState.type === 'reject' ? 'Rejecting...' : 'Reject & Release'}
-                    </motion.button>
-                  </div>
-                  
-                  <motion.button
-                    onClick={() => handleAction('finalize', selectedReviewCase.id)}
-                    whileHover={!isAnyActionProcessing ? { scale: 1.01 } : {}}
-                    whileTap={!isAnyActionProcessing ? { scale: 0.98 } : {}}
-                    disabled={isAnyActionProcessing}
-                    className={`w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15 transition-all ${isAnyActionProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    {actionState.type === 'finalize' ? 'Authorizing...' : 'Authorize & Finalize Restriction'}
-                  </motion.button>
-                  <p className="text-center text-[10px] text-slate-600">Restriction will become active for branch operations</p>
-                </div>
-              )}
-              
-            </motion.div>
-          ) : (
+        {/* Right panel */}
+        <div className="w-[380px] flex-shrink-0 overflow-y-auto p-5 hidden lg:block space-y-5">
+          {!selectedCaseId ? (
             <div className="h-full flex items-center justify-center">
               <div className="text-center text-slate-600">
                 <Scale className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                <p className="text-[10px]">Select a case to view governance details</p>
+                <p className="text-[10px]">Select a case to review</p>
               </div>
             </div>
+          ) : loadingCtx ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-5 h-5 text-slate-500 animate-spin" />
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div key={selectedCaseId} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
+
+                {/* Case header */}
+                <div>
+                  <h3 className="text-xs font-bold text-slate-300">{selectedCase?.customerName}</h3>
+                  <p className="text-[10px] text-slate-500 font-mono">{selectedCaseId}</p>
+                  {reviewCtx && <div className="mt-1"><StatusBadge status={reviewCtx.caseStatus} /></div>}
+                </div>
+
+                {/* Amounts */}
+                {selectedCase && (
+                  <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/30 space-y-2">
+                    <div className="flex justify-between text-xs"><span className="text-slate-500">Risk Amount</span><span className="font-mono font-bold text-slate-300">{fmt(selectedCase.riskAmount)}</span></div>
+                    <div className="flex justify-between text-xs"><span className="text-slate-500">Traced (Lien)</span><span className="font-mono font-bold text-amber-400">{fmt(selectedCase.tracedAmount)}</span></div>
+                    {reviewCtx?.recommendation?.selectedAction && (
+                      <div className="flex justify-between text-xs border-t border-slate-800/50 pt-2">
+                        <span className="text-slate-500">AML Recommendation</span>
+                        <span className="text-emerald-400 font-semibold text-[11px]">{reviewCtx.recommendation.selectedAction}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Backend context — node verdict breakdown */}
+                {reviewCtx && (
+                  <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/30 space-y-2">
+                    <h4 className="text-[10px] font-bold text-slate-400 tracking-widest">INVESTIGATION SUMMARY</h4>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div><p className="text-[10px] text-slate-500">Nodes</p><p className="text-sm font-bold text-slate-300">{reviewCtx.nodeCount}</p></div>
+                      <div><p className="text-[10px] text-slate-500">Unreviewed</p><p className={`text-sm font-bold ${reviewCtx.unreviewedNodes > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>{reviewCtx.unreviewedNodes}</p></div>
+                      <div><p className="text-[10px] text-slate-500">Evidence</p><p className="text-sm font-bold text-slate-300">{reviewCtx.evidenceCount}</p></div>
+                    </div>
+                    {reviewCtx.nodes?.length > 0 && (
+                      <div className="space-y-1 pt-1 border-t border-slate-800/30">
+                        {reviewCtx.nodes.map(n => (
+                          <div key={n.nodeId} className="flex items-center justify-between text-[10px]">
+                            <span className="text-slate-400">{n.label}</span>
+                            <div className="flex gap-1.5">
+                              <span className="text-slate-500">{n.aiClassification}</span>
+                              <span className={n.officerVerdict === 'UNREVIEWED' ? 'text-amber-400' : 'text-emerald-400'}>{n.officerVerdict}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Review checklist — derived client-side */}
+                {reviewCtx && (
+                  <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/30 space-y-2">
+                    <h4 className="text-[10px] font-bold text-slate-400 tracking-widest">REVIEW CHECKLIST</h4>
+                    {checks.map(c => (
+                      <div key={c.label} className="flex items-center gap-2 text-[11px]">
+                        <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 ${c.pass ? 'text-emerald-400' : 'text-slate-600'}`} />
+                        <span className={c.pass ? 'text-slate-300' : 'text-slate-500'}>{c.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Timeline (read-only) */}
+                {reviewCtx?.timeline?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-[10px] font-bold text-slate-400 tracking-widest">TIMELINE</h4>
+                    <div className="space-y-0 max-h-40 overflow-y-auto">
+                      {reviewCtx.timeline.slice(-6).map((e, i, arr) => (
+                        <div key={e.eventId} className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0">
+                              <Clock className="w-2.5 h-2.5 text-slate-500" />
+                            </div>
+                            {i < arr.length - 1 && <div className="w-px h-6 bg-slate-800" />}
+                          </div>
+                          <div className="pb-2 pt-0.5">
+                            <p className="text-[10px] font-mono text-slate-500">{fmtTime(e.timestamp)} · {e.actor}</p>
+                            <p className="text-[11px] text-slate-300">{e.title}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* STR Draft panel */}
+                {activeTab === 'pending' && selectedCase?.status === CASE_STATUS.AWAITING_LEGAL_REVIEW && (
+                  <div className="space-y-3 pt-2 border-t border-slate-800/50">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[10px] font-bold text-slate-400 tracking-widest">STR DRAFT (FIU-IND)</h4>
+                      <button onClick={handleGenerateStr} disabled={strLoading}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 disabled:opacity-50 transition-all">
+                        {strLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />}
+                        {strLoading ? 'Generating…' : 'Generate'}
+                      </button>
+                    </div>
+                    {strError && (
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                        <p className="text-[10px] text-red-400">{strError} — AI unavailable, draft manually below.</p>
+                      </div>
+                    )}
+                    <textarea
+                      value={strNarrative}
+                      onChange={e => { setStrNarrative(e.target.value); setStrSaved(false) }}
+                      placeholder="STR narrative will appear here after generation, or type manually…"
+                      rows={5}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 resize-none"
+                    />
+                    <button onClick={handleSaveStr} disabled={!strNarrative.trim()}
+                      className="w-full py-1.5 rounded-lg text-[11px] font-bold border border-slate-700/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5">
+                      {strSaved ? <><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />Saved</> : 'Save Draft'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Evidence Package export */}
+                <div className="pt-2 border-t border-slate-800/50">
+                  <button onClick={() => handleExportEvidencePackage(selectedCase)}
+                    className="w-full py-2 rounded-xl text-[11px] font-bold border border-slate-700/50 bg-slate-900/50 text-slate-300 hover:bg-slate-800/50 transition-all flex items-center justify-center gap-2">
+                    <Download className="w-3.5 h-3.5 text-amber-400" />
+                    Export Case Evidence Package
+                  </button>
+                </div>
+
+                {/* Decision buttons — only for pending cases */}
+                {activeTab === 'pending' && selectedCase?.status === CASE_STATUS.AWAITING_LEGAL_REVIEW && (
+                  <div className="pt-2 border-t border-slate-800/50 space-y-2">
+                    <h4 className="text-[10px] font-bold text-slate-400 tracking-widest">DECISION</h4>
+
+                    {showReturnInput && (
+                      <div className="space-y-2">
+                        <textarea
+                          value={returnComment}
+                          onChange={e => setReturnComment(e.target.value)}
+                          placeholder="Reason for return (required)…"
+                          rows={2}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500/30 resize-none"
+                        />
+                        <div className="flex gap-2">
+                          <button onClick={() => handleDecision('RETURN')} disabled={!returnComment.trim() || deciding}
+                            className="flex-1 py-2 rounded-xl text-[11px] font-bold border border-amber-500/20 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5">
+                            <RotateCcw className="w-3.5 h-3.5" />Return to AML
+                          </button>
+                          <button onClick={() => handleDecision('NEED_MORE_EVIDENCE')} disabled={!returnComment.trim() || deciding}
+                            className="flex-1 py-2 rounded-xl text-[11px] font-bold border border-amber-500/20 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 disabled:opacity-40 transition-all">
+                            Need Evidence
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {!showReturnInput && (
+                      <div className="flex gap-2">
+                        <button onClick={() => setShowReturnInput(true)} disabled={deciding}
+                          className="flex-1 py-2 rounded-xl text-[11px] font-bold border border-amber-500/20 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5">
+                          <RotateCcw className="w-3.5 h-3.5" />Return
+                        </button>
+                        <button onClick={() => handleDecision('REJECT')} disabled={deciding}
+                          className="flex-1 py-2 rounded-xl text-[11px] font-bold border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5">
+                          <XOctagon className="w-3.5 h-3.5" />Reject
+                        </button>
+                      </div>
+                    )}
+
+                    <button onClick={() => handleDecision('APPROVE')} disabled={deciding}
+                      className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15 disabled:opacity-50 transition-all">
+                      <ChevronRight className="w-4 h-4" />
+                      {deciding ? 'Processing…' : 'Approve — Activate Restriction'}
+                    </button>
+                    <p className="text-center text-[10px] text-slate-600">Approval transitions case to Branch Manager execution</p>
+                  </div>
+                )}
+
+              </motion.div>
+            </AnimatePresence>
           )}
         </div>
       </div>
     </div>
   )
 }
-
-export default ComplianceWorkspace

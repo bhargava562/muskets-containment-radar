@@ -1,5 +1,7 @@
 package com.muskets.backend.investigation.controller;
 
+import com.muskets.backend.investigation.ai.AiUnavailableException;
+import com.muskets.backend.investigation.ai.RateLimitExceededException;
 import com.muskets.backend.investigation.dto.internal.AiSchemaContract;
 import com.muskets.backend.investigation.dto.request.ReanalyzeRequest;
 import com.muskets.backend.investigation.service.AiOrchestrationService;
@@ -45,12 +47,30 @@ public class AiReviewController {
             );
             return ResponseEntity.ok(results);
         } catch (IllegalArgumentException e) {
-            // Validation failed or bad argument mapping (JEP validation)
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            // Service timeout or API key missing
+        } catch (RateLimitExceededException e) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("error", e.getMessage()));
+        } catch (AiUnavailableException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Triggers the background AI triage scan (initial assessment generation) on-demand.
+     */
+    @PostMapping("/{caseId}/refresh-ai")
+    public ResponseEntity<?> refreshAi(@PathVariable String caseId) {
+        try {
+            aiOrchestrationService.generateInitialAssessmentAsync(caseId);
+            return ResponseEntity.ok(Map.of("message", "Background AI assessment generation triggered successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", e.getMessage()));
         }
     }

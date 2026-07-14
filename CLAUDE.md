@@ -44,3 +44,11 @@ End of initial CLAUDE.md — continue by appending further operational notes and
 - **Inline Gateway Modal**: Gate decision Modal (`CaseGateModal.jsx`) is rendered inline inside the center canvas rather than full-screen overlays to prevent hiding context.
 - **Node-Verdict Gating**: Escalation to legal review is guarded. Both the backend `/proceed` endpoint and the frontend submission validation block legal escalation until all nodes in the suspect graph have been assigned a review verdict.
 - **Queue Segmentation**: Sidebar queue is segmented into four tabs: `Triage` (Fresh alerts), `Drafts` (Active investigations), `Escalated` (Awaiting Legal), and `Archived` (Closed).
+
+### AI Copilot Integration
+- **JSON Schema Enforcement**: Leverages Gemini's native `generationConfig.responseSchema` to guarantee structured JSON outputs matching the `AiSchemaContract` contract, completely preventing unstructured text/markdown responses.
+- **Asynchronous AI Triage Scan**: Suspect graph constructs instantly without waiting for the LLM. The initial triage scan runs in a background thread while the frontend UI displays a loading spinner and polls context state every 1.5s until complete.
+- **On-Demand AI Refresh**: A dedicated `/refresh-ai` endpoint allows officers to rerun network evaluation on-demand.
+- **Response Telemetry**: Performance metadata (live vs mocked status, provider, model, latency in ms, and timestamp) is displayed as a badge at the bottom of the AI Copilot tab.
+- **Retry-Once Policy**: Captures JSON schema parsing and semantic validation failures on the backend and retries the call once with the validation errors appended to the prompt. HTTP/network errors (429, 503, 401) propagate immediately.
+- **Shared Mock Evaluator**: Reuses the same mock response keyword evaluator across swappable client implementations for offline/hackathon execution.

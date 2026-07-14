@@ -2,8 +2,19 @@ import { Cpu, GitCompare, History, ShieldAlert, Sparkles, Activity, Link2, Info 
 import { useInvestigation } from '../../context/InvestigationContext'
 
 export default function AiCopilotPanel({ node }) {
-  const { context } = useInvestigation()
+  const { context, loading } = useInvestigation()
   
+  if (context?.aiGenerating || loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+        <div className="w-8 h-8 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+        <div className="text-slate-400 font-mono text-[11px] animate-pulse">
+          AI Copilot compiling network telemetry...
+        </div>
+      </div>
+    )
+  }
+
   const ai = node.aiAnalysis
   const revisions = context?.aiRevisionHistory || [] // Corrected key to match seed JSON
 
@@ -123,6 +134,20 @@ export default function AiCopilotPanel({ node }) {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Telemetry Badge */}
+      {context?.aiResponseMetadata && (
+        <div className="border-t border-slate-900 pt-4 flex items-center justify-between text-[9px] font-mono text-slate-500">
+          <span className="flex items-center gap-1">
+            <Cpu className="w-3 h-3 text-slate-600" />
+            {context.aiResponseMetadata.provider.toUpperCase()} ({context.aiResponseMetadata.model})
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${context.aiResponseMetadata.live ? 'bg-emerald-500 animate-pulse' : 'bg-slate-600'}`} />
+            {context.aiResponseMetadata.live ? 'Live' : 'Offline Mock'} | {(context.aiResponseMetadata.latencyMs / 1000).toFixed(2)}s
+          </span>
         </div>
       )}
     </div>

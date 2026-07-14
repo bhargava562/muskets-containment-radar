@@ -34,9 +34,9 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   ai:
-    provider: anthropic
-    api-key: ${AI_API_KEY:MOCK_KEY}
-    model: ${AI_MODEL:claude-sonnet-4-6}
+    provider: ${AI_PROVIDER:gemini}
+    api-key: ${GEMINI_API_KEY:${AI_API_KEY:MOCK_KEY}}
+    model: ${AI_MODEL:gemini-2.5-flash}
   investigation:
     reanalyze-rate-limit-per-day: ${REANALYZE_RATE_LIMIT:200}
 

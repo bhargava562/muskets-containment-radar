@@ -80,3 +80,15 @@ cd backend && .\mvnw.cmd clean package -DskipTests
 # Frontend
 cd frontend && npm run build
 ```
+
+## GeminiApiIntegrationAgent — 2026-07-14
+Implemented Gemini native JSON structured output integration on the Spring Boot backend using responseSchema enforcement, custom error exception mapping (503 and 429), and a retry-once validation wrapper. Designed the initial triage assessment to run asynchronously in a background thread to prevent blocking graph construction. Configured the React frontend with a 1.5-second polling loop and populated a telemetry metadata badge in the AI panel.
+
+### How to test
+```bash
+# Verify backend package compilation
+cd backend && .\mvnw.cmd clean package -DskipTests
+
+# Verify React application bundles correctly
+cd frontend && npm run build
+```

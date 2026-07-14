@@ -29,6 +29,10 @@ public class InvestigationContext {
     private List<AiRevision> revisionHistory = new ArrayList<>();
     private OfficerRecommendation recommendation;
     private String caseStatus;
+    private StrDraft strDraft;
+    private List<ExecutionRecord> executionLog = new ArrayList<>();
+    private boolean aiGenerating;
+    private AiResponseMetadata aiResponseMetadata;
 
     public InvestigationContext() {
         this.contextVersion = 1;
@@ -147,4 +151,16 @@ public class InvestigationContext {
 
     public String getCaseStatus() { return caseStatus; }
     public void setCaseStatus(String caseStatus) { this.caseStatus = caseStatus; }
+
+    public boolean isAiGenerating() { return aiGenerating; }
+    public void setAiGenerating(boolean aiGenerating) { this.aiGenerating = aiGenerating; }
+
+    public AiResponseMetadata getAiResponseMetadata() { return aiResponseMetadata; }
+    public void setAiResponseMetadata(AiResponseMetadata aiResponseMetadata) { this.aiResponseMetadata = aiResponseMetadata; }
+
+    public StrDraft getStrDraft() { return strDraft; }
+    public void setStrDraft(StrDraft strDraft) { this.strDraft = strDraft; }
+
+    public List<ExecutionRecord> getExecutionLog() { return executionLog; }
+    public void setExecutionLog(List<ExecutionRecord> executionLog) { this.executionLog = executionLog; }
 }

@@ -11,6 +11,7 @@ This `docs/` set exists to keep four things separated that kept getting blended 
 | [`03-RESEARCH-EVIDENCE.md`](./03-RESEARCH-EVIDENCE.md) | Every legal, regulatory, and statistical claim used above, tiered by confidence, with an explicit exclusion list of fabricated/unverifiable citations | Source-tiered (🟢/🟡/🔴) |
 | [`04-DETECTION-MODULE-IMPLEMENTATION.md`](./04-DETECTION-MODULE-IMPLEMENTATION.md) | Full details of the implemented backend detection module, engine logic, and docker deployment | Code-implemented and verified |
 | [`05-AML-OFFICER-INVESTIGATION-WORKBENCH.md`](./05-AML-OFFICER-INVESTIGATION-WORKBENCH.md) | Re-architected investigation flow, tab ordering rationale, blocking DISPUTED reason, audit log, and enriched DTOs | Code-implemented and verified |
+| [`06-PRINCIPAL-OFFICER-AND-BRANCH-MANAGER.md`](./06-PRINCIPAL-OFFICER-AND-BRANCH-MANAGER.md) | Principal Officer review workspace (STR draft, decision flow, evidence package export) and Branch Manager execution workspace — both rewired from mock context to real backend, with terminology corrections (SAR→STR, DPIP→Case Evidence Package, role label fix) | Code-implemented and verified |
 
 ## Reading order
 

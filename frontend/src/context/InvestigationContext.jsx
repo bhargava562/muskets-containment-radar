@@ -77,6 +77,17 @@ export function InvestigationProvider({ children }) {
     }
   }, [activeCaseId, backendUrl])
 
+  // Poll context when AI is generating in the background
+  useEffect(() => {
+    if (!activeCaseId || !context || !context.aiGenerating) return
+
+    const interval = setInterval(() => {
+      refreshContext(activeCaseId)
+    }, 1500)
+
+    return () => clearInterval(interval)
+  }, [activeCaseId, context?.aiGenerating, refreshContext])
+
   // Get specific node details from context
   const getSelectedNode = useCallback(() => {
     if (!context || !selectedNodeId) return null

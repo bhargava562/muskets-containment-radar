@@ -12,7 +12,7 @@ const MainLayout = () => {
     switch (currentUser?.role) {
       case 'AML Compliance Officer':
         return 'queue'
-      case 'Legal & Principal Officer':
+      case 'Principal Officer (Compliance)':
         return 'pending'
       case 'Branch Manager':
         return 'assigned'
@@ -25,7 +25,7 @@ const MainLayout = () => {
     switch (currentUser?.role) {
       case 'AML Compliance Officer':
         return <AnalystWorkspace activeView={activeView} />
-      case 'Legal & Principal Officer':
+      case 'Principal Officer (Compliance)':
         return <ComplianceWorkspace activeView={activeView} />
       case 'Branch Manager':
         return <BranchWorkspace activeView={activeView} />

@@ -22,10 +22,15 @@ public class InvestigationService {
 
     private final InvestigationContextStore store;
     private final CaseContextBuilder contextBuilder;
+    private final AiOrchestrationService aiOrchestrationService;
 
-    public InvestigationService(InvestigationContextStore store, CaseContextBuilder contextBuilder) {
+    public InvestigationService(
+            InvestigationContextStore store,
+            CaseContextBuilder contextBuilder,
+            AiOrchestrationService aiOrchestrationService) {
         this.store = store;
         this.contextBuilder = contextBuilder;
+        this.aiOrchestrationService = aiOrchestrationService;
     }
 
     /**
@@ -69,9 +74,8 @@ public class InvestigationService {
             .orElseThrow(() -> new IllegalArgumentException("Investigation not started: " + caseId));
 
         if ("PENDING_TRIAGE".equals(context.getCaseStatus())) {
-            // In a real DB flow, this would query PostOperatorEngine.
-            // Here we have pre-seeded graph nodes inside the template context.
             context.setCaseStatus("UNDER_INVESTIGATION");
+            context.setAiGenerating(true);
             context.appendTimelineEntry(
                 "SYSTEM_ALERT",
                 "System",
@@ -79,6 +83,9 @@ public class InvestigationService {
                 "Connected accounts within 4 hops populated in workcanvas."
             );
             store.save(context);
+
+            // Kick off background assessment
+            aiOrchestrationService.generateInitialAssessmentAsync(caseId);
         }
 
         return context;
