@@ -118,3 +118,12 @@ Audited the codebase for credentials safety and verified that no sensitive API k
 # Verify that untracked/ignored credentials remain uncommitted
 git status --ignored
 ```
+
+## GroqAiProviderAgent — 2026-07-14
+Implemented Groq native API provider integration on the Spring Boot backend via a swappable `GroqAiClientImpl` component conditional on `app.ai.provider=groq`. Integrated Groq OpenAI-compatible request structure enforcing `response_format: { type: "json_object" }` at request time. Reused the shared `MockAiEvaluator` for offline fallback when the API key is absent. Changed default provider to `groq` with `llama-3.1-8b-instant` as the default model. Updated security and credential documentation.
+
+### How to test
+```bash
+# Verify backend package compilation
+cd backend && .\mvnw.cmd compile
+```

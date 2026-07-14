@@ -34,9 +34,9 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   ai:
-    provider: ${AI_PROVIDER:gemini}
-    api-key: ${GEMINI_API_KEY:${AI_API_KEY:MOCK_KEY}}
-    model: ${AI_MODEL:gemini-2.5-flash}
+    provider: ${AI_PROVIDER:groq}
+    api-key: ${GROQ_API_KEY:${AI_API_KEY:MOCK_KEY}}
+    model: ${AI_MODEL:llama-3.1-8b-instant}
   investigation:
     reanalyze-rate-limit-per-day: ${REANALYZE_RATE_LIMIT:200}
 
