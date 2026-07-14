@@ -109,3 +109,12 @@ Ran full code review across all 6 files from the Principal Officer/Branch Manage
 ```bash
 cd backend && .\mvnw.cmd compile
 ```
+
+## SecurityAndDocsAgent — 2026-07-14
+Audited the codebase for credentials safety and verified that no sensitive API keys or credentials are hardcoded. Excluded the `GEMINI_API_KEY` configuration from version control, binding it dynamically in `application.yaml` to resolve from environment variables. Verified that `.env` files, local database files under `data/`, and the dataset `sample_mule_account_data.csv` are properly ignored by Git using `.gitignore`. Created `docs/08-SECURITY-AND-CREDENTIALS-SAFETY.md` documenting this security layout, and registered it in the documentation index.
+
+### How to test
+```bash
+# Verify that untracked/ignored credentials remain uncommitted
+git status --ignored
+```
