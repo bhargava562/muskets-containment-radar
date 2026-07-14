@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -131,16 +132,16 @@ public class PrincipalReviewController {
         if (ctx == null) return ResponseEntity.notFound().build();
 
         String currentStatus = ctx.getCaseStatus();
-        String targetStatus;
         String actor = "Principal Officer";
 
-        switch (request.decision()) {
-            case "APPROVE" -> targetStatus = "RESTRICTION_ACTIVE";
-            case "RETURN", "NEED_MORE_EVIDENCE" -> targetStatus = "RETURNED_TO_AML";
-            case "REJECT" -> targetStatus = "CLOSED_FALSE_POSITIVE";
-            default -> {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid decision: " + request.decision()));
-            }
+        String targetStatus = switch (request.decision()) {
+            case "APPROVE" -> "RESTRICTION_ACTIVE";
+            case "RETURN", "NEED_MORE_EVIDENCE" -> "RETURNED_TO_AML";
+            case "REJECT" -> "CLOSED_FALSE_POSITIVE";
+            default -> null;
+        };
+        if (targetStatus == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid decision: " + request.decision()));
         }
 
         if (!statusMachine.isValidTransition(currentStatus, targetStatus)) {
@@ -160,7 +161,7 @@ public class PrincipalReviewController {
 
         ctx.appendTimelineEntry("OFFICER_REVIEW", actor,
             "Principal Officer Decision: " + request.decision(),
-            "Case " + request.decision().toLowerCase().replace("_", " ") +
+            "Case " + request.decision().toLowerCase(Locale.ROOT).replace("_", " ") +
             (comment.isBlank() ? "" : ". Comment: " + comment));
 
         ctx.bumpVersion();

@@ -40,7 +40,10 @@ public class StrDraftService {
             narrative = aiClient.call(STR_SYSTEM_PROMPT, userPrompt);
         } catch (AiUnavailableException e) {
             throw new RuntimeException("STR draft generation unavailable: " + e.getMessage(), e);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("STR draft generation interrupted", e);
+        } catch (Exception e) {  // AiClient.call() declares throws Exception — interface-forced broad catch
             throw new RuntimeException("STR draft generation failed: " + e.getMessage(), e);
         }
 
