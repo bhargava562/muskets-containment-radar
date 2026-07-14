@@ -92,3 +92,20 @@ cd backend && .\mvnw.cmd clean package -DskipTests
 # Verify React application bundles correctly
 cd frontend && npm run build
 ```
+
+## PrincipalOfficerBranchManagerAgent — 2026-07-14
+Rewired `ComplianceWorkspace.jsx` (Principal Officer) and `BranchWorkspace.jsx` (Branch Manager) from mock `AppContextSimplified` context to real Spring Boot backend endpoints. Created two new backend packages: `investigation/principal/` (PrincipalReviewController, StrDraftService) and `investigation/branch/` (BranchExecutionController). Added 5 new REST endpoints under `/api/investigation/{caseId}/`: `GET /review-summary`, `POST /str-draft`, `PUT /str-draft`, `POST /decision`, `POST /execution`. Added `StrDraft` and `ExecutionRecord` DTOs plus `strDraft` and `executionLog` fields to `InvestigationContext`. Applied terminology corrections across LoginPage, SideNav, MainLayout: SAR→STR (FIU-IND/PMLA), DPIP→Case Evidence Package, "Legal & Principal Officer"→"Principal Officer (Compliance)". Decision flow maps APPROVE→RESTRICTION_ACTIVE, RETURN/NEED_MORE_EVIDENCE→RETURNED_TO_AML, REJECT→CLOSED_FALSE_POSITIVE via the existing state machine. No new state machine states added. Backend compiles clean, frontend builds clean (3375 modules). 4 pre-existing test failures confirmed unrelated.
+
+### How to test
+```bash
+cd backend && .\mvnw.cmd compile
+cd frontend && npm run build
+```
+
+## CodeReviewFixAgent — 2026-07-14
+Ran full code review across all 6 files from the Principal Officer/Branch Manager implementation. Fixed 2 real findings in `PrincipalReviewController.java`: added `Locale.ROOT` to `toLowerCase()` call (locale-sensitivity fix) and converted statement-form switch to switch expression (eliminates fall-through warning). Fixed 1 finding in `StrDraftService.java`: added explicit `InterruptedException` handler before the broad `Exception` catch; broad catch retained because `AiClient.call()` declares `throws Exception` at the interface level — narrowing is not possible without changing the interface. Two findings confirmed false positives: SSRF on `VITE_BACKEND_URL` (build-time env var, not runtime input) and CWE-396 on `StrDraftService` (interface-forced). Backend compiles clean after fixes. See `docs/07-CODE-REVIEW-FIXES-AND-VERIFICATION.md` for full detail.
+
+### How to test
+```bash
+cd backend && .\mvnw.cmd compile
+```
