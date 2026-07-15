@@ -18,24 +18,44 @@ public class MockAiEvaluator {
 
         // Scenario 0: STR Narrative generation check (specifically formatted plain text, not JSON context)
         if (userPrompt.contains("Case ID: ") && userPrompt.contains("Nodes in network:")) {
-            return """
-                SUSPICIOUS TRANSACTION REPORT (STR) NARRATIVE
-                ============================================
-                1. Case Reference:
-                   - Case ID: FRA-2026-IOB-00847
-                   - Primary Subject: Rajesh Chandra Sekhar (M1) - SUSPECTED_MULE
-                   - Secondary Counterparty: Sunil Patil (M2) - CLEARED
+            String caseId = "Unknown Case";
+            String customerName = "Unknown Customer";
+            String riskAmount = "0";
+            String tracedAmount = "0";
+            String trigger = "Unspecified anomaly";
 
-                2. Alert Ingestion & Analysis:
-                   - Ingress amount of INR 1,50,000.0 from victim node V1 was structured and split into downstream links.
-                   - Node M1 showed rapid velocity of pass-through transactions with no clear commercial justification.
-                   - Node M2 was verified by the branch team as a legitimate secondary salary link and subsequently cleared.
+            for (String line : userPrompt.split("\n")) {
+                line = line.trim();
+                if (line.startsWith("Case ID: ")) {
+                    caseId = line.substring("Case ID: ".length()).trim();
+                } else if (line.startsWith("Customer: ")) {
+                    customerName = line.substring("Customer: ".length()).trim();
+                } else if (line.startsWith("Risk Amount: INR ")) {
+                    riskAmount = line.substring("Risk Amount: INR ".length()).trim();
+                } else if (line.startsWith("Traced Amount: INR ")) {
+                    tracedAmount = line.substring("Traced Amount: INR ".length()).trim();
+                } else if (line.startsWith("Trigger: ")) {
+                    trigger = line.substring("Trigger: ".length()).trim();
+                }
+            }
 
-                3. Compliance Recommendations:
-                   - Primary suspect node M1 has been escalated for a full core banking freeze.
-                   - Proportional lien has been successfully recommended on M2 for early containment of disputed funds under PMLA Section 12AA.
-                   - Evidence package is compiled and hashed for FIU-IND submission.
-                """;
+            return String.format(
+                "SUSPICIOUS TRANSACTION REPORT (STR) NARRATIVE\n" +
+                "============================================\n" +
+                "1. Case Reference:\n" +
+                "   - Case ID: %s\n" +
+                "   - Primary Subject: %s\n" +
+                "   - Trigger Event: %s\n\n" +
+                "2. Alert Ingestion & Analysis:\n" +
+                "   - Ingress amount of INR %s was identified under alert rules.\n" +
+                "   - Layering patterns indicate potential smurfing behavior with INR %s successfully traced across downstream hops.\n" +
+                "   - Customer profile has been flagged for further verification against the reported transaction velocity.\n\n" +
+                "3. Compliance Recommendations:\n" +
+                "   - Primary subject %s has been recommended for a core banking system lien / restriction.\n" +
+                "   - Proportional restrictions are applied to safeguard active merchant balances under PMLA Section 12AA.\n" +
+                "   - Evidence package is compiled and hashed for formal FIU-IND filing.\n",
+                caseId, customerName, trigger, riskAmount, tracedAmount, customerName
+            );
         }
 
         // Scenario 1: Sunil/cleared/innocent keywords

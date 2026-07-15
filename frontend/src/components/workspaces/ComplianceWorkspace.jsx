@@ -403,9 +403,10 @@ export default function ComplianceWorkspace() {
                     <textarea
                       value={strNarrative}
                       onChange={e => { setStrNarrative(e.target.value); setStrSaved(false) }}
-                      placeholder="STR narrative will appear here after generation, or type manually…"
+                      placeholder={strLoading ? "AI is analyzing investigation trails and drafting compliance report..." : "STR narrative will appear here after generation, or type manually…"}
                       rows={5}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 resize-none"
+                      disabled={strLoading}
+                      className={`w-full px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 resize-none transition-all ${strLoading ? 'animate-pulse opacity-60' : ''}`}
                     />
                     <button onClick={handleSaveStr} disabled={!strNarrative.trim()}
                       className="w-full py-1.5 rounded-lg text-[11px] font-bold border border-slate-700/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 disabled:opacity-40 transition-all flex items-center justify-center gap-1.5">
