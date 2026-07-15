@@ -31,8 +31,13 @@ public class StrDraftService {
     }
 
     public StrDraft generateDraft(String caseId) {
-        InvestigationContext ctx = store.get(caseId)
-            .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
+        InvestigationContext ctx = store.get(caseId).orElseGet(() -> {
+            InvestigationContext seed = new InvestigationContext();
+            seed.setCaseId(caseId);
+            seed.setCaseStatus("AWAITING_LEGAL_REVIEW");
+            store.save(seed);
+            return seed;
+        });
 
         String userPrompt = buildStrPrompt(ctx);
         String narrative;

@@ -36,44 +36,59 @@ public class PrincipalReviewController {
     }
 
     /**
+     * Returns an existing context or seeds a minimal one for cases that arrived
+     * via the SSE/mock path and never went through the AML Officer start flow.
+     */
+    private InvestigationContext getOrSeedContext(String caseId, String assumedStatus) {
+        return store.get(caseId).orElseGet(() -> {
+            InvestigationContext ctx = new InvestigationContext();
+            ctx.setCaseId(caseId);
+            ctx.setCaseStatus(assumedStatus);
+            ctx.appendTimelineEntry("SYSTEM_ALERT", "System",
+                "Context auto-seeded",
+                "Case arrived via SSE alert path. Minimal context created for Principal Officer review.");
+            store.save(ctx);
+            return ctx;
+        });
+    }
+
+    /**
      * Read-only review summary for Principal Officer — shaped from existing summary endpoint.
      */
     @GetMapping("/{caseId}/review-summary")
     public ResponseEntity<?> getReviewSummary(@PathVariable String caseId) {
-        return store.get(caseId)
-            .map(ctx -> {
-                long unreviewed = ctx.getNodes().stream()
-                    .filter(n -> n.getOfficerVerdict() != null &&
-                        "UNREVIEWED".equals(n.getOfficerVerdict().name()))
-                    .count();
+        InvestigationContext ctx = getOrSeedContext(caseId, "AWAITING_LEGAL_REVIEW");
 
-                List<Map<String, Object>> nodeSummaries = ctx.getNodes().stream().map(n -> {
-                    Map<String, Object> m = new LinkedHashMap<>();
-                    m.put("nodeId", n.getNodeId());
-                    m.put("label", n.getLabel() != null ? n.getLabel() : "");
-                    m.put("nodeType", n.getNodeType() != null ? n.getNodeType() : "");
-                    m.put("officerVerdict", n.getOfficerVerdict() != null ? n.getOfficerVerdict().name() : "UNREVIEWED");
-                    m.put("nodeAction", n.getNodeAction() != null ? n.getNodeAction().name() : "NO_ACTION");
-                    m.put("aiClassification", n.getAiAnalysis() != null ? n.getAiAnalysis().aiClassification().name() : "UNCLASSIFIED");
-                    m.put("confidence", n.getAiAnalysis() != null ? n.getAiAnalysis().confidence() : 0.0);
-                    return m;
-                }).collect(Collectors.toList());
+        long unreviewed = ctx.getNodes().stream()
+            .filter(n -> n.getOfficerVerdict() != null &&
+                "UNREVIEWED".equals(n.getOfficerVerdict().name()))
+            .count();
 
-                Map<String, Object> result = new LinkedHashMap<>();
-                result.put("caseId", ctx.getCaseId());
-                result.put("caseStatus", ctx.getCaseStatus() != null ? ctx.getCaseStatus() : "");
-                result.put("snapshot", ctx.getSnapshot());
-                result.put("recommendation", ctx.getRecommendation() != null ? ctx.getRecommendation() : Map.of());
-                result.put("nodeCount", ctx.getNodes().size());
-                result.put("unreviewedNodes", unreviewed);
-                result.put("evidenceCount", ctx.getEvidenceRepository().size());
-                result.put("timeline", ctx.getTimeline());
-                result.put("caseNotes", ctx.getCaseNotes());
-                result.put("strDraft", ctx.getStrDraft() != null ? ctx.getStrDraft() : Map.of());
-                result.put("nodes", nodeSummaries);
-                return ResponseEntity.ok(result);
-            })
-            .orElse(ResponseEntity.notFound().build());
+        List<Map<String, Object>> nodeSummaries = ctx.getNodes().stream().map(n -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("nodeId", n.getNodeId());
+            m.put("label", n.getLabel() != null ? n.getLabel() : "");
+            m.put("nodeType", n.getNodeType() != null ? n.getNodeType() : "");
+            m.put("officerVerdict", n.getOfficerVerdict() != null ? n.getOfficerVerdict().name() : "UNREVIEWED");
+            m.put("nodeAction", n.getNodeAction() != null ? n.getNodeAction().name() : "NO_ACTION");
+            m.put("aiClassification", n.getAiAnalysis() != null ? n.getAiAnalysis().aiClassification().name() : "UNCLASSIFIED");
+            m.put("confidence", n.getAiAnalysis() != null ? n.getAiAnalysis().confidence() : 0.0);
+            return m;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("caseId", ctx.getCaseId());
+        result.put("caseStatus", ctx.getCaseStatus() != null ? ctx.getCaseStatus() : "");
+        result.put("snapshot", ctx.getSnapshot());
+        result.put("recommendation", ctx.getRecommendation() != null ? ctx.getRecommendation() : Map.of());
+        result.put("nodeCount", ctx.getNodes().size());
+        result.put("unreviewedNodes", unreviewed);
+        result.put("evidenceCount", ctx.getEvidenceRepository().size());
+        result.put("timeline", ctx.getTimeline());
+        result.put("caseNotes", ctx.getCaseNotes());
+        result.put("strDraft", ctx.getStrDraft() != null ? ctx.getStrDraft() : Map.of());
+        result.put("nodes", nodeSummaries);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -128,8 +143,7 @@ public class PrincipalReviewController {
             @PathVariable String caseId,
             @RequestBody PrincipalDecisionRequest request) {
 
-        InvestigationContext ctx = store.get(caseId).orElse(null);
-        if (ctx == null) return ResponseEntity.notFound().build();
+        InvestigationContext ctx = getOrSeedContext(caseId, "AWAITING_LEGAL_REVIEW");
 
         String currentStatus = ctx.getCaseStatus();
         String actor = "Principal Officer";

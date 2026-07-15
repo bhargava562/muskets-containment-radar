@@ -38,7 +38,7 @@ const StatusBadge = ({ status }) => {
 }
 
 export default function ComplianceWorkspace() {
-  const { getCasesByStatuses, CASE_STATUS: _ } = useApp()
+  const { getCasesByStatuses, CASE_STATUS: _, finalizeRestriction, returnToAML, rejectCase } = useApp()
   const pendingCases = getCasesByStatuses([CASE_STATUS.AWAITING_LEGAL_REVIEW])
   const closedCases = getCasesByStatuses([CASE_STATUS.RESTRICTION_ACTIVE, CASE_STATUS.RETURNED_TO_AML, CASE_STATUS.CLOSED_FALSE_POSITIVE, CASE_STATUS.RESOLVED])
 
@@ -151,6 +151,10 @@ export default function ComplianceWorkspace() {
       }
       const labels = { APPROVE: 'Restriction approved', RETURN: 'Case returned to AML', NEED_MORE_EVIDENCE: 'Returned — more evidence requested', REJECT: 'Case rejected as false positive' }
       showToast(labels[decision] || decision)
+      // Sync AppContextSimplified so the case moves out of the pending list
+      if (decision === 'APPROVE') finalizeRestriction(selectedCaseId)
+      else if (decision === 'RETURN' || decision === 'NEED_MORE_EVIDENCE') returnToAML(selectedCaseId, returnComment)
+      else if (decision === 'REJECT') rejectCase(selectedCaseId, returnComment)
       setSelectedCaseId(null)
       setReviewCtx(null)
     } catch (e) {
