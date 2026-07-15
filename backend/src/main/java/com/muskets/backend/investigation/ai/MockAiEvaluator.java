@@ -16,6 +16,28 @@ public class MockAiEvaluator {
         String lowerPrompt = userPrompt.toLowerCase();
         log.info("Simulating AI re-evaluation/initial scan for query: {}", userPrompt);
 
+        // Scenario 0: STR Narrative generation check (specifically formatted plain text, not JSON context)
+        if (userPrompt.contains("Case ID: ") && userPrompt.contains("Nodes in network:")) {
+            return """
+                SUSPICIOUS TRANSACTION REPORT (STR) NARRATIVE
+                ============================================
+                1. Case Reference:
+                   - Case ID: FRA-2026-IOB-00847
+                   - Primary Subject: Rajesh Chandra Sekhar (M1) - SUSPECTED_MULE
+                   - Secondary Counterparty: Sunil Patil (M2) - CLEARED
+
+                2. Alert Ingestion & Analysis:
+                   - Ingress amount of INR 1,50,000.0 from victim node V1 was structured and split into downstream links.
+                   - Node M1 showed rapid velocity of pass-through transactions with no clear commercial justification.
+                   - Node M2 was verified by the branch team as a legitimate secondary salary link and subsequently cleared.
+
+                3. Compliance Recommendations:
+                   - Primary suspect node M1 has been escalated for a full core banking freeze.
+                   - Proportional lien has been successfully recommended on M2 for early containment of disputed funds under PMLA Section 12AA.
+                   - Evidence package is compiled and hashed for FIU-IND submission.
+                """;
+        }
+
         // Scenario 1: Sunil/cleared/innocent keywords
         if (lowerPrompt.contains("cleared") || lowerPrompt.contains("innocent") || lowerPrompt.contains("sunil")) {
             return """
