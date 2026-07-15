@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Upload, File, ShieldCheck, Database, Fingerprint, FileSearch, AlertCircle, Calendar, Link2, Info } from 'lucide-react'
 import { useInvestigation } from '../../context/InvestigationContext'
@@ -10,39 +10,28 @@ export default function EvidenceRepository({ nodeId, node }) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
   const files = context?.evidenceRepository || []
 
-  // Simulated file upload handler
-  const handleUpload = async (fileName, fileSize) => {
+  const fileInputRef = useRef(null)
+
+  const handleRealUpload = async (files) => {
+    if (!files?.length) return
     setUploading(true)
     try {
-      const formData = new FormData()
-      const blob = new Blob(['mock content'], { type: 'text/plain' })
-      formData.append('file', blob, fileName)
-      formData.append('uploadedBy', 'EMP-902')
-
-      const res = await fetch(`${backendUrl}/api/investigation/${context.caseId}/evidence`, {
-        method: 'POST',
-        body: formData
-      })
-      
-      if (!res.ok) throw new Error('Upload failed')
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('uploadedBy', 'EMP-902')
+        const res = await fetch(`${backendUrl}/api/investigation/${context.caseId}/evidence`, {
+          method: 'POST',
+          body: formData
+        })
+        if (!res.ok) throw new Error('Upload failed')
+      }
       await refreshContext()
     } catch (e) {
       console.error(e)
     } finally {
       setUploading(false)
     }
-  }
-
-  const triggerMockUpload = () => {
-    const mockFiles = [
-      { name: `KYC_Aadhaar_Mismatch_${nodeId}.pdf`, size: 102400 },
-      { name: `CBS_Transaction_Dump_${nodeId}.csv`, size: 245760 },
-      { name: `Device_IP_Mismatch_Audit_${nodeId}.log`, size: 12288 },
-      { name: `Branch_Verification_Letter_${nodeId}.pdf`, size: 56320 },
-      { name: `Customer_Statement_${nodeId}.pdf`, size: 89600 }
-    ]
-    const randomFile = mockFiles[Math.floor(Math.random() * mockFiles.length)]
-    handleUpload(randomFile.name, randomFile.size)
   }
 
   const formatSize = (bytes) => {
@@ -169,19 +158,36 @@ export default function EvidenceRepository({ nodeId, node }) {
           Officer-Uploaded Records
         </span>
 
-        {/* Upload Button */}
-        <div 
-          onClick={triggerMockUpload}
-          className="border border-dashed rounded-xl p-4 text-center cursor-pointer transition-all duration-200 bg-slate-950/20 border-slate-800 hover:border-slate-700/80 hover:bg-slate-900/20"
+        {/* Upload zone */}
+        <div
+          onClick={() => !uploading && fileInputRef.current?.click()}
+          onDragOver={e => e.preventDefault()}
+          onDrop={e => { e.preventDefault(); handleRealUpload(Array.from(e.dataTransfer.files)) }}
+          className={`border border-dashed rounded-xl p-4 text-center transition-all duration-200 bg-slate-950/20 border-slate-800 ${
+            uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-slate-700/80 hover:bg-slate-900/20'
+          }`}
         >
           <div className="space-y-1">
-            <Upload className="w-4 h-4 mx-auto text-slate-500 animate-pulse" />
+            {uploading
+              ? <Upload className="w-4 h-4 mx-auto text-cyan-400 animate-spin" />
+              : <Upload className="w-4 h-4 mx-auto text-slate-500" />
+            }
             <div className="text-[11px]">
-              <span className="font-semibold text-cyan-400">Click to upload document</span>
+              <span className="font-semibold text-cyan-400">
+                {uploading ? 'Uploading…' : 'Click or drag to upload document'}
+              </span>
               <p className="text-[9px] text-slate-500 mt-0.5">PDF, CSV, PNG, LOG up to 10MB</p>
             </div>
           </div>
         </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.csv,.png,.log,.txt,.jpg,.jpeg"
+          className="hidden"
+          onChange={e => { handleRealUpload(Array.from(e.target.files)); e.target.value = '' }}
+        />
 
         {/* Uploaded Files list */}
         <div className="space-y-2 max-h-[160px] overflow-y-auto">
