@@ -12,7 +12,7 @@ Repository overview (short)
   - `frontend/` — React + Vite app
   - `backend/` — mock Express server and a Maven Spring Boot project
   - `.github/workflows/ci.yml` — CI workflow (builds frontend & backend)
-  - `docker-compose.yml` — local docker-first dev flow
+  - `.github/workflows/ci.yml` — CI workflow (builds backend with Maven)
 
 Agent responsibilities
 ----------------------
@@ -29,7 +29,7 @@ Memory & Handoff conventions
 
 How to extend
 -------------
-1. Create or update a single small file per change and run the repository tests or CI locally (via Docker Compose or GitHub Actions runner) to confirm.
+1. Create or update a single small file per change and run the repository tests or CI locally (via Maven or GitHub Actions runner) to confirm.
 2. Append a one-paragraph summary to `AGENTS.md` under a new section titled with the agent name and ISO date (e.g., `## SearchAgent — 2026-07-02`).
 3. If the change affects build/runtime behavior, include a `How to test` snippet and the exact commands used.
 
@@ -40,12 +40,12 @@ Do not store secrets or credentials in `CLAUDE.md` or `AGENTS.md`. Use CI secret
 End of AGENTS.md — other agents should now append operational findings using the conventions above.
 
 ## DetectionAgent — 2026-07-12
-Implemented the Spring Boot Detection Module (O(1) PreFlagger and bounded BFS PostOperator) using JDK 25 and Spring Boot 4.1.0. Bundled the entire application (embedded React frontend + H2 file-mode DB) into a single Docker image via a multi-stage `Dockerfile` and `docker-compose.yml`. Configured Flyway migrations for schema management, ArchUnit tests to enforce strict module boundaries, and updated the GitHub Actions CI pipeline to build and test inside the container environment. Excluded the secret `sample_mule_account_data.csv` from Git and Docker build contexts.
+Implemented the Spring Boot Detection Module (O(1) PreFlagger and bounded BFS PostOperator) using JDK 25 and Spring Boot 4.1.0. Configured Flyway migrations for schema management, ArchUnit tests to enforce strict module boundaries, and updated the GitHub Actions CI pipeline. Excluded the secret `sample_mule_account_data.csv` from Git.
 
 ### How to test
 ```bash
-# Run Maven tests inside the docker compose container environment
-docker compose run --rm --entrypoint "./mvnw test -Dspring.profiles.active=test" muskets
+# Run Maven tests natively
+cd backend && ./mvnw test -Dspring.profiles.active=test
 ```
 
 ## InvestigationWorkspaceAgent — 2026-07-12

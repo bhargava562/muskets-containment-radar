@@ -7,20 +7,20 @@ This file is an AI-oriented summary (for Claude-style agents) of the repository.
 High-level summary
 ------------------
 - Name: Muskets — Post-Detection Containment and Operational Response Platform
-- Stack: Frontend (React + Vite + Tailwind), Backend (Express mock server in Node.js) and an optional Spring Boot backend present under `backend/` (Maven project). Docker Compose is provided to run the stack locally.
+- Stack: Frontend (React + Vite + Tailwind) deployed on Vercel, Backend (Spring Boot 4.1.0, JDK 25, Maven) deployed on Railway. H2 file-mode database for persistence.
 
 Key files & start commands
 --------------------------
-- Root README: contains architecture, demo, and docker-first instructions.
-- Frontend: `frontend/` — run `npm ci` then `npm run dev` (dev) or `npm run build` (production). Vite dev server on port 5173 in README.
-- Backend: `backend/` — README mentions npm-based mock backend (start with `npm install` and `npm start`), and there is also a Maven Spring Boot project in the same folder (use `./mvnw spring-boot:run` or `./mvnw -B package`).
-- Docker Compose: `docker compose up --build` will start frontend and backend (ports 5173 and 3001 by default).
+- Root README: contains architecture, problem statement, solution, detection math, and deployment instructions.
+- Frontend: `frontend/` — run `npm ci` then `npm run dev` (dev) or `npm run build` (production). Vite dev server on port 5173.
+- Backend: `backend/` — run `./mvnw spring-boot:run` (dev) or `./mvnw clean package -DskipTests && java -jar target/*.jar` (production JAR).
+- CI: GitHub Actions runs `./mvnw clean verify -DskipTests` on push/PR to main.
 
 Quick notes for Claude-style agents
 ----------------------------------
 - When editing files, prefer small, focused diffs and preserve existing project structure.
-- Use the Docker Compose flow for integration testing when possible; it matches README instructions.
-- The repository contains downloaded Windows Zone.Identifier ADS files; they are ignored now via `.gitignore` and `.dockerignore` updates.
+- Run `./mvnw clean package -DskipTests` in the `backend/` directory to verify compilation.
+- The repository contains downloaded Windows Zone.Identifier ADS files; they are ignored via `.gitignore`.
 
 Where to continue (memory)
 --------------------------

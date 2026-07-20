@@ -72,50 +72,45 @@ When an investigation starts, it runs a Level-Order BFS traversal starting from 
 
 ---
 
-## 4. Single-Container Bundling Setup
-
-To satisfy production deployment constraints, a single-container multi-stage build has been introduced.
-
-### Dockerfile Design (`/Dockerfile`)
-The build process runs entirely inside isolated containers:
-1.  **Stage 1 (node:24.4.1-alpine3.21):** Installs frontend dependencies and builds the Vite distribution bundle (`/dist`).
-2.  **Stage 2 (eclipse-temurin:25-jdk):** Copies the frontend bundle into `/src/main/resources/static/` of the Spring Boot application, resolved Maven dependencies, and packages the JAR file.
-3.  **Stage 3 (eclipse-temurin:25-jre):** Copy the packaged JAR file into a lightweight runtime image, sets up `/data` for file-based H2 database persistence, and exposes port `8080`.
+## 4. Deployment Setup
 
 ### Database Architecture
-*   **H2 Database (File-Mode):** Embedded database stored under `/data/muskets`. It operates in-process, eliminating the overhead of network roundtrips and connection pool negotiation.
+*   **H2 Database (File-Mode):** Embedded database stored under `./data/muskets`. It operates in-process, eliminating the overhead of network roundtrips and connection pool negotiation.
 *   **Flyway Migrations:** Schema is managed version-by-version under `src/main/resources/db/migration/V1__create_alert_log.sql`. This uses highly portable ANSI SQL, allowing an instant switch to PostgreSQL or any SQL database in the future by updating connection strings in `application.yaml`.
 *   **H2 Web Console:** Disabled by default in all profiles (`spring.h2.console.enabled=false`) to eliminate the JNDI remote code execution vector (CVE-2021-42392).
 
+### Railway Deployment
+The backend is deployed as a native JAR on Railway. Railway automatically detects the Maven project, runs `./mvnw clean package -DskipTests`, and starts the resulting JAR. The `PORT` environment variable is injected by Railway at runtime via `server.port: ${PORT:8080}` in `application.yaml`.
+
 ### GitHub Actions Integration (`/.github/workflows/ci.yml`)
-The CI workflow has been optimized to compile, package, and execute all tests inside the unified Docker context using `docker compose`. This avoids environment drift between developer machines and runners.
+The CI workflow validates backend compilation using `./mvnw clean verify -DskipTests` with JDK 25 (Temurin) on Ubuntu. Maven dependencies are cached for faster builds.
 
 ---
 
 ## 5. Security & Secret Protection
 
 ### CSV Exclusions
-The primary dataset `sample_mule_account_data.csv` is marked as a restricted document. It is excluded from version control and Docker builds:
+The primary dataset `sample_mule_account_data.csv` is marked as a restricted document. It is excluded from version control:
 *   Added to root `.gitignore` and `backend/.gitignore`.
-*   Added to root `.dockerignore` and `frontend/.dockerignore`.
 
 ---
 
 ## 6. How to Run and Verify
 
 ### Execute Tests
-Execute unit tests, integration tests, and ArchUnit boundary checks inside the container context:
+Run unit tests, integration tests, and ArchUnit boundary checks:
 ```bash
-docker compose run --rm --entrypoint "./mvnw test -Dspring.profiles.active=test" muskets
+cd backend && ./mvnw test -Dspring.profiles.active=test
 ```
 
 ### Build and Launch Application
-Build the single JAR image and spin up the unified web app:
+Package the JAR and run:
 ```bash
-docker compose up --build
+cd backend && ./mvnw clean package -DskipTests
+java -jar target/*.jar
 ```
 
-Access the unified portal at `http://localhost:8080`. The Spring Boot backend serves both the API endpoints (`/api/**`) and the static React Single Page Application (root `/`).
+Access the backend API at `http://localhost:8080`. The Spring Boot backend serves the API endpoints (`/api/**`).
 
 ### Replay Data Feed
 To test detection thresholds against the `sample_mule_account_data.csv` dataset, send an explicit REST trigger:

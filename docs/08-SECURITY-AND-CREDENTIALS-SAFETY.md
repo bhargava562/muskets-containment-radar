@@ -68,5 +68,8 @@ git status --ignored
 To run the application locally with a live AI model:
 1. Create a `.env` file in the `backend/` directory.
 2. Define the key: `GROQ_API_KEY=your_actual_groq_api_key_here` (or `GEMINI_API_KEY` if using Gemini).
-3. The Docker Compose configuration in [docker-compose.yml](file:///d:/IOB/docker-compose.yml) loads the `.env` file automatically via the `env_file` property, passing it safely into the container without exposing it in repository files.
+3. Source the environment variables before running the application:
+   - **Linux/Mac**: `export $(cat backend/.env | xargs) && cd backend && ./mvnw spring-boot:run`
+   - **Windows PowerShell**: Load each variable from `backend/.env` manually or use a `.env` loader plugin.
+4. Alternatively, set the environment variables directly in your Railway project settings for production deployment.
 
