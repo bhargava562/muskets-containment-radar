@@ -129,11 +129,14 @@ cd backend && .\mvnw.cmd compile
 ```
 
 ## RailwayDeploymentAgent — 2026-07-20
-Removed Docker completely from the codebase by deleting Dockerfile, docker-compose.yml, .dockerignore, and backend/compose.yaml. Updated GitHub Actions to run a native Java 25 verification build using Maven wrapper instead of Docker. Added PORT env var mapping to application.yaml, configured backend/railpack.json to pin Java version 25 for Railway deployment compatibility, and thoroughly updated all documentation indices and instructions. Fully rewrote the root README.md with comprehensive descriptions, detection math formulas, role-based workflows, screenshots, and system architecture.
+Removed Docker completely from the codebase by deleting Dockerfile, docker-compose.yml, .dockerignore, and backend/compose.yaml. Updated GitHub Actions to run a native Java 25 verification build using Maven wrapper instead of Docker. Added PORT env var mapping to application.yaml, configured backend/railpack.json to pin Java version 25 for Railway deployment compatibility, and thoroughly updated all documentation indices and instructions. Fully rewrote the root README.md with comprehensive descriptions, detection math formulas, role-based workflows, screenshots, and system architecture. Tracked and committed `sample_mule_account_data.csv` to version control and verified CSV ingestion works on the live Railway public URL.
 
 ### How to test
 ```bash
 # Verify the build locally without Docker
 cd backend && ./mvnw clean package -DskipTests
+
+# Verify live Railway endpoint CSV processing
+curl -X POST https://muskets-containment-radar-production.up.railway.app/api/detection/replay-csv
 ```
 
