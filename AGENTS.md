@@ -140,3 +140,11 @@ cd backend && ./mvnw clean package -DskipTests
 curl -X POST https://muskets-containment-radar-production.up.railway.app/api/detection/replay-csv
 ```
 
+## AnalyticsAgent — 2026-07-20
+Imported and integrated the Vercel Analytics component into the main layout of the React application (`App.jsx`). Configured the correct `@vercel/analytics/react` entrypoint path suitable for standard React Vite applications rather than Next.js. Verified successful bundling and compilation.
+
+### How to test
+```bash
+cd frontend && npm run build
+```
+
