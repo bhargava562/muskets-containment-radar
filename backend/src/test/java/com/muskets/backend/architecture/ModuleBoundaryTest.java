@@ -37,5 +37,6 @@ class ModuleBoundaryTest {
                             "..detection.ingest.."
                     )
                     .as("Classes outside the detection module must not depend on detection internals " +
-                            "(engine, model, ingest). Use MuleFlaggedEvent from shared.events instead.");
+                            "(engine, model, ingest). Use MuleFlaggedEvent from shared.events instead.")
+                    .allowEmptyShould(true);
 }

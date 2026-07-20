@@ -132,6 +132,8 @@ class PreFlaggerEngineTest {
         }
 
         // negativeBalanceStreak is now 10 (≥5 → +4.0 to score)
+        // Clear captured events so that the subsequent P1 alert is the first captured event
+        capturedEvents.clear();
         // Now send a huge outlier amount → Z-score anomaly (+4.0)
         // Total: 4.0 + 4.0 = 8.0 ≥ P1 threshold
         engine.processTransaction(txn(acid, 500000, -500100, "D"));

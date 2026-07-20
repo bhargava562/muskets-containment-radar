@@ -14,7 +14,15 @@ const LoginPage = ({ onLogin }) => {
   return (
     <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center px-6 relative">
       <button 
-        onClick={() => { localStorage.clear(); window.location.reload(); }}
+        onClick={() => {
+          const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+          fetch(`${backendUrl}/reset`, { method: 'POST' })
+            .catch(err => console.error('Failed to reset backend database state:', err))
+            .finally(() => {
+              localStorage.clear();
+              window.location.reload();
+            });
+        }}
         className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900/50 text-slate-400 hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/10 transition-colors"
       >
         <RotateCcw className="w-3.5 h-3.5" />

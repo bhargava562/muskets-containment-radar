@@ -2,6 +2,8 @@ package com.muskets.backend.alerts;
 
 import com.muskets.backend.investigation.store.InvestigationContextStore;
 import com.muskets.backend.shared.events.MuleFlaggedEvent;
+import com.muskets.backend.shared.events.SystemResetEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -24,16 +26,19 @@ public class RootEndpointsController {
     private final MuleFlaggedEventListener alertListener;
     private final AlertLogRepository alertLogRepository;
     private final InvestigationContextStore contextStore;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
     public RootEndpointsController(
             MuleFlaggedEventListener alertListener,
             AlertLogRepository alertLogRepository,
-            InvestigationContextStore contextStore) {
+            InvestigationContextStore contextStore,
+            ApplicationEventPublisher eventPublisher) {
         this.alertListener = alertListener;
         this.alertLogRepository = alertLogRepository;
         this.contextStore = contextStore;
+        this.eventPublisher = eventPublisher;
     }
 
     @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -104,7 +109,10 @@ public class RootEndpointsController {
         // 3. Clear active case contexts
         contextStore.clear();
 
-        // 4. Broadcast reset message to emitters
+        // 4. Publish SystemResetEvent to reset detection engines decoupled
+        eventPublisher.publishEvent(new SystemResetEvent());
+
+        // 5. Broadcast reset message to emitters
         for (SseEmitter emitter : emitters) {
             try {
                 emitter.send(SseEmitter.event().data(Map.of("alertQueue", List.of())));

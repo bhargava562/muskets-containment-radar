@@ -126,7 +126,7 @@ export function AppProvider({ children }) {
 
   // Connect to mock transaction backend via SSE
   useEffect(() => {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://muskets-mock.up.railway.app'
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
     const es = new EventSource(`${backendUrl}/events`)
     es.onmessage = (e) => {
       const serverState = JSON.parse(e.data)
@@ -354,7 +354,7 @@ export function AppProvider({ children }) {
     localStorage.setItem(STORAGE_KEYS.CASES, JSON.stringify(mockData.cases))
 
     // Reset the mock backend state
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://muskets-mock.up.railway.app'
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
     fetch(`${backendUrl}/reset`, { method: 'POST' }).catch(err => console.error('Failed to reset backend state:', err))
   }, [])
 
