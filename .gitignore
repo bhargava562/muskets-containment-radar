@@ -45,6 +45,6 @@ Thumbs.db
 *Zone.Identifier
 
 # Specific Exclusions for Muskets Project
-**/*sample_mule_account_data.csv
+
 data/
 **/data/muskets*
