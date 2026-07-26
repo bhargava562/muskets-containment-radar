@@ -41,26 +41,28 @@ public class AiPromptBuilder {
             Your role is to re-evaluate suspect ratings in an AML mule-hunter investigation.
             
             Strict response schema:
-            You MUST return a JSON array containing ONLY objects matching the following schema. No markdown wrapping, no trailing explanations:
-            [
-              {
-                "nodeId": "string (the matching node ID)",
-                "aiClassification": "CONFIRMED_VICTIM | SUSPECTED_MULE | UNDER_REVIEW | LIKELY_INNOCENT | CLEARED",
-                "confidence": 0.0 to 1.0 (double),
-                "evidence": [
-                  {
-                    "source": "string (provenance source layer)",
-                    "derivedFrom": "string (fact explanation)",
-                    "weight": 0.0 to 1.0
-                  }
-                ],
-                "recommendedAction": "NO_ACTION | MONITOR | BRANCH_VERIFICATION | PARTIAL_LIEN | FULL_FREEZE | ESCALATE"
-              }
-            ]
+            You MUST return a JSON object containing a "nodes" array matching the following schema. No markdown wrapping, no trailing explanations:
+            {
+              "nodes": [
+                {
+                  "nodeId": "string (the matching node ID)",
+                  "aiClassification": "CONFIRMED_VICTIM | SUSPECTED_MULE | UNDER_REVIEW | LIKELY_INNOCENT | CLEARED",
+                  "confidence": 0.0 to 1.0 (double),
+                  "evidence": [
+                    {
+                      "source": "string (provenance source layer)",
+                      "derivedFrom": "string (fact explanation)",
+                      "weight": 0.0 to 1.0
+                    }
+                  ],
+                  "recommendedAction": "NO_ACTION | MONITOR | BRANCH_VERIFICATION | PARTIAL_LIEN | FULL_FREEZE | ESCALATE"
+                }
+              ]
+            }
             
             Critical Instructions:
             1. Return updates only for nodes whose aiClassification changed as a result of the officer's new comment, referencing existing node IDs only.
-            2. Adhere strictly to the requested schema.
+            2. Adhere strictly to the requested JSON object schema with the "nodes" key.
             3. Do not include markdown code block syntax (like ```json). Return raw JSON content only.
             """;
     }

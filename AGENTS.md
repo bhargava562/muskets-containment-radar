@@ -169,4 +169,14 @@ cd frontend && npm run build
 cd backend && .\mvnw.cmd test "-Dspring.profiles.active=test"
 ```
 
+## GroqJsonModeFixAgent — 2026-07-26
+Fixed Groq JSON mode deserialization mismatch in `AiOrchestrationService.java` and `AiPromptBuilder.java`. Groq's OpenAI-compatible JSON mode (`response_format: { type: "json_object" }`) requires top-level responses to be valid JSON Objects starting with `{`, causing `llama-3.3-70b-versatile` to wrap node evaluations in `{ "nodes": [ ... ] }`. Updated `validateOrThrow` to dynamically extract array nodes from root JSON objects as well as root JSON arrays. Updated `AiPromptBuilder` system prompt to specify the root JSON object schema containing a `"nodes"` array. Added `AiOrchestrationServiceTest.java` verifying both formats. All 23 tests pass cleanly without triggering validation retries or exceeding Groq rate limits.
+
+### How to test
+```bash
+# Run unit test suite
+cd backend && .\mvnw.cmd test "-Dtest=AiOrchestrationServiceTest"
+```
+
+
 

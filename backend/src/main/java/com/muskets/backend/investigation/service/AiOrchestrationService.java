@@ -202,8 +202,34 @@ public class AiOrchestrationService {
     }
 
     private List<AiSchemaContract> validateOrThrow(String rawJson, InvestigationContext context) throws Exception {
-        List<AiSchemaContract> parsed = objectMapper.readValue(rawJson, new TypeReference<List<AiSchemaContract>>() {});
-        
+        com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(rawJson);
+        List<AiSchemaContract> parsed;
+
+        if (root.isArray()) {
+            parsed = objectMapper.convertValue(root, new TypeReference<List<AiSchemaContract>>() {});
+        } else if (root.isObject()) {
+            com.fasterxml.jackson.databind.JsonNode arrayNode = null;
+            var fields = root.fields();
+            while (fields.hasNext()) {
+                var entry = fields.next();
+                if (entry.getValue().isArray()) {
+                    arrayNode = entry.getValue();
+                    break;
+                }
+            }
+
+            if (arrayNode != null) {
+                parsed = objectMapper.convertValue(arrayNode, new TypeReference<List<AiSchemaContract>>() {});
+            } else if (root.has("nodeId") && root.has("aiClassification")) {
+                AiSchemaContract single = objectMapper.treeToValue(root, AiSchemaContract.class);
+                parsed = List.of(single);
+            } else {
+                throw new IllegalArgumentException("JSON object response does not contain an array of node evaluations: " + rawJson);
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid JSON format from AI: expected Array or Object, got " + root.getNodeType());
+        }
+
         Set<String> knownNodeIds = context.getNodes().stream()
             .map(InvestigationNode::getNodeId)
             .collect(Collectors.toSet());
