@@ -46,7 +46,7 @@ End of initial CLAUDE.md — continue by appending further operational notes and
 - **Queue Segmentation**: Sidebar queue is segmented into four tabs: `Triage` (Fresh alerts), `Drafts` (Active investigations), `Escalated` (Awaiting Legal), and `Archived` (Closed).
 
 ### AI Copilot Integration
-- **JSON Schema Enforcement**: Leverages Gemini's native `generationConfig.responseSchema` to guarantee structured JSON outputs matching the `AiSchemaContract` contract, completely preventing unstructured text/markdown responses.
+- **JSON Schema Enforcement**: Leverages Groq's native JSON mode (`response_format: { type: "json_object" }`) with model `llama-3.3-70b-versatile` to guarantee structured JSON outputs matching the `AiSchemaContract` contract, completely preventing unstructured text/markdown responses.
 - **Asynchronous AI Triage Scan**: Suspect graph constructs instantly without waiting for the LLM. The initial triage scan runs in a background thread while the frontend UI displays a loading spinner and polls context state every 1.5s until complete.
 - **On-Demand AI Refresh**: A dedicated `/refresh-ai` endpoint allows officers to rerun network evaluation on-demand.
 - **Response Telemetry**: Performance metadata (live vs mocked status, provider, model, latency in ms, and timestamp) is displayed as a badge at the bottom of the AI Copilot tab.

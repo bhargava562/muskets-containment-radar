@@ -111,7 +111,7 @@ cd backend && .\mvnw.cmd compile
 ```
 
 ## SecurityAndDocsAgent — 2026-07-14
-Audited the codebase for credentials safety and verified that no sensitive API keys or credentials are hardcoded. Excluded the `GEMINI_API_KEY` configuration from version control, binding it dynamically in `application.yaml` to resolve from environment variables. Verified that `.env` files, local database files under `data/`, and the dataset `sample_mule_account_data.csv` are properly ignored by Git using `.gitignore`. Created `docs/08-SECURITY-AND-CREDENTIALS-SAFETY.md` documenting this security layout, and registered it in the documentation index.
+Audited the codebase for credentials safety and verified that no sensitive API keys or credentials are hardcoded. Excluded the `GROQ_API_KEY` configuration from version control, binding it dynamically in `application.yaml` to resolve from environment variables. Verified that `.env` files, local database files under `data/`, and the dataset `sample_mule_account_data.csv` are properly ignored by Git using `.gitignore`. Created `docs/08-SECURITY-AND-CREDENTIALS-SAFETY.md` documenting this security layout, and registered it in the documentation index.
 
 ### How to test
 ```bash
@@ -120,7 +120,7 @@ git status --ignored
 ```
 
 ## GroqAiProviderAgent — 2026-07-14
-Implemented Groq native API provider integration on the Spring Boot backend via a swappable `GroqAiClientImpl` component conditional on `app.ai.provider=groq`. Integrated Groq OpenAI-compatible request structure enforcing `response_format: { type: "json_object" }` at request time. Reused the shared `MockAiEvaluator` for offline fallback when the API key is absent. Changed default provider to `groq` with `llama-3.1-8b-instant` as the default model. Updated security and credential documentation.
+Implemented Groq native API provider integration on the Spring Boot backend via a swappable `GroqAiClientImpl` component conditional on `app.ai.provider=groq`. Integrated Groq OpenAI-compatible request structure enforcing `response_format: { type: "json_object" }` at request time. Reused the shared `MockAiEvaluator` for offline fallback when the API key is absent. Changed default provider to `groq` with `llama-3.3-70b-versatile` as the default model. Updated security and credential documentation.
 
 ### How to test
 ```bash

@@ -399,8 +399,7 @@ Three roles mirror real PMLA/RBI governance responsibilities:
 
 | Provider | Model | Mode |
 |:---|:---|:---|
-| Groq (default) | llama-3.1-8b-instant | Production |
-| Gemini | gemini-2.5-flash | Alternative |
+| Groq (default) | llama-3.3-70b-versatile | Production |
 | Mock | MockAiEvaluator | Offline / hackathon fallback |
 
 ---
@@ -448,7 +447,7 @@ Create a `backend/.env` file:
 ```env
 CORS_ALLOWED_ORIGINS=http://localhost:5173
 GROQ_API_KEY=your_groq_api_key
-AI_MODEL=llama-3.1-8b-instant
+AI_MODEL=llama-3.3-70b-versatile
 REANALYZE_RATE_LIMIT=200
 ```
 
@@ -468,7 +467,7 @@ The backend is configured for direct Railway deployment from GitHub — no Docke
 |:---|:---|
 | `CORS_ALLOWED_ORIGINS` | `https://muskets-containment-radar.vercel.app` |
 | `GROQ_API_KEY` | Your Groq API key |
-| `AI_MODEL` | `llama-3.1-8b-instant` |
+| `AI_MODEL` | `llama-3.3-70b-versatile` |
 | `REANALYZE_RATE_LIMIT` | `200` |
 
 4. **Railway automatically:**
@@ -490,9 +489,9 @@ The frontend is already deployed on Vercel at [`muskets-containment-radar.vercel
 |:---|:---|:---|
 | `PORT` | `8080` | Server port (injected by Railway) |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Allowed CORS origins |
-| `AI_PROVIDER` | `groq` | AI provider (`groq`, `gemini`, `mock`) |
+| `AI_PROVIDER` | `groq` | AI provider (`groq`, `mock`) |
 | `GROQ_API_KEY` | `MOCK_KEY` | Groq API key |
-| `AI_MODEL` | `llama-3.1-8b-instant` | AI model identifier |
+| `AI_MODEL` | `llama-3.3-70b-versatile` | AI model identifier |
 | `REANALYZE_RATE_LIMIT` | `200` | Max AI reanalysis calls per day |
 | `SPRING_DATASOURCE_URL` | `jdbc:h2:file:./data/muskets...` | Database connection URL |
 | `SPRING_DATASOURCE_DRIVER_CLASS_NAME` | `org.h2.Driver` | JDBC driver class |

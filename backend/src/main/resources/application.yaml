@@ -39,7 +39,7 @@ app:
   ai:
     provider: ${AI_PROVIDER:groq}
     api-key: ${GROQ_API_KEY:${AI_API_KEY:MOCK_KEY}}
-    model: ${AI_MODEL:llama-3.1-8b-instant}
+    model: ${AI_MODEL:llama-3.3-70b-versatile}
   investigation:
     reanalyze-rate-limit-per-day: ${REANALYZE_RATE_LIMIT:200}
 

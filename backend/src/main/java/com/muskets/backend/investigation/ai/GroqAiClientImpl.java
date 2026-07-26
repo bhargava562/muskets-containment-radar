@@ -51,7 +51,7 @@ public class GroqAiClientImpl implements AiClient {
         log.info("Sending reanalysis payload to Groq (model: {})", config.getAi().getModel());
 
         ObjectNode requestBody = objectMapper.createObjectNode();
-        requestBody.put("model", config.getAi().getModel()); // "llama-3.1-8b-instant" by default
+        requestBody.put("model", config.getAi().getModel()); // "llama-3.3-70b-versatile" by default
         requestBody.put("temperature", 0.0);
 
         ObjectNode responseFormat = objectMapper.createObjectNode();
