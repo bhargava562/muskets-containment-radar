@@ -4,7 +4,7 @@ import { Upload, File, ShieldCheck, Database, Fingerprint, FileSearch, AlertCirc
 import { useInvestigation } from '../../context/InvestigationContext'
 
 export default function EvidenceRepository({ nodeId, node }) {
-  const { context, refreshContext } = useInvestigation()
+  const { context, activeCaseId, refreshContext } = useInvestigation()
   const [uploading, setUploading] = useState(false)
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
@@ -12,21 +12,22 @@ export default function EvidenceRepository({ nodeId, node }) {
 
   const fileInputRef = useRef(null)
 
-  const handleRealUpload = async (files) => {
-    if (!files?.length) return
+  const handleRealUpload = async (filesToUpload) => {
+    const targetCaseId = activeCaseId || context?.caseId
+    if (!filesToUpload?.length || !targetCaseId) return
     setUploading(true)
     try {
-      for (const file of files) {
+      for (const file of filesToUpload) {
         const formData = new FormData()
         formData.append('file', file)
         formData.append('uploadedBy', 'EMP-902')
-        const res = await fetch(`${backendUrl}/api/investigation/${context.caseId}/evidence`, {
+        const res = await fetch(`${backendUrl}/api/investigation/${targetCaseId}/evidence`, {
           method: 'POST',
           body: formData
         })
         if (!res.ok) throw new Error('Upload failed')
       }
-      await refreshContext()
+      await refreshContext(targetCaseId)
     } catch (e) {
       console.error(e)
     } finally {
@@ -35,7 +36,7 @@ export default function EvidenceRepository({ nodeId, node }) {
   }
 
   const formatSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes'
+    if (!bytes || bytes === 0) return '0 Bytes'
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
@@ -55,7 +56,10 @@ export default function EvidenceRepository({ nodeId, node }) {
       timeline.push({ type: 'Alert', label: '1930 Portal Complaint Linked', date: '2026-07-12' })
     }
     files.forEach(f => {
-      timeline.push({ type: 'Officer', label: `Dossier: ${f.fileName}`, date: '2026-07-13' })
+      const fileDate = f.uploadedAt
+        ? new Date(f.uploadedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+        : 'Recently'
+      timeline.push({ type: 'Officer', label: `Dossier: ${f.fileName}`, date: fileDate })
     })
     return timeline
   }, [node, files])
@@ -152,10 +156,10 @@ export default function EvidenceRepository({ nodeId, node }) {
         </div>
       </div>
 
-      {/* SECTION 3: Officer-Uploaded Evidence */}
+      {/* SECTION 3: Case Evidence Repository (Global Upload) */}
       <div className="space-y-2 border-t border-slate-900/60 pt-4">
         <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block font-bold">
-          Officer-Uploaded Records
+          Case Evidence Repository (Global Upload)
         </span>
 
         {/* Upload zone */}
@@ -174,9 +178,9 @@ export default function EvidenceRepository({ nodeId, node }) {
             }
             <div className="text-[11px]">
               <span className="font-semibold text-cyan-400">
-                {uploading ? 'Uploading…' : 'Click or drag to upload document'}
+                {uploading ? 'Uploading…' : 'Click or drag to upload case evidence document'}
               </span>
-              <p className="text-[9px] text-slate-500 mt-0.5">PDF, CSV, PNG, LOG up to 10MB</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">PDF, CSV, PNG, LOG up to 10MB · Appends to case evidence dossier stored in H2</p>
             </div>
           </div>
         </div>
@@ -193,7 +197,7 @@ export default function EvidenceRepository({ nodeId, node }) {
         <div className="space-y-2 max-h-[160px] overflow-y-auto">
           {files.length === 0 ? (
             <div className="text-center py-4 border border-slate-900 rounded-xl bg-slate-950/10 text-slate-600 text-[10px] font-mono">
-              No files uploaded for this node.
+              No case evidence files uploaded yet. Upload a document from any node to fulfill audit checklist requirement.
             </div>
           ) : (
             files.map((file) => (

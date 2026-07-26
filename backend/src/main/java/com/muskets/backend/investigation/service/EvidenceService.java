@@ -20,9 +20,11 @@ public class EvidenceService {
     private static final Logger log = LoggerFactory.getLogger(EvidenceService.class);
 
     private final InvestigationContextStore store;
+    private final CaseContextBuilder contextBuilder;
 
-    public EvidenceService(InvestigationContextStore store) {
+    public EvidenceService(InvestigationContextStore store, CaseContextBuilder contextBuilder) {
         this.store = store;
+        this.contextBuilder = contextBuilder;
     }
 
     /**
@@ -33,7 +35,13 @@ public class EvidenceService {
         log.info("Registering evidence file {} ({}) for case {}", fileName, fileSize, caseId);
 
         InvestigationContext context = store.get(caseId)
-            .orElseThrow(() -> new IllegalArgumentException("Case not found: " + caseId));
+            .orElseGet(() -> {
+                log.info("Case {} not in store during evidence upload. Loading seed data.", caseId);
+                InvestigationContext seed = contextBuilder.loadSeedContext(caseId)
+                    .orElseThrow(() -> new IllegalArgumentException("Case not found or seed missing: " + caseId));
+                store.save(seed);
+                return seed;
+            });
 
         if (context.getEvidenceRepository() == null) {
             context.setEvidenceRepository(new ArrayList<>());

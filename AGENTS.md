@@ -157,3 +157,16 @@ Fully integrated the event-driven system reset to clear both the H2 database tab
 cd backend && .\mvnw.cmd test "-Dspring.profiles.active=test"
 ```
 
+## EvidenceUploadAgent — 2026-07-26
+Fixed AML Officer evidence upload tracking and audit checklist verification. Clarified the evidence checklist label in `NodeDetailDrawer.jsx` to state `Evidence document attached (case dossier)`, reflecting that uploading evidence in any node attaches to the case-level evidence repository stored in backend in-memory H2 store and passes the audit check. Updated `EvidenceRepository.jsx` header and empty state descriptions to specify global case evidence dossier uploads, formatted uploaded file timestamps, and ensured bottom list tiles update dynamically. Enhanced `EvidenceService.java` with auto-seeding via `CaseContextBuilder` if context is not yet present during upload. All 21 Maven tests pass and React frontend builds cleanly.
+
+### How to test
+```bash
+# Frontend build
+cd frontend && npm run build
+
+# Backend compilation and tests
+cd backend && .\mvnw.cmd test "-Dspring.profiles.active=test"
+```
+
+

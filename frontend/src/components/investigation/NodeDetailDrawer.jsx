@@ -43,7 +43,7 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
       detail: `${reviewedNodes}/${totalNodes}`
     },
     {
-      label: 'Evidence attached where flagged',
+      label: 'Evidence document attached (case dossier)',
       done: totalEvidence > 0,
       detail: `${totalEvidence} item(s)`
     },
