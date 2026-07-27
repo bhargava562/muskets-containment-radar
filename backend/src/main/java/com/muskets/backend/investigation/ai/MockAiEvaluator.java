@@ -92,8 +92,9 @@ public class MockAiEvaluator {
                 """;
         }
 
-        // Scenario 2: patil/m2/kyc keywords
-        if (lowerPrompt.contains("kyc") || lowerPrompt.contains("m2") || lowerPrompt.contains("patil")) {
+        // Scenario 2: patil/m2/kyc keywords (without incomplete/hidden keywords)
+        if ((lowerPrompt.contains("kyc") || lowerPrompt.contains("m2") || lowerPrompt.contains("patil"))
+            && !lowerPrompt.contains("incomplete") && !lowerPrompt.contains("hidden") && !lowerPrompt.contains("m3") && !lowerPrompt.contains("deshmukh") && !lowerPrompt.contains("trace") && !lowerPrompt.contains("unlisted")) {
             return """
                 [
                   {
@@ -110,6 +111,31 @@ public class MockAiEvaluator {
                     "recommendedAction": "NO_ACTION"
                   }
                 ]
+                """;
+        }
+
+        // Scenario 3: Hidden mule / incomplete trace keywords (M3 / Sanjay Deshmukh / unlisted counterparty)
+        if (lowerPrompt.contains("incomplete") || lowerPrompt.contains("m3") || lowerPrompt.contains("deshmukh")
+            || lowerPrompt.contains("hidden") || lowerPrompt.contains("unlisted") || lowerPrompt.contains("counterparty")
+            || lowerPrompt.contains("txn87321009") || lowerPrompt.contains("trace") || lowerPrompt.contains("expand")) {
+            return """
+                {
+                  "nodes": [
+                    {
+                      "nodeId": "M3",
+                      "aiClassification": "SUSPECTED_MULE",
+                      "confidence": 0.89,
+                      "evidence": [
+                        {
+                          "source": "TRANSACTION_PATTERN",
+                          "derivedFrom": "Transaction TXN87321009 (₹90,000) from M2 to account 185502000011234 (Sanjay Deshmukh) identified in transaction logs.",
+                          "weight": 0.92
+                        }
+                      ],
+                      "recommendedAction": "FULL_FREEZE"
+                    }
+                  ]
+                }
                 """;
         }
 

@@ -233,6 +233,11 @@ public class AiOrchestrationService {
         Set<String> knownNodeIds = context.getNodes().stream()
             .map(InvestigationNode::getNodeId)
             .collect(Collectors.toSet());
+        if (context.getExpandPreview() != null && context.getExpandPreview().nodes() != null) {
+            for (InvestigationNode pNode : context.getExpandPreview().nodes()) {
+                knownNodeIds.add(pNode.getNodeId());
+            }
+        }
 
         for (AiSchemaContract item : parsed) {
             if (!knownNodeIds.contains(item.nodeId())) {

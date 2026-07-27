@@ -102,4 +102,30 @@ public class AiOrchestrationServiceTest {
         assertEquals("M1", contracts.get(0).nodeId());
         assertEquals("CLEARED", contracts.get(0).aiClassification());
     }
+
+    @Test
+    public void testHiddenNodePromotionOnAiReanalysis() throws Exception {
+        // Setup hidden preview node M3 in context
+        InvestigationNode m3 = new InvestigationNode();
+        m3.setNodeId("M3");
+        m3.setNodeType("MULE");
+        ExpandPreview preview = new ExpandPreview(List.of(m3), List.of(new GraphEdge("M2", "M3", 90000.0, 1783858740000L, "UPI")));
+        context.setExpandPreview(preview);
+
+        AiSchemaContract revision = new AiSchemaContract(
+            "M3",
+            "SUSPECTED_MULE",
+            0.89,
+            List.of(new EvidenceClaim("EV-M3", "TRANSACTION_PATTERN", "Layered transfer to unlisted counterparty Deshmukh", 0.92, "TXN87321009")),
+            "FULL_FREEZE"
+        );
+
+        context.applyAiRevision(List.of(revision), "M2", "Trace incomplete, include hidden mule Sanjay Deshmukh", "2026-07-27T10:00:00Z");
+
+        // Verify M3 was promoted into active graph nodes
+        assertEquals(2, context.getNodes().size());
+        assertTrue(context.getNodes().stream().anyMatch(n -> n.getNodeId().equals("M3")));
+        assertEquals(AiClassification.SUSPECTED_MULE, context.getNodes().stream().filter(n -> n.getNodeId().equals("M3")).findFirst().get().getAiAnalysis().aiClassification());
+        assertTrue(context.getEdges().stream().anyMatch(e -> e.fromNodeId().equals("M2") && e.toNodeId().equals("M3")));
+    }
 }

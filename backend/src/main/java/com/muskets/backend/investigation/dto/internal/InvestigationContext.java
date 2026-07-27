@@ -33,6 +33,8 @@ public class InvestigationContext {
     private List<ExecutionRecord> executionLog = new ArrayList<>();
     private boolean aiGenerating;
     private AiResponseMetadata aiResponseMetadata;
+    private InvestigationCoverage investigationCoverage;
+    private ExpandPreview expandPreview;
 
     public InvestigationContext() {
         this.contextVersion = 1;
@@ -76,6 +78,60 @@ public class InvestigationContext {
     }
 
     public void applyAiRevision(List<AiSchemaContract> revisions, String focusNodeId, String comment, String timestamp) {
+        // Promote hidden preview nodes if AI returned classifications for them
+        if (this.expandPreview != null && this.expandPreview.nodes() != null) {
+            List<InvestigationNode> promotedNodes = new ArrayList<>();
+            for (AiSchemaContract revision : revisions) {
+                boolean existsInMain = this.nodes.stream().anyMatch(n -> n.getNodeId().equals(revision.nodeId()));
+                if (!existsInMain) {
+                    for (InvestigationNode pNode : this.expandPreview.nodes()) {
+                        if (pNode.getNodeId().equals(revision.nodeId())) {
+                            promotedNodes.add(pNode);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            for (InvestigationNode pNode : promotedNodes) {
+                this.nodes.add(pNode);
+
+                // Copy connected edges from expandPreview
+                if (this.expandPreview.edges() != null) {
+                    for (GraphEdge pEdge : this.expandPreview.edges()) {
+                        if (pEdge.fromNodeId().equals(pNode.getNodeId()) || pEdge.toNodeId().equals(pNode.getNodeId())) {
+                            boolean edgeExists = this.edges.stream().anyMatch(e ->
+                                e.fromNodeId().equals(pEdge.fromNodeId()) && e.toNodeId().equals(pEdge.toNodeId()));
+                            if (!edgeExists) {
+                                this.edges.add(pEdge);
+                            }
+                        }
+                    }
+                }
+
+                // Update investigationCoverage
+                if (this.investigationCoverage != null) {
+                    List<String> unreviewed = new ArrayList<>(this.investigationCoverage.unreviewedNodeIds());
+                    if (!unreviewed.contains(pNode.getNodeId())) {
+                        unreviewed.add(pNode.getNodeId());
+                    }
+                    this.investigationCoverage = new InvestigationCoverage(
+                        this.nodes.size(),
+                        this.investigationCoverage.reviewedNodes(),
+                        unreviewed,
+                        this.investigationCoverage.expandableNodeIds()
+                    );
+                }
+
+                appendTimelineEntry(
+                    "AI_REANALYSIS",
+                    "AI Copilot",
+                    "Network Scope Expanded: Hidden Node Revealed",
+                    "Copilot identified unlisted counterparty transaction in logs and revealed hidden node " + pNode.getNodeId() + " (" + pNode.getLabel() + ")."
+                );
+            }
+        }
+
         // Apply classification and evidence claim updates to matching nodes
         for (AiSchemaContract revision : revisions) {
             for (InvestigationNode node : this.nodes) {
@@ -112,7 +168,7 @@ public class InvestigationContext {
             "AI_REANALYSIS",
             "AI Copilot",
             "AI Copilot Reanalysis Complete",
-            "Reanalysis completed for node " + focusNodeId + " based on comments."
+            "Reanalysis completed for node " + (focusNodeId != null ? focusNodeId : "network") + " based on officer feedback."
         );
         bumpVersion();
     }
@@ -163,4 +219,10 @@ public class InvestigationContext {
 
     public List<ExecutionRecord> getExecutionLog() { return executionLog; }
     public void setExecutionLog(List<ExecutionRecord> executionLog) { this.executionLog = executionLog; }
+
+    public InvestigationCoverage getInvestigationCoverage() { return investigationCoverage; }
+    public void setInvestigationCoverage(InvestigationCoverage investigationCoverage) { this.investigationCoverage = investigationCoverage; }
+
+    public ExpandPreview getExpandPreview() { return expandPreview; }
+    public void setExpandPreview(ExpandPreview expandPreview) { this.expandPreview = expandPreview; }
 }

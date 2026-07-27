@@ -64,6 +64,7 @@ public class AiPromptBuilder {
             1. Return updates only for nodes whose aiClassification changed as a result of the officer's new comment, referencing existing node IDs only.
             2. Adhere strictly to the requested JSON object schema with the "nodes" key.
             3. Do not include markdown code block syntax (like ```json). Return raw JSON content only.
+            4. If officer notes/comments point out unlisted counterparties, incomplete transaction traces, or hidden mules (e.g. referencing transactions in logs or hidden preview nodes like M3), include those node IDs in your JSON output with appropriate aiClassification (e.g. SUSPECTED_MULE) to expand network scope.
             """;
     }
 
@@ -119,12 +120,31 @@ public class AiPromptBuilder {
                     nodeMap.put("aiAnalysis", node.getAiAnalysis());
                 }
 
+                // Include recent transactions (masked)
+                if (node.getRecentTransactions() != null) {
+                    nodeMap.put("recentTransactions", node.getRecentTransactions());
+                }
+
                 maskedNodes.add(nodeMap);
             }
             payload.put("nodes", maskedNodes);
 
-            // Populate edges (they map node IDs, not account numbers, so no PII)
+            // Populate edges
             payload.put("edges", context.getEdges());
+
+            // Hidden preview nodes available for scope expansion
+            if (context.getExpandPreview() != null && context.getExpandPreview().nodes() != null) {
+                List<Map<String, Object>> previewList = new ArrayList<>();
+                for (InvestigationNode pNode : context.getExpandPreview().nodes()) {
+                    Map<String, Object> pMap = new HashMap<>();
+                    pMap.put("nodeId", pNode.getNodeId());
+                    pMap.put("label", pNode.getLabel());
+                    pMap.put("accountId", maskPii(pNode.getAccountId()));
+                    pMap.put("nodeType", pNode.getNodeType());
+                    previewList.add(pMap);
+                }
+                payload.put("hiddenPreviewNodes", previewList);
+            }
 
             // Prior AI revisions
             payload.put("revisions", context.getRevisionHistory());
