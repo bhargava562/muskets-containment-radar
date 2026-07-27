@@ -99,7 +99,18 @@ export default function SuspectGraphCanvas() {
       links.push(...previewLinks)
     }
 
-    return { nodes, links }
+    // Deduplicate nodes by ID
+    const uniqueNodes = Array.from(new Map(nodes.map(n => [n.id, n])).values())
+    const nodeIds = new Set(uniqueNodes.map(n => n.id))
+
+    // Filter links to ensure both source and target exist in nodeIds
+    const validLinks = links.filter(l => {
+      const sourceId = typeof l.source === 'object' ? l.source.id : l.source
+      const targetId = typeof l.target === 'object' ? l.target.id : l.target
+      return nodeIds.has(sourceId) && nodeIds.has(targetId)
+    })
+
+    return { nodes: uniqueNodes, links: validLinks }
   }, [context, showPreview, selectedNodeId])
 
   // Custom node renderer

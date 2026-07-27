@@ -2,10 +2,15 @@ package com.muskets.backend.investigation.dto.internal;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonAlias;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * The canonical object containing all state for a single investigation.
@@ -15,6 +20,8 @@ import java.util.UUID;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InvestigationContext {
+
+    private static final Logger log = LoggerFactory.getLogger(InvestigationContext.class);
 
     private String caseId;
     private int contextVersion;
@@ -80,55 +87,78 @@ public class InvestigationContext {
     public void applyAiRevision(List<AiSchemaContract> revisions, String focusNodeId, String comment, String timestamp) {
         // Promote hidden preview nodes if AI returned classifications for them
         if (this.expandPreview != null && this.expandPreview.nodes() != null) {
-            List<InvestigationNode> promotedNodes = new ArrayList<>();
+            Set<String> activeNodeIds = this.nodes.stream()
+                .map(InvestigationNode::getNodeId)
+                .collect(Collectors.toSet());
+
+            Set<String> nodesToPromote = new HashSet<>();
             for (AiSchemaContract revision : revisions) {
-                boolean existsInMain = this.nodes.stream().anyMatch(n -> n.getNodeId().equals(revision.nodeId()));
-                if (!existsInMain) {
-                    for (InvestigationNode pNode : this.expandPreview.nodes()) {
-                        if (pNode.getNodeId().equals(revision.nodeId())) {
-                            promotedNodes.add(pNode);
-                            break;
+                if (!activeNodeIds.contains(revision.nodeId())) {
+                    nodesToPromote.add(revision.nodeId());
+                }
+            }
+
+            // Expand nodesToPromote transitively so no connected edge has a missing target node
+            boolean expanded = true;
+            while (expanded) {
+                expanded = false;
+                if (this.expandPreview.edges() != null) {
+                    for (GraphEdge pEdge : this.expandPreview.edges()) {
+                        if (nodesToPromote.contains(pEdge.fromNodeId()) || nodesToPromote.contains(pEdge.toNodeId())) {
+                            if (!activeNodeIds.contains(pEdge.fromNodeId()) && nodesToPromote.add(pEdge.fromNodeId())) {
+                                expanded = true;
+                            }
+                            if (!activeNodeIds.contains(pEdge.toNodeId()) && nodesToPromote.add(pEdge.toNodeId())) {
+                                expanded = true;
+                            }
                         }
                     }
                 }
             }
 
-            for (InvestigationNode pNode : promotedNodes) {
-                this.nodes.add(pNode);
+            for (String pId : nodesToPromote) {
+                for (InvestigationNode pNode : this.expandPreview.nodes()) {
+                    if (pNode.getNodeId().equals(pId) && this.nodes.stream().noneMatch(n -> n.getNodeId().equals(pId))) {
+                        log.info("Promoting hidden node {} ({}) into active graph context", pNode.getNodeId(), pNode.getLabel());
+                        this.nodes.add(pNode);
 
-                // Copy connected edges from expandPreview
-                if (this.expandPreview.edges() != null) {
-                    for (GraphEdge pEdge : this.expandPreview.edges()) {
-                        if (pEdge.fromNodeId().equals(pNode.getNodeId()) || pEdge.toNodeId().equals(pNode.getNodeId())) {
-                            boolean edgeExists = this.edges.stream().anyMatch(e ->
-                                e.fromNodeId().equals(pEdge.fromNodeId()) && e.toNodeId().equals(pEdge.toNodeId()));
-                            if (!edgeExists) {
-                                this.edges.add(pEdge);
+                        // Update investigationCoverage
+                        if (this.investigationCoverage != null) {
+                            List<String> unreviewed = new ArrayList<>(this.investigationCoverage.unreviewedNodeIds());
+                            if (!unreviewed.contains(pNode.getNodeId())) {
+                                unreviewed.add(pNode.getNodeId());
                             }
+                            this.investigationCoverage = new InvestigationCoverage(
+                                this.nodes.size(),
+                                this.investigationCoverage.reviewedNodes(),
+                                unreviewed,
+                                this.investigationCoverage.expandableNodeIds()
+                            );
+                        }
+
+                        appendTimelineEntry(
+                            "AI_REANALYSIS",
+                            "AI Copilot",
+                            "Network Scope Expanded: Hidden Node Revealed",
+                            "Copilot identified unlisted counterparty transaction in logs and revealed hidden node " + pNode.getNodeId() + " (" + pNode.getLabel() + ")."
+                        );
+                        break;
+                    }
+                }
+            }
+
+            // Copy all connected edges from expandPreview whose endpoints exist in active nodes
+            if (this.expandPreview.edges() != null) {
+                Set<String> currentNodes = this.nodes.stream().map(InvestigationNode::getNodeId).collect(Collectors.toSet());
+                for (GraphEdge pEdge : this.expandPreview.edges()) {
+                    if (currentNodes.contains(pEdge.fromNodeId()) && currentNodes.contains(pEdge.toNodeId())) {
+                        boolean edgeExists = this.edges.stream().anyMatch(e ->
+                            e.fromNodeId().equals(pEdge.fromNodeId()) && e.toNodeId().equals(pEdge.toNodeId()));
+                        if (!edgeExists) {
+                            this.edges.add(pEdge);
                         }
                     }
                 }
-
-                // Update investigationCoverage
-                if (this.investigationCoverage != null) {
-                    List<String> unreviewed = new ArrayList<>(this.investigationCoverage.unreviewedNodeIds());
-                    if (!unreviewed.contains(pNode.getNodeId())) {
-                        unreviewed.add(pNode.getNodeId());
-                    }
-                    this.investigationCoverage = new InvestigationCoverage(
-                        this.nodes.size(),
-                        this.investigationCoverage.reviewedNodes(),
-                        unreviewed,
-                        this.investigationCoverage.expandableNodeIds()
-                    );
-                }
-
-                appendTimelineEntry(
-                    "AI_REANALYSIS",
-                    "AI Copilot",
-                    "Network Scope Expanded: Hidden Node Revealed",
-                    "Copilot identified unlisted counterparty transaction in logs and revealed hidden node " + pNode.getNodeId() + " (" + pNode.getLabel() + ")."
-                );
             }
         }
 

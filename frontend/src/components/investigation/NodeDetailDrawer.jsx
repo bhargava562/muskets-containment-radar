@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { User, Landmark, ShieldAlert, Cpu, FileText, ArrowRightLeft, ShieldCheck, AlertTriangle } from 'lucide-react'
 import { useInvestigation } from '../../context/InvestigationContext'
@@ -20,8 +20,32 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
   const { getSelectedNode, context } = useInvestigation()
   const [activeMainTab, setActiveMainTab] = useState('node') // 'node' or 'case'
   const [activeTab, setActiveTab] = useState('ai')
+  const [txnScope, setTxnScope] = useState('selected') // 'selected' or 'all'
 
   const node = getSelectedNode()
+
+  // Aggregate all transactions from visible nodes + expandPreview hidden nodes
+  const allNetworkTransactions = useMemo(() => {
+    if (!context) return []
+    const map = new Map()
+    const allNodes = [...(context.nodes || []), ...(context.expandPreview?.nodes || [])]
+    for (const n of allNodes) {
+      if (n.recentTransactions) {
+        for (const t of n.recentTransactions) {
+          if (!map.has(t.txnId)) {
+            map.set(t.txnId, t)
+          }
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+  }, [context])
+
+  // Active set of node account numbers in context.nodes
+  const activeAccountNumbers = useMemo(() => {
+    if (!context?.nodes) return new Set()
+    return new Set(context.nodes.map(n => n.accountId))
+  }, [context])
 
   // Reset tab to AI Assessment when selected node changes
   useEffect(() => {
@@ -171,36 +195,81 @@ export default function NodeDetailDrawer({ onOpenSummary }) {
 
                 {activeTab === 'transactions' && (
                   <div className="space-y-3">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Transaction Chain — This Node
-                    </h4>
-                    {(!node.recentTransactions || node.recentTransactions.length === 0) ? (
-                      <div className="text-center py-8 text-slate-600 text-xs font-mono">
-                        No transaction records linked to this node.
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        Transaction Chain
+                      </h4>
+                      <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                        <button
+                          onClick={() => setTxnScope('selected')}
+                          className={`px-2 py-1 text-[9px] font-bold rounded ${
+                            txnScope === 'selected'
+                              ? 'bg-slate-800 text-cyan-400'
+                              : 'text-slate-500 hover:text-slate-400'
+                          }`}
+                        >
+                          This Node
+                        </button>
+                        <button
+                          onClick={() => setTxnScope('all')}
+                          className={`px-2 py-1 text-[9px] font-bold rounded ${
+                            txnScope === 'all'
+                              ? 'bg-slate-800 text-cyan-400'
+                              : 'text-slate-500 hover:text-slate-400'
+                          }`}
+                        >
+                          All Network (Visible + Hidden)
+                        </button>
                       </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {node.recentTransactions.map((txn) => (
-                          <div key={txn.txnId} className="p-3 rounded-xl border border-slate-800 bg-slate-950/40 text-xs">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className={`font-mono font-bold px-1.5 py-0.5 rounded text-[9px] ${
-                                txn.type === 'UPI' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
-                                txn.type === 'IMPS' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' :
-                                txn.type === 'NEFT' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                txn.type === 'ATM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                                'bg-slate-800 text-slate-400 border border-slate-700'
-                              }`}>{txn.type}</span>
-                              <span className="font-mono font-bold text-slate-200">{formatCurrency(txn.amount)}</span>
-                            </div>
-                            <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-                              <span className="truncate mr-2">{txn.fromAccount} → {txn.toAccount}</span>
-                              <span className="flex-shrink-0">{new Date(txn.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                            {txn.narration && <p className="text-slate-400 mt-1.5 italic text-[10px]">{txn.narration}</p>}
+                    </div>
+
+                    {(() => {
+                      const displayTxns = txnScope === 'all'
+                        ? allNetworkTransactions
+                        : (node.recentTransactions || [])
+
+                      if (!displayTxns || displayTxns.length === 0) {
+                        return (
+                          <div className="text-center py-8 text-slate-600 text-xs font-mono">
+                            No transaction records linked to this view.
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        )
+                      }
+
+                      return (
+                        <div className="space-y-2">
+                          {displayTxns.map((txn) => {
+                            const isUnlisted = (txn.fromAccount && !activeAccountNumbers.has(txn.fromAccount)) || (txn.toAccount && !activeAccountNumbers.has(txn.toAccount))
+                            return (
+                              <div key={txn.txnId} className="p-3 rounded-xl border border-slate-800 bg-slate-950/40 text-xs">
+                                <div className="flex justify-between items-center mb-1 gap-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`font-mono font-bold px-1.5 py-0.5 rounded text-[9px] ${
+                                      txn.type === 'UPI' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
+                                      txn.type === 'IMPS' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' :
+                                      txn.type === 'NEFT' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                      txn.type === 'ATM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                      'bg-slate-800 text-slate-400 border border-slate-700'
+                                    }`}>{txn.type}</span>
+                                    {isUnlisted && (
+                                      <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold">
+                                        Unlisted Counterparty
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="font-mono font-bold text-slate-200">{formatCurrency(txn.amount)}</span>
+                                </div>
+                                <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                                  <span className="truncate mr-2 font-mono">{txn.fromAccount} → {txn.toAccount}</span>
+                                  <span className="flex-shrink-0">{new Date(txn.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                                {txn.narration && <p className="text-slate-400 mt-1.5 italic text-[10px]">{txn.narration}</p>}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })()}
                   </div>
                 )}
 
