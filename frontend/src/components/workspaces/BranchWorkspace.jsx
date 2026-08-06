@@ -13,7 +13,7 @@ const INTERACTION_ACTIONS = [
 ]
 
 export default function BranchWorkspace() {
-  const { getCasesByStatus } = useApp()
+  const { getCasesByStatus, resolveCase } = useApp()
   const activeCases = getCasesByStatus(CASE_STATUS.RESTRICTION_ACTIVE)
 
   const [selectedCase, setSelectedCase] = useState(null)
@@ -93,7 +93,10 @@ export default function BranchWorkspace() {
       }
       const data = await res.json()
       showToast(action === 'RESTRICTION_APPLIED' ? 'Restriction applied — case resolved' : 'Status recorded')
-      if (data.caseStatus === 'RESOLVED') setSelectedCase(null)
+      if (data.caseStatus === 'RESOLVED') {
+        resolveCase(selectedCase.id)
+        setSelectedCase(null)
+      }
     } catch (e) {
       setExecError(e.message)
     } finally {

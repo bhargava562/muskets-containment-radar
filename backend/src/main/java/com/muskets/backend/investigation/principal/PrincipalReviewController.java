@@ -88,6 +88,8 @@ public class PrincipalReviewController {
         result.put("caseNotes", ctx.getCaseNotes());
         result.put("strDraft", ctx.getStrDraft() != null ? ctx.getStrDraft() : Map.of());
         result.put("nodes", nodeSummaries);
+        result.put("evidenceItems", ctx.getEvidenceRepository());
+        result.put("aiRevisions", ctx.getRevisionHistory());
         return ResponseEntity.ok(result);
     }
 

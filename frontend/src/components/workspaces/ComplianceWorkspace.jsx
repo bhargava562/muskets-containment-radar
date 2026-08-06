@@ -167,52 +167,331 @@ export default function ComplianceWorkspace() {
   const handleExportEvidencePackage = (caseItem) => {
     if (!caseItem) return
     const doc = new jsPDF()
-    let y = 20
-    doc.setFontSize(15); doc.setFont('helvetica', 'bold')
-    doc.text('CASE EVIDENCE PACKAGE', 20, y); y += 10
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal')
-    doc.text(`Generated: ${new Date().toISOString()}`, 20, y); y += 5
-    doc.text(`Case ID: ${caseItem.id}  |  Priority: ${caseItem.priority}`, 20, y); y += 10
+    const pageW = doc.internal.pageSize.width
+    const pageH = doc.internal.pageSize.height
+    const marginL = 18
+    const marginR = 18
+    const contentW = pageW - marginL - marginR
+    let y = 0
+    const pageNum = { current: 1 }
+
+    // --- Helpers ---
+    const addPageFooter = () => {
+      doc.setDrawColor(100, 116, 139)
+      doc.line(marginL, pageH - 18, pageW - marginR, pageH - 18)
+      doc.setFontSize(7)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(100, 116, 139)
+      doc.text('CONFIDENTIAL — For Authorized Personnel Only', marginL, pageH - 13)
+      doc.text(`Page ${pageNum.current}`, pageW - marginR, pageH - 13, { align: 'right' })
+      doc.setTextColor(0, 0, 0)
+    }
+
+    const checkPageBreak = (needed = 20) => {
+      if (y + needed > pageH - 25) {
+        addPageFooter()
+        doc.addPage()
+        pageNum.current++
+        y = 20
+      }
+    }
+
+    const sectionTitle = (title) => {
+      checkPageBreak(14)
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(15, 23, 42)
+      doc.text(title, marginL, y)
+      y += 2
+      doc.setDrawColor(14, 165, 233)
+      doc.setLineWidth(0.6)
+      doc.line(marginL, y, marginL + 50, y)
+      doc.setLineWidth(0.2)
+      y += 6
+    }
+
+    // ================================================
+    // PAGE 1 — HEADER
+    // ================================================
+    // Bank header block
+    doc.setFillColor(15, 23, 42)
+    doc.rect(0, 0, pageW, 36, 'F')
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(255, 255, 255)
+    doc.text('SUSPICIOUS TRANSACTION REPORT', marginL, 16)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(148, 163, 184)
+    doc.text('FIU-IND Filing | Prevention of Money Laundering Act, 2002', marginL, 24)
+    doc.text(`Generated: ${new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'medium' })}`, marginL, 30)
+    
+    // STR Reference
+    const strRef = `STR-${caseItem.id.replace(/[^A-Z0-9]/gi, '-').toUpperCase()}`
+    doc.setFontSize(9)
+    doc.setTextColor(14, 165, 233)
+    doc.text(`Reference: ${strRef}`, pageW - marginR, 16, { align: 'right' })
+    doc.setTextColor(148, 163, 184)
+    doc.text('MUSKETS Containment Platform', pageW - marginR, 24, { align: 'right' })
+
+    doc.setTextColor(0, 0, 0)
+    y = 44
+
+    // ================================================
+    // SECTION 1 — CASE DETAILS
+    // ================================================
+    sectionTitle('1. CASE DETAILS')
+    
+    const caseDetailsBody = [
+      ['Case ID', caseItem.id],
+      ['Customer Name', caseItem.customerName || 'N/A'],
+      ['Priority', caseItem.priority || 'P1'],
+      ['Risk Amount', fmt(caseItem.riskAmount)],
+      ['Traced Amount (Lien)', fmt(caseItem.tracedAmount)],
+      ['Total Balance', fmt(caseItem.totalBalance || 0)],
+      ['Case Status', caseItem.status?.replace(/_/g, ' ') || 'N/A'],
+    ]
+    if (reviewCtx?.recommendation?.selectedAction) {
+      caseDetailsBody.push(['AML Officer Recommendation', reviewCtx.recommendation.selectedAction])
+    }
+    if (reviewCtx?.recommendation?.rationale) {
+      caseDetailsBody.push(['Recommendation Rationale', reviewCtx.recommendation.rationale])
+    }
 
     autoTable(doc, {
       startY: y,
       head: [['Field', 'Value']],
-      body: [
-        ['Customer', caseItem.customerName],
-        ['Risk Amount', fmt(caseItem.riskAmount)],
-        ['Traced Amount', fmt(caseItem.tracedAmount)],
-        ['Recommended Action', 'Proportional Lien'],
-        ['Status', caseItem.status],
-      ],
-      margin: { left: 20, right: 20 }, styles: { fontSize: 9 }
+      body: caseDetailsBody,
+      margin: { left: marginL, right: marginR },
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [241, 245, 249] },
+      columnStyles: { 0: { fontStyle: 'bold', cellWidth: 55 } }
     })
-
     y = doc.lastAutoTable.finalY + 10
-    if (reviewCtx?.timeline?.length) {
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold')
-      doc.text('Investigation Timeline', 20, y); y += 6
+
+    // ================================================
+    // SECTION 2 — INVESTIGATION SUMMARY (Node Verdicts)
+    // ================================================
+    if (reviewCtx?.nodes?.length > 0) {
+      sectionTitle('2. INVESTIGATION SUMMARY — Network Nodes')
+      
+      const nodeRows = reviewCtx.nodes.map(n => [
+        n.nodeId,
+        n.label || '',
+        n.nodeType || '',
+        n.aiClassification || 'UNCLASSIFIED',
+        typeof n.confidence === 'number' ? `${(n.confidence * 100).toFixed(0)}%` : 'N/A',
+        n.officerVerdict || 'UNREVIEWED',
+        n.nodeAction || 'NO_ACTION'
+      ])
+
       autoTable(doc, {
         startY: y,
-        head: [['Time', 'Actor', 'Event']],
-        body: reviewCtx.timeline.map(e => [fmtTime(e.timestamp), e.actor, e.title]),
-        margin: { left: 20, right: 20 }, styles: { fontSize: 8 }
+        head: [['Node', 'Label', 'Type', 'AI Classification', 'Confidence', 'Officer Verdict', 'Action']],
+        body: nodeRows,
+        margin: { left: marginL, right: marginR },
+        styles: { fontSize: 8, cellPadding: 2.5 },
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7 },
+        alternateRowStyles: { fillColor: [241, 245, 249] },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 14 } }
       })
       y = doc.lastAutoTable.finalY + 10
     }
 
-    if (strNarrative) {
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold')
-      doc.text('STR Narrative (FIU-IND)', 20, y); y += 6
-      doc.setFontSize(9); doc.setFont('helvetica', 'normal')
-      const lines = doc.splitTextToSize(strNarrative, 170)
-      doc.text(lines, 20, y); y += lines.length * 5 + 8
+    // ================================================
+    // SECTION 3 — EVIDENCE REPOSITORY
+    // ================================================
+    const evidenceItems = reviewCtx?.evidenceItems || []
+    if (evidenceItems.length > 0) {
+      checkPageBreak(30)
+      sectionTitle('3. EVIDENCE REPOSITORY')
+
+      const evidenceRows = evidenceItems.map(e => [
+        e.evidenceId || '-',
+        e.fileName || '-',
+        e.uploadedBy || '-',
+        e.uploadedAt ? fmtTime(e.uploadedAt) : '-',
+        e.fileSize ? `${(e.fileSize / 1024).toFixed(1)} KB` : '-'
+      ])
+
+      autoTable(doc, {
+        startY: y,
+        head: [['Evidence ID', 'File Name', 'Uploaded By', 'Timestamp', 'Size']],
+        body: evidenceRows,
+        margin: { left: marginL, right: marginR },
+        styles: { fontSize: 8, cellPadding: 2.5 },
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [241, 245, 249] }
+      })
+      y = doc.lastAutoTable.finalY + 10
+    } else {
+      checkPageBreak(14)
+      sectionTitle('3. EVIDENCE REPOSITORY')
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(100, 116, 139)
+      doc.text('No evidence documents uploaded for this case.', marginL, y)
+      doc.setTextColor(0, 0, 0)
+      y += 10
     }
 
-    const hash = Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
+    // ================================================
+    // SECTION 4 — AI ASSESSMENT & SCORING RATIONALE
+    // ================================================
+    const aiRevisions = reviewCtx?.aiRevisions || []
+    if (aiRevisions.length > 0 || reviewCtx?.nodes?.some(n => n.aiClassification && n.aiClassification !== 'UNCLASSIFIED')) {
+      checkPageBreak(30)
+      sectionTitle('4. AI ASSESSMENT & SCORING RATIONALE')
+
+      // Node-level AI summaries
+      if (reviewCtx?.nodes?.length > 0) {
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        for (const n of reviewCtx.nodes) {
+          if (!n.aiClassification || n.aiClassification === 'UNCLASSIFIED') continue
+          checkPageBreak(16)
+          doc.setFont('helvetica', 'bold')
+          doc.text(`${n.nodeId} — ${n.label || 'Unknown'}`, marginL, y)
+          doc.setFont('helvetica', 'normal')
+          doc.text(`Classification: ${n.aiClassification} | Confidence: ${typeof n.confidence === 'number' ? (n.confidence * 100).toFixed(0) + '%' : 'N/A'}`, marginL + 2, y + 5)
+          y += 12
+        }
+      }
+
+      // Revision history
+      if (aiRevisions.length > 0) {
+        checkPageBreak(14)
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'bold')
+        doc.text('AI Revision History:', marginL, y)
+        y += 6
+
+        const revRows = aiRevisions.map((r, i) => [
+          `Rev ${i + 1}`,
+          r.triggeredBy || 'System',
+          r.timestamp ? fmtTime(r.timestamp) : '-',
+          r.nodesRevised ? String(r.nodesRevised) : '-'
+        ])
+
+        autoTable(doc, {
+          startY: y,
+          head: [['Revision', 'Triggered By', 'Timestamp', 'Nodes Revised']],
+          body: revRows,
+          margin: { left: marginL, right: marginR },
+          styles: { fontSize: 8, cellPadding: 2.5 },
+          headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [241, 245, 249] }
+        })
+        y = doc.lastAutoTable.finalY + 10
+      }
+    }
+
+    // ================================================
+    // SECTION 5 — STR NARRATIVE
+    // ================================================
+    if (strNarrative) {
+      checkPageBreak(30)
+      sectionTitle('5. STR NARRATIVE (FIU-IND)')
+
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      const narrativeLines = doc.splitTextToSize(strNarrative, contentW)
+      
+      // Handle multi-page narrative
+      for (const line of narrativeLines) {
+        checkPageBreak(6)
+        doc.text(line, marginL, y)
+        y += 5
+      }
+      y += 8
+    }
+
+    // ================================================
+    // SECTION 6 — INVESTIGATION TIMELINE
+    // ================================================
+    if (reviewCtx?.timeline?.length > 0) {
+      checkPageBreak(30)
+      sectionTitle('6. INVESTIGATION TIMELINE')
+
+      const tlRows = reviewCtx.timeline.map(e => [
+        e.timestamp ? fmtTime(e.timestamp) : '-',
+        e.actor || '-',
+        e.title || '-',
+        e.details || ''
+      ])
+
+      autoTable(doc, {
+        startY: y,
+        head: [['Timestamp', 'Actor', 'Event', 'Details']],
+        body: tlRows,
+        margin: { left: marginL, right: marginR },
+        styles: { fontSize: 7.5, cellPadding: 2 },
+        headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [241, 245, 249] },
+        columnStyles: { 3: { cellWidth: 60 } }
+      })
+      y = doc.lastAutoTable.finalY + 10
+    }
+
+    // ================================================
+    // FOOTER — Integrity Hash & Signature
+    // ================================================
+    checkPageBreak(30)
+    doc.setDrawColor(100, 116, 139)
+    doc.line(marginL, y, pageW - marginR, y)
+    y += 8
+
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'bold')
+    doc.text('DOCUMENT INTEGRITY', marginL, y)
+    y += 5
+    doc.setFont('helvetica', 'normal')
     doc.setFontSize(7)
-    doc.text(`Integrity Hash (SHA-256): ${hash}`, 20, doc.internal.pageSize.height - 10)
-    doc.save(`EvidencePackage-${caseItem.id}.pdf`)
-    showToast('Evidence package exported')
+    const hash = Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
+    doc.text(`SHA-256: ${hash}`, marginL, y)
+    y += 4
+    doc.text(`Total Pages: ${pageNum.current}  |  Generated by MUSKETS Containment Platform`, marginL, y)
+    y += 8
+    
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'bold')
+    doc.text('DECLARATION', marginL, y)
+    y += 5
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7)
+    const declaration = doc.splitTextToSize(
+      'I hereby declare that the information furnished above is true and correct to the best of my knowledge and belief. ' +
+      'This report is being filed pursuant to Section 12 of the Prevention of Money Laundering Act, 2002 and the rules made thereunder. ' +
+      'The reporting entity has taken all reasonable steps to verify the information before filing this report with FIU-IND.',
+      contentW
+    )
+    doc.text(declaration, marginL, y)
+    y += declaration.length * 4 + 8
+
+    // Signature blocks
+    checkPageBreak(30)
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'normal')
+    const sigY = y
+    doc.text('_________________________', marginL, sigY)
+    doc.text('Principal Officer (Compliance)', marginL, sigY + 5)
+    doc.text('Date: ____________________', marginL, sigY + 10)
+
+    doc.text('_________________________', pageW / 2 + 10, sigY)
+    doc.text('Designated Director', pageW / 2 + 10, sigY + 5)
+    doc.text('Date: ____________________', pageW / 2 + 10, sigY + 10)
+
+    // Add footer to all pages
+    const totalPages = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i)
+      pageNum.current = i
+      addPageFooter()
+    }
+
+    doc.save(`STR-${caseItem.id}.pdf`)
+    showToast('STR document exported')
   }
 
   const { allPassed, checks } = useReviewChecklist(reviewCtx)
@@ -419,12 +698,12 @@ export default function ComplianceWorkspace() {
                   </div>
                 )}
 
-                {/* Evidence Package export */}
+                {/* STR Document export */}
                 <div className="pt-2 border-t border-slate-800/50">
                   <button onClick={() => handleExportEvidencePackage(selectedCase)}
                     className="w-full py-2 rounded-xl text-[11px] font-bold border border-slate-700/50 bg-slate-900/50 text-slate-300 hover:bg-slate-800/50 transition-all flex items-center justify-center gap-2">
                     <Download className="w-3.5 h-3.5 text-amber-400" />
-                    Export Case Evidence Package
+                    Export STR Document (PDF)
                   </button>
                 </div>
 

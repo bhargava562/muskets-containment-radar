@@ -42,21 +42,32 @@ public class GroqAiClientImpl implements AiClient {
 
     @Override
     public String call(String systemPrompt, String userPrompt) throws Exception {
+        return doCall(systemPrompt, userPrompt, true);
+    }
+
+    @Override
+    public String callPlainText(String systemPrompt, String userPrompt) throws Exception {
+        return doCall(systemPrompt, userPrompt, false);
+    }
+
+    private String doCall(String systemPrompt, String userPrompt, boolean forceJsonMode) throws Exception {
         String apiKey = config.getAi().getApiKey();
         if (apiKey == null || apiKey.isBlank() || "MOCK_KEY".equals(apiKey)) {
             log.info("No GROQ_API_KEY found. Executing mock Copilot evaluator fallback.");
             return mockAiEvaluator.generateMockResponse(userPrompt);
         }
 
-        log.info("Sending reanalysis payload to Groq (model: {})", config.getAi().getModel());
+        log.info("Sending {} payload to Groq (model: {})", forceJsonMode ? "JSON-mode" : "plain-text", config.getAi().getModel());
 
         ObjectNode requestBody = objectMapper.createObjectNode();
         requestBody.put("model", config.getAi().getModel()); // "llama-3.3-70b-versatile" by default
         requestBody.put("temperature", 0.0);
 
-        ObjectNode responseFormat = objectMapper.createObjectNode();
-        responseFormat.put("type", "json_object");
-        requestBody.set("response_format", responseFormat);
+        if (forceJsonMode) {
+            ObjectNode responseFormat = objectMapper.createObjectNode();
+            responseFormat.put("type", "json_object");
+            requestBody.set("response_format", responseFormat);
+        }
 
         ArrayNode messages = objectMapper.createArrayNode();
         messages.add(objectMapper.createObjectNode().put("role", "system").put("content", systemPrompt));

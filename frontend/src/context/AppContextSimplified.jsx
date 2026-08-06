@@ -288,6 +288,17 @@ export function AppProvider({ children }) {
     )
   }, [transitionCase])
 
+  const resolveCase = useCallback((caseId) => {
+    transitionCase(
+      caseId,
+      CASE_STATUS.RESOLVED,
+      'Branch Manager',
+      'Restriction applied — case resolved',
+      null,
+      { resolvedAt: new Date().toISOString() }
+    )
+  }, [transitionCase])
+
   // --- Non-Transition Actions (mutate case data, NOT status) ---
 
   const updateInvestigatorNotes = useCallback((caseId, notes) => {
@@ -362,7 +373,7 @@ export function AppProvider({ children }) {
     cases, selectedCaseId, setSelectedCaseId,
     getSelectedCase, getCasesByStatus, getCasesByStatuses, getGraphForCase,
     approveContainment, finalizeRestriction, markFalsePositive,
-    returnToAML, rejectCase,
+    returnToAML, rejectCase, resolveCase,
     updateInvestigatorNotes, reanalyzeAI, appendAuditLog,
     resetDatabase, markUnderInvestigation
   }
