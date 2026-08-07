@@ -76,9 +76,16 @@ export default function CaseGateModal() {
               </div>
 
               {/* Signals */}
-              <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800/50 space-y-2">
+              <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800/50 space-y-3">
                 <span className="text-[10px] font-mono text-slate-500 uppercase">Triage Flag Reasons</span>
-                <p className="text-xs text-slate-300 font-mono leading-relaxed bg-slate-900 p-3 rounded-lg border border-slate-800/60">
+                <div className="flex flex-wrap gap-1.5">
+                  {['Z_SCORE_ANOMALY', 'HIGH_VELOCITY'].map(flag => (
+                    <span key={flag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[9px] font-bold text-red-400 uppercase tracking-wider">
+                      <ShieldAlert className="w-2.5 h-2.5" />{flag.replace(/_/g, ' ')}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed bg-slate-900 p-3 rounded-lg border border-slate-800/60">
                   {caseSnapshot.triggerReason}
                 </p>
               </div>

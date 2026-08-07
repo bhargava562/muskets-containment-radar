@@ -10,7 +10,7 @@
     "riskAmount": 150000.0,
     "tracedAmount": 112500.0,
     "totalBalance": 270000.0,
-    "triggerReason": "Z_SCORE_ANOMALY | HIGH_VELOCITY",
+    "triggerReason": "Z-Score Anomaly detected on account 185502000087321: transaction velocity spiked to 14 tx/min (baseline: 2.1 tx/min, σ=6.8). High-velocity burst of ₹1,50,000 across 3 downstream hops within a 48-minute window indicates potential layered structuring consistent with mule relay patterns under PMLA Section 12AA threshold monitoring.",
     "generatedAt": "2026-07-12T10:00:00Z",
     "status": "PENDING_TRIAGE"
   },
