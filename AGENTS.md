@@ -178,5 +178,14 @@ Fixed Groq JSON mode deserialization mismatch in `AiOrchestrationService.java` a
 cd backend && .\mvnw.cmd test "-Dtest=AiOrchestrationServiceTest"
 ```
 
+## RenderDockerDeploymentAgent — 2026-09-05
+Configured a multi-stage Dockerfile and `.dockerignore` in the `backend/` directory for deploying the Spring Boot backend to Render. Stage 1 uses `eclipse-temurin:25-jdk` to resolve dependencies and build the executable JAR via `./mvnw clean package -B -DskipTests`, normalizing script line endings with `sed` to prevent CRLF execution issues. Stage 2 uses `eclipse-temurin:25-jre` runtime with container-aware JVM memory options (`-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0`), dynamically binds to Render's injected `$PORT` env var (defaulting to 8080), and creates `/app/data` for H2 file persistence.
 
+### How to test
+```bash
+# Build the Docker image locally from backend directory
+cd backend && docker build -t muskets-backend .
 
+# Run the container locally
+docker run -p 8080:8080 -e PORT=8080 muskets-backend
+```

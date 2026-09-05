@@ -1,0 +1,10 @@
+target/
+data/
+.env
+.idea/
+.junie/
+*.log
+*.mv.db
+*.trace.db
+.git
+.gitignore
