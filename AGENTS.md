@@ -189,3 +189,15 @@ cd backend && docker build -t muskets-backend .
 # Run the container locally
 docker run -p 8080:8080 -e PORT=8080 muskets-backend
 ```
+
+## HealthCheckEndpointAgent — 2026-09-18
+Implemented standard `/health` and `/api/health` diagnostic endpoints in `RootEndpointsController.java` to support Render keep-alive cron jobs, cloud platform readiness/liveness probes, and uptime monitoring. The endpoint verifies database connectivity via `AlertLogRepository`, gathers JVM memory metrics (used, free, total, max), system processors, Java version, ISO-8601 timestamp, and uptime seconds. Returns HTTP 200 `UP` when healthy and HTTP 503 `DEGRADED` if the database probe fails. Added `HealthEndpointTest.java` verifying both healthy and degraded states. All 27 Maven tests pass.
+
+### How to test
+```bash
+# Run unit tests for health check
+cd backend && .\mvnw.cmd test "-Dtest=HealthEndpointTest"
+
+# Run full test suite
+cd backend && .\mvnw.cmd test "-Dspring.profiles.active=test"
+```

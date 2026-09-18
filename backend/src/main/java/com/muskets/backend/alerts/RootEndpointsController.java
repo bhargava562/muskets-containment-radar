@@ -8,12 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -122,5 +126,60 @@ public class RootEndpointsController {
         }
 
         return Map.of("status", "success", "message", "Backend state reset successfully");
+    }
+
+    /**
+     * Health check and diagnostics endpoint for cloud deployment platforms (Render, Railway),
+     * keep-alive cron jobs, and monitoring probes.
+     *
+     * <p>Exposed at both {@code /health} and {@code /api/health}.</p>
+     */
+    @GetMapping({"/health", "/api/health"})
+    public ResponseEntity<Map<String, Object>> healthCheck() {
+        boolean dbHealthy = false;
+        String dbError = null;
+        try {
+            alertLogRepository.count();
+            dbHealthy = true;
+        } catch (Exception e) {
+            log.warn("Health check database probe failed: {}", e.getMessage());
+            dbError = e.getMessage();
+        }
+
+        long uptimeSeconds = ManagementFactory.getRuntimeMXBean().getUptime() / 1000;
+        Runtime runtime = Runtime.getRuntime();
+        long totalMem = runtime.totalMemory();
+        long freeMem = runtime.freeMemory();
+        long usedMem = totalMem - freeMem;
+        long maxMem = runtime.maxMemory();
+
+        Map<String, Object> memory = Map.of(
+                "usedMb", usedMem / (1024 * 1024),
+                "freeMb", freeMem / (1024 * 1024),
+                "totalMb", totalMem / (1024 * 1024),
+                "maxMb", maxMem / (1024 * 1024)
+        );
+
+        Map<String, Object> database = new LinkedHashMap<>();
+        database.put("status", dbHealthy ? "UP" : "DOWN");
+        if (dbError != null) {
+            database.put("error", dbError);
+        }
+
+        Map<String, Object> systemInfo = Map.of(
+                "availableProcessors", runtime.availableProcessors(),
+                "javaVersion", System.getProperty("java.version", "unknown")
+        );
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", dbHealthy ? "UP" : "DEGRADED");
+        response.put("service", "muskets-backend");
+        response.put("timestamp", Instant.now().toString());
+        response.put("uptimeSeconds", uptimeSeconds);
+        response.put("database", database);
+        response.put("memory", memory);
+        response.put("system", systemInfo);
+
+        return dbHealthy ? ResponseEntity.ok(response) : ResponseEntity.status(503).body(response);
     }
 }
