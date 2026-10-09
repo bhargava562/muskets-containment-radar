@@ -1,0 +1,723 @@
+{
+  "caseId": "case-FRA-2026-IOB-00923",
+  "caseStatus": "PENDING_TRIAGE",
+  "contextVersion": 1,
+  "snapshot": {
+    "caseId": "case-FRA-2026-IOB-00923",
+    "accountId": "712308000087654",
+    "customerName": "Priya Venkatesh",
+    "priority": "P1",
+    "riskAmount": 450000.0,
+    "tracedAmount": 312000.0,
+    "totalBalance": 1850000.0,
+    "triggerReason": "₹4.5L funneled through dual-victim coordinated attack. 6 mule accounts activated within 180-second window. Master mule pattern identified on account 712308000087654.",
+    "generatedAt": "2026-05-17T13:58:42Z",
+    "status": "PENDING_TRIAGE"
+  },
+  "nodes": [
+    {
+      "nodeId": "V1",
+      "accountId": "185501000034567",
+      "label": "V1 — Priya Venkatesh (Victim)",
+      "nodeType": "VICTIM",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Priya Venkatesh",
+        "idType": "PAN",
+        "idNumber": "XXXXX4821A",
+        "dateOfBirth": "19/04/1988",
+        "address": "12/A, Gandhi Road, T. Nagar, Chennai",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "15/02/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX3456",
+        "occupation": "School Principal",
+        "customerSince": "2017"
+      },
+      "cbs": {
+        "accountNumber": "185501000034567",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "T. Nagar Branch",
+        "currentBalance": 1850000.0,
+        "averageMonthlyBalance": 420000.0,
+        "accountOpenDate": "14/06/2017",
+        "totalTransactionsLast30Days": 16,
+        "totalDebitLast30Days": 230000.0,
+        "totalCreditLast30Days": 85000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "Venkatesh S.",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-10"
+      },
+      "device": {
+        "lastLoginDevice": "Apple iPhone 14",
+        "lastLoginIp": "122.178.44.12",
+        "lastLoginLocation": "Chennai, India",
+        "lastLoginTimestamp": "2026-05-17T13:50:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 2,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "complaint": {
+        "complaintId": "CYB2026-05-17-9128",
+        "victimName": "Priya Venkatesh",
+        "crimeType": "IMPERSONATION_FRAUD",
+        "reportedAmount": 230000.0,
+        "registeredAt": "1930 Portal",
+        "firLinked": true
+      },
+      "aiAnalysis": {
+        "aiClassification": "CONFIRMED_VICTIM",
+        "confidence": 0.99,
+        "evidence": [
+          {
+            "evidenceId": "EV-01",
+            "source": "KYC_VERIFICATION",
+            "derivedFrom": "Verified salary account holder with clean 9-year history.",
+            "weight": 0.98,
+            "linkedRecordId": "KYC-V1-kycStatus"
+          },
+          {
+            "evidenceId": "EV-02",
+            "source": "COMPLAINT_MATCH",
+            "derivedFrom": "Complaint CYB2026-05-17-9128 registered on National Cybercrime Portal 1930.",
+            "weight": 0.97,
+            "linkedRecordId": "CYB2026-05-17-9128"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Priya Venkatesh is a confirmed victim of cyber impersonation. Funds rapidly debited to multiple intermediary mule accounts."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN9230001",
+          "fromAccount": "185501000034567",
+          "toAccount": "501234000098765",
+          "amount": 120000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:55:00Z",
+          "narration": "IMPS/Transfer to Alpha"
+        },
+        {
+          "txnId": "TXN9230002",
+          "fromAccount": "185501000034567",
+          "toAccount": "403201000054321",
+          "amount": 110000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:56:00Z",
+          "narration": "IMPS/Transfer to Beta"
+        }
+      ]
+    },
+    {
+      "nodeId": "V2",
+      "accountId": "185501000034999",
+      "label": "V2 — Suresh Nair (Victim 2)",
+      "nodeType": "VICTIM",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Suresh Nair",
+        "idType": "PAN",
+        "idNumber": "XXXXX1923K",
+        "dateOfBirth": "08/11/1975",
+        "address": "45/2, MG Road, Ernakulam, Kochi",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "10/01/2026",
+        "riskCategory": "LOW",
+        "mobile": "94XXXX8912",
+        "occupation": "Chartered Accountant",
+        "customerSince": "2015"
+      },
+      "cbs": {
+        "accountNumber": "185501000034999",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Kochi Branch",
+        "currentBalance": 920000.0,
+        "averageMonthlyBalance": 310000.0,
+        "accountOpenDate": "12/03/2015",
+        "totalTransactionsLast30Days": 22,
+        "totalDebitLast30Days": 220000.0,
+        "totalCreditLast30Days": 110000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "Geetha Nair",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-12"
+      },
+      "device": {
+        "lastLoginDevice": "OnePlus 11",
+        "lastLoginIp": "117.200.12.89",
+        "lastLoginLocation": "Kochi, India",
+        "lastLoginTimestamp": "2026-05-17T13:48:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "complaint": {
+        "complaintId": "CYB2026-05-17-9130",
+        "victimName": "Suresh Nair",
+        "crimeType": "INVESTMENT_SCAM",
+        "reportedAmount": 220000.0,
+        "registeredAt": "1930 Portal",
+        "firLinked": true
+      },
+      "aiAnalysis": {
+        "aiClassification": "CONFIRMED_VICTIM",
+        "confidence": 0.98,
+        "evidence": [
+          {
+            "evidenceId": "EV-03",
+            "source": "TRANSACTION_PATTERN",
+            "derivedFrom": "Dual victim funnel: Simultaneous transfer to Mule Beta and Master Mule.",
+            "weight": 0.96,
+            "linkedRecordId": "TXN9230003"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Suresh Nair is the second victim targeted concurrently in the dual-victim coordinated attack."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN9230003",
+          "fromAccount": "185501000034999",
+          "toAccount": "403201000054321",
+          "amount": 95000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:56:30Z",
+          "narration": "IMPS/Investment trf"
+        },
+        {
+          "txnId": "TXN9230004",
+          "fromAccount": "185501000034999",
+          "toAccount": "712308000087654",
+          "amount": 125000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:57:00Z",
+          "narration": "IMPS/Investment trf 2"
+        }
+      ]
+    },
+    {
+      "nodeId": "M1",
+      "accountId": "501234000098765",
+      "label": "M1 — Mule Alpha (Layer 1)",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Rohan Gupta",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-1122",
+        "dateOfBirth": "12/05/2002",
+        "address": "Shop 4, Karol Bagh, New Delhi",
+        "kycStatus": "RECENT_UPDATE",
+        "lastVerifiedDate": "20/04/2026",
+        "riskCategory": "HIGH",
+        "mobile": "91XXXX5544",
+        "occupation": "Student",
+        "customerSince": "2026"
+      },
+      "cbs": {
+        "accountNumber": "501234000098765",
+        "ifscCode": "SBIN0001234",
+        "accountType": "SAVINGS",
+        "branchName": "Karol Bagh Branch",
+        "currentBalance": 20000.0,
+        "averageMonthlyBalance": 1200.0,
+        "accountOpenDate": "01/04/2026",
+        "totalTransactionsLast30Days": 14,
+        "totalDebitLast30Days": 100000.0,
+        "totalCreditLast30Days": 120000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Redmi Note 12",
+        "lastLoginIp": "185.220.101.4",
+        "lastLoginLocation": "Frankfurt, Germany",
+        "lastLoginTimestamp": "2026-05-17T13:55:12Z",
+        "uniqueDevicesLast30Days": 3,
+        "uniqueIpsLast30Days": 5,
+        "vpnDetected": true,
+        "rootedDeviceDetected": false,
+        "simChanged": true,
+        "failedLoginAttempts": 2,
+        "geoVelocityFlag": "HIGH"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.97,
+        "evidence": [
+          {
+            "evidenceId": "EV-04",
+            "source": "VELOCITY_SPIKE",
+            "derivedFrom": "Dwell time of 12 seconds: ₹1.2L received from Priya and ₹1.0L forwarded immediately to Master Mule.",
+            "weight": 0.98,
+            "linkedRecordId": "TXN9230005"
+          },
+          {
+            "evidenceId": "EV-05",
+            "source": "DEVICE_ANOMALY",
+            "derivedFrom": "VPN login detected from non-resident IP address during rapid transfer sequence.",
+            "weight": 0.94,
+            "linkedRecordId": "DEV-M1"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "First-hop mule account operated via VPN proxy. Retained 12 seconds before pass-through."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN9230001",
+          "fromAccount": "185501000034567",
+          "toAccount": "501234000098765",
+          "amount": 120000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:55:00Z",
+          "narration": "IMPS/Inward"
+        },
+        {
+          "txnId": "TXN9230005",
+          "fromAccount": "501234000098765",
+          "toAccount": "712308000087654",
+          "amount": 100000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:55:12Z",
+          "narration": "IMPS/Forward to Master Mule"
+        }
+      ]
+    },
+    {
+      "nodeId": "M2",
+      "accountId": "403201000054321",
+      "label": "M2 — Mule Beta (Layer 1)",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Manish Verma",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-9944",
+        "dateOfBirth": "14/09/2000",
+        "address": "B-22, Sector 18, Noida, UP",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "11/03/2026",
+        "riskCategory": "HIGH",
+        "mobile": "99XXXX8877",
+        "occupation": "Gig Delivery Worker",
+        "customerSince": "2026"
+      },
+      "cbs": {
+        "accountNumber": "403201000054321",
+        "ifscCode": "HDFC0001244",
+        "accountType": "SAVINGS",
+        "branchName": "Noida Sector 18",
+        "currentBalance": 107000.0,
+        "averageMonthlyBalance": 800.0,
+        "accountOpenDate": "05/03/2026",
+        "totalTransactionsLast30Days": 8,
+        "totalDebitLast30Days": 98000.0,
+        "totalCreditLast30Days": 205000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Realme 9 Pro",
+        "lastLoginIp": "103.45.120.9",
+        "lastLoginLocation": "Noida, India",
+        "lastLoginTimestamp": "2026-05-17T13:56:08Z",
+        "uniqueDevicesLast30Days": 2,
+        "uniqueIpsLast30Days": 3,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "MEDIUM"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.96,
+        "evidence": [
+          {
+            "evidenceId": "EV-06",
+            "source": "DUAL_INFLOW",
+            "derivedFrom": "Received ₹1.1L from Victim 1 and ₹95K from Victim 2 within 30 seconds. Dwell time: 8s.",
+            "weight": 0.97,
+            "linkedRecordId": "TXN9230006"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "Dual-inflow intermediary node receiving funds from both victims and routing to secondary merchant exit."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN9230002",
+          "fromAccount": "185501000034567",
+          "toAccount": "403201000054321",
+          "amount": 110000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:56:00Z",
+          "narration": "IMPS/From Priya"
+        },
+        {
+          "txnId": "TXN9230003",
+          "fromAccount": "185501000034999",
+          "toAccount": "403201000054321",
+          "amount": 95000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:56:30Z",
+          "narration": "IMPS/From Suresh"
+        },
+        {
+          "txnId": "TXN9230006",
+          "fromAccount": "403201000054321",
+          "toAccount": "812205000012398",
+          "amount": 98000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:56:38Z",
+          "narration": "IMPS/To KVR Auto"
+        }
+      ]
+    },
+    {
+      "nodeId": "M3",
+      "accountId": "712308000087654",
+      "label": "M3 — Master Mule (Syndicate Node)",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Karthik R.",
+        "idType": "PAN",
+        "idNumber": "XXXXX7712M",
+        "dateOfBirth": "03/07/1996",
+        "address": "401, Cyber City Towers, Hyderabad",
+        "kycStatus": "FLAGGED",
+        "lastVerifiedDate": "15/01/2026",
+        "riskCategory": "HIGH",
+        "mobile": "97XXXX3311",
+        "occupation": "Unemployed",
+        "customerSince": "2025"
+      },
+      "cbs": {
+        "accountNumber": "712308000087654",
+        "ifscCode": "ICIC0001920",
+        "accountType": "CURRENT",
+        "branchName": "Hyderabad Cyber Towers",
+        "currentBalance": 195000.0,
+        "averageMonthlyBalance": 450.0,
+        "accountOpenDate": "14/02/2025",
+        "totalTransactionsLast30Days": 42,
+        "totalDebitLast30Days": 550000.0,
+        "totalCreditLast30Days": 690000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Samsung Galaxy S23 Ultra",
+        "lastLoginIp": "194.26.29.112",
+        "lastLoginLocation": "Amsterdam, Netherlands",
+        "lastLoginTimestamp": "2026-05-17T13:57:05Z",
+        "uniqueDevicesLast30Days": 4,
+        "uniqueIpsLast30Days": 8,
+        "vpnDetected": true,
+        "rootedDeviceDetected": true,
+        "simChanged": true,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "HIGH"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.99,
+        "evidence": [
+          {
+            "evidenceId": "EV-07",
+            "source": "MASTER_CONVERGENCE",
+            "derivedFrom": "Convergence hub: received ₹1.0L from Mule Alpha and ₹1.25L from Victim Suresh simultaneously. Dispersed to merchant exit in 5s.",
+            "weight": 0.99,
+            "linkedRecordId": "TXN9230007"
+          },
+          {
+            "evidenceId": "EV-08",
+            "source": "CROSS_BANK_INTELLIGENCE",
+            "derivedFrom": "Flagged across 2 other regional institutions in the DPIP intelligence exchange.",
+            "weight": 0.96,
+            "linkedRecordId": "DPIP-FLAG-7123"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "Master mule aggregator node for syndicate operations. Critical immediate containment required."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN9230005",
+          "fromAccount": "501234000098765",
+          "toAccount": "712308000087654",
+          "amount": 100000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:55:12Z",
+          "narration": "IMPS/From Alpha"
+        },
+        {
+          "txnId": "TXN9230004",
+          "fromAccount": "185501000034999",
+          "toAccount": "712308000087654",
+          "amount": 125000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:57:00Z",
+          "narration": "IMPS/From Suresh"
+        },
+        {
+          "txnId": "TXN9230007",
+          "fromAccount": "712308000087654",
+          "toAccount": "234510000076543",
+          "amount": 145000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:57:05Z",
+          "narration": "IMPS/To Sri Lakshmi Textiles"
+        }
+      ]
+    },
+    {
+      "nodeId": "MR1",
+      "accountId": "234510000076543",
+      "label": "MR1 — Sri Lakshmi Textiles (Merchant Exit)",
+      "nodeType": "MERCHANT",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Sri Lakshmi Textiles Pvt Ltd",
+        "idType": "GSTIN",
+        "idNumber": "33AAACL1234F1Z8",
+        "dateOfBirth": "15/09/2012",
+        "address": "12, Textile Market, Erode, Tamil Nadu",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "01/01/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX7654",
+        "occupation": "Wholesale Textile Trading",
+        "customerSince": "2012"
+      },
+      "cbs": {
+        "accountNumber": "234510000076543",
+        "ifscCode": "IOBA0002345",
+        "accountType": "CURRENT",
+        "branchName": "Erode Main",
+        "currentBalance": 3450000.0,
+        "averageMonthlyBalance": 2800000.0,
+        "accountOpenDate": "15/09/2012",
+        "totalTransactionsLast30Days": 142,
+        "totalDebitLast30Days": 4200000.0,
+        "totalCreditLast30Days": 4800000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "N/A",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Dell OptiPlex POS",
+        "lastLoginIp": "122.164.88.20",
+        "lastLoginLocation": "Erode, India",
+        "lastLoginTimestamp": "2026-05-17T14:00:00Z",
+        "uniqueDevicesLast30Days": 2,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "aiAnalysis": {
+        "aiClassification": "LIKELY_INNOCENT",
+        "confidence": 0.91,
+        "evidence": [
+          {
+            "evidenceId": "EV-09",
+            "source": "COMMERCIAL_REGISTRY",
+            "derivedFrom": "Active GSTIN with monthly filings and legitimate commercial operation.",
+            "weight": 0.94,
+            "linkedRecordId": "GST-33AAACL1234F1Z8"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Legitimate wholesale business endpoint receiving settlement funds from fraudulent purchases. Partial lien on traced amount recommended."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN9230007",
+          "fromAccount": "712308000087654",
+          "toAccount": "234510000076543",
+          "amount": 145000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:57:05Z",
+          "narration": "IMPS/Settlement/Textiles"
+        }
+      ]
+    },
+    {
+      "nodeId": "MR2",
+      "accountId": "812205000012398",
+      "label": "MR2 — KVR Auto Parts (Merchant Exit)",
+      "nodeType": "MERCHANT",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "KVR Auto Parts",
+        "idType": "GSTIN",
+        "idNumber": "07AAACK5678B1Z2",
+        "dateOfBirth": "20/04/2016",
+        "address": "Plot 8, Mayapuri Industrial Area, New Delhi",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "12/02/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX1239",
+        "occupation": "Automotive Spare Parts",
+        "customerSince": "2016"
+      },
+      "cbs": {
+        "accountNumber": "812205000012398",
+        "ifscCode": "PUNB0008122",
+        "accountType": "CURRENT",
+        "branchName": "Mayapuri Branch",
+        "currentBalance": 1280000.0,
+        "averageMonthlyBalance": 850000.0,
+        "accountOpenDate": "20/04/2016",
+        "totalTransactionsLast30Days": 88,
+        "totalDebitLast30Days": 950000.0,
+        "totalCreditLast30Days": 1100000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "N/A",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "HP POS Terminal",
+        "lastLoginIp": "182.74.11.89",
+        "lastLoginLocation": "New Delhi, India",
+        "lastLoginTimestamp": "2026-05-17T14:02:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "aiAnalysis": {
+        "aiClassification": "LIKELY_INNOCENT",
+        "confidence": 0.89,
+        "evidence": [
+          {
+            "evidenceId": "EV-10",
+            "source": "COMMERCIAL_REGISTRY",
+            "derivedFrom": "Valid GST entity with consistent wholesale auto parts transaction history.",
+            "weight": 0.92,
+            "linkedRecordId": "GST-07AAACK5678B1Z2"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Legitimate auto parts merchant endpoint where layered fraud proceeds were cashed out."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN9230006",
+          "fromAccount": "403201000054321",
+          "toAccount": "812205000012398",
+          "amount": 98000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T13:56:38Z",
+          "narration": "IMPS/Auto Parts Settlement"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M1",
+      "amount": 120000.0,
+      "timestampMillis": 1779026100000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M2",
+      "amount": 110000.0,
+      "timestampMillis": 1779026160000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "V2",
+      "toNodeId": "M2",
+      "amount": 95000.0,
+      "timestampMillis": 1779026190000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "V2",
+      "toNodeId": "M3",
+      "amount": 125000.0,
+      "timestampMillis": 1779026220000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "M1",
+      "toNodeId": "M3",
+      "amount": 100000.0,
+      "timestampMillis": 1779026112000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "M3",
+      "toNodeId": "MR1",
+      "amount": 145000.0,
+      "timestampMillis": 1779026225000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "M2",
+      "toNodeId": "MR2",
+      "amount": 98000.0,
+      "timestampMillis": 1779026198000,
+      "type": "IMPS"
+    }
+  ]
+}

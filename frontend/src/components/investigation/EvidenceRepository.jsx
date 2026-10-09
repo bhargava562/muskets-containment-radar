@@ -2,12 +2,13 @@ import { useState, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Upload, File, ShieldCheck, Database, Fingerprint, FileSearch, AlertCircle, Calendar, Link2, Info } from 'lucide-react'
 import { useInvestigation } from '../../context/InvestigationContext'
+import { getBackendUrl } from '../../config/api'
 
 export default function EvidenceRepository({ nodeId, node }) {
   const { context, activeCaseId, refreshContext } = useInvestigation()
   const [uploading, setUploading] = useState(false)
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+  const backendUrl = getBackendUrl()
   const files = context?.evidenceRepository || []
 
   const fileInputRef = useRef(null)

@@ -9,10 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -46,7 +48,12 @@ public class RootEndpointsController {
     }
 
     @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamEvents() {
+    public SseEmitter streamEvents(HttpServletResponse response) {
+        // Essential SSE headers to prevent proxy buffering, timeouts, and HTTP/2 protocol drops
+        response.setHeader("Cache-Control", "no-cache, no-transform");
+        response.setHeader("X-Accel-Buffering", "no");
+        response.setHeader("Connection", "keep-alive");
+
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         emitters.add(emitter);
 
@@ -58,6 +65,17 @@ public class RootEndpointsController {
         sendStateToEmitter(emitter);
 
         return emitter;
+    }
+
+    @Scheduled(fixedRate = 15000)
+    public void sendHeartbeat() {
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event().comment("keep-alive"));
+            } catch (Exception e) {
+                emitters.remove(emitter);
+            }
+        }
     }
 
     @EventListener

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Shield, RotateCcw } from 'lucide-react'
+import { getBackendUrl } from '../../config/api'
 
 const LoginPage = ({ onLogin }) => {
   const [employeeId, setEmployeeId] = useState('')
@@ -15,7 +16,7 @@ const LoginPage = ({ onLogin }) => {
     <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center px-6 relative">
       <button 
         onClick={() => {
-          const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+          const backendUrl = getBackendUrl();
           fetch(`${backendUrl}/reset`, { method: 'POST' })
             .catch(err => console.error('Failed to reset backend database state:', err))
             .finally(() => {

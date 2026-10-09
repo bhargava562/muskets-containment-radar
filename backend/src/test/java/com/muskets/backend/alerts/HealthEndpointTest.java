@@ -80,4 +80,14 @@ class HealthEndpointTest {
                 .andExpect(jsonPath("$.database.status").value("DOWN"))
                 .andExpect(jsonPath("$.database.error").value("Connection refused"));
     }
+
+    @Test
+    @DisplayName("GET /events should return text/event-stream with anti-buffering Cache-Control")
+    void eventsShouldReturnSseWithAntiBufferingHeaders() throws Exception {
+        mockMvc.perform(get("/events"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache, no-transform"))
+                .andExpect(header().string("X-Accel-Buffering", "no"))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM));
+    }
 }

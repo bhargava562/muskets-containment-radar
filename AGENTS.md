@@ -201,3 +201,16 @@ cd backend && .\mvnw.cmd test "-Dtest=HealthEndpointTest"
 # Run full test suite
 cd backend && .\mvnw.cmd test "-Dspring.profiles.active=test"
 ```
+
+## DeploymentConnectivityAgent — 2026-10-09
+Resolved production connectivity failures between the Vercel-deployed frontend and Railway-deployed Spring Boot backend. Fixed the missing protocol issue by standardizing `VITE_BACKEND_URL` in `frontend/.env` to `https://muskets-containment-radar-production-8b27.up.railway.app` and creating a centralized `getBackendUrl()` helper with defensive protocol injection (preventing relative URL resolution on Vercel). Fixed the 404 on `POST /api/investigation/{caseId}/start` by generating full seed JSON dossiers for all mock cases (`FRA-2026-IOB-00923`, `FRA-2026-IOB-01124`, `FRA-2026-IOB-00781`, `FRA-2026-IOB-00695`) and adding an automatic fallback to the base seed template inside `CaseContextBuilder.java` for unseeded cases. Resolved the SSE `ERR_HTTP2_PROTOCOL_ERROR` on `/events` by injecting `Cache-Control: no-cache, no-transform`, `X-Accel-Buffering: no`, and `Connection: keep-alive` response headers, adding a 15-second keep-alive heartbeat loop (`@Scheduled`) to keep reverse-proxy HTTP/2 streams alive, and implementing resilient reconnection backoff in `AppContextSimplified.jsx`. All 31 backend tests pass and frontend builds cleanly.
+
+### How to test
+```bash
+# Backend unit & integration test suite
+cd backend && .\mvnw.cmd test "-Dspring.profiles.active=test"
+
+# Frontend production bundle build
+cd frontend && npm run build
+```
+

@@ -1,0 +1,409 @@
+{
+  "caseId": "case-FRA-2026-IOB-01124",
+  "caseStatus": "PENDING_TRIAGE",
+  "contextVersion": 1,
+  "snapshot": {
+    "caseId": "case-FRA-2026-IOB-01124",
+    "accountId": "712308000034521",
+    "customerName": "Anand Krishnamurthy",
+    "priority": "P2",
+    "riskAmount": 85000.0,
+    "tracedAmount": 62000.0,
+    "totalBalance": 520000.0,
+    "triggerReason": "₹85K split through 2 mule accounts. VPN login flagged from non-service area. Low-velocity but consistent smurfing pattern.",
+    "generatedAt": "2026-05-17T13:45:18Z",
+    "status": "PENDING_TRIAGE"
+  },
+  "nodes": [
+    {
+      "nodeId": "V1",
+      "accountId": "185501000056789",
+      "label": "V1 — Anand Krishnamurthy (Victim)",
+      "nodeType": "VICTIM",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Anand Krishnamurthy",
+        "idType": "PAN",
+        "idNumber": "XXXXX3312B",
+        "dateOfBirth": "22/03/1984",
+        "address": "14/3, Race Course Road, Coimbatore, Tamil Nadu",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "18/01/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX5678",
+        "occupation": "Textile Mill Supervisor",
+        "customerSince": "2019"
+      },
+      "cbs": {
+        "accountNumber": "185501000056789",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Coimbatore Main",
+        "currentBalance": 520000.0,
+        "averageMonthlyBalance": 180000.0,
+        "accountOpenDate": "10/05/2019",
+        "totalTransactionsLast30Days": 14,
+        "totalDebitLast30Days": 85000.0,
+        "totalCreditLast30Days": 65000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "Lakshmi K.",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-12"
+      },
+      "device": {
+        "lastLoginDevice": "Vivo V27",
+        "lastLoginIp": "157.48.19.102",
+        "lastLoginLocation": "Coimbatore, India",
+        "lastLoginTimestamp": "2026-05-17T13:40:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "complaint": {
+        "complaintId": "CYB2026-05-17-7721",
+        "victimName": "Anand Krishnamurthy",
+        "crimeType": "LOTTERY_PHISHING",
+        "reportedAmount": 85000.0,
+        "registeredAt": "1930 Portal",
+        "firLinked": true
+      },
+      "aiAnalysis": {
+        "aiClassification": "CONFIRMED_VICTIM",
+        "confidence": 0.98,
+        "evidence": [
+          {
+            "evidenceId": "EV-01",
+            "source": "KYC_VERIFICATION",
+            "derivedFrom": "Longstanding individual account in good standing.",
+            "weight": 0.97,
+            "linkedRecordId": "KYC-V1"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Confirmed phishing scam victim. Funds divided across 2 mule hops."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN1124001",
+          "fromAccount": "185501000056789",
+          "toAccount": "712308000034521",
+          "amount": 50000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:42:00Z",
+          "narration": "UPI/Fee Payment"
+        },
+        {
+          "txnId": "TXN1124002",
+          "fromAccount": "185501000056789",
+          "toAccount": "185503000098765",
+          "amount": 35000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:42:45Z",
+          "narration": "UPI/Verification"
+        }
+      ]
+    },
+    {
+      "nodeId": "M1",
+      "accountId": "712308000034521",
+      "label": "M1 — Mule X",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Sanjay Rao",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-3344",
+        "dateOfBirth": "15/06/2001",
+        "address": "4th Cross, Malleshwaram, Bangalore",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "12/04/2026",
+        "riskCategory": "HIGH",
+        "mobile": "98XXXX3452",
+        "occupation": "Delivery Executive",
+        "customerSince": "2026"
+      },
+      "cbs": {
+        "accountNumber": "712308000034521",
+        "ifscCode": "ICIC0007123",
+        "accountType": "SAVINGS",
+        "branchName": "Malleshwaram",
+        "currentBalance": 8000.0,
+        "averageMonthlyBalance": 450.0,
+        "accountOpenDate": "10/04/2026",
+        "totalTransactionsLast30Days": 12,
+        "totalDebitLast30Days": 42000.0,
+        "totalCreditLast30Days": 50000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Motorola G54",
+        "lastLoginIp": "45.14.71.22",
+        "lastLoginLocation": "Frankfurt, Germany",
+        "lastLoginTimestamp": "2026-05-17T13:42:45Z",
+        "uniqueDevicesLast30Days": 2,
+        "uniqueIpsLast30Days": 4,
+        "vpnDetected": true,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "HIGH"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.95,
+        "evidence": [
+          {
+            "evidenceId": "EV-02",
+            "source": "VELOCITY_SPIKE",
+            "derivedFrom": "Dwell time 45s with VPN exit node in Frankfurt.",
+            "weight": 0.95,
+            "linkedRecordId": "TXN1124003"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "Primary intermediary mule account with rapid onward routing."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN1124001",
+          "fromAccount": "185501000056789",
+          "toAccount": "712308000034521",
+          "amount": 50000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:42:00Z",
+          "narration": "UPI/Inward"
+        },
+        {
+          "txnId": "TXN1124003",
+          "fromAccount": "712308000034521",
+          "toAccount": "920020000087654",
+          "amount": 42000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:42:45Z",
+          "narration": "UPI/Outward"
+        }
+      ]
+    },
+    {
+      "nodeId": "M2",
+      "accountId": "185503000098765",
+      "label": "M2 — Mule Y",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Farhan Ali",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-8811",
+        "dateOfBirth": "19/10/1998",
+        "address": "12, Park Street, Kolkata, WB",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "14/02/2026",
+        "riskCategory": "HIGH",
+        "mobile": "98XXXX9876",
+        "occupation": "Freelancer",
+        "customerSince": "2026"
+      },
+      "cbs": {
+        "accountNumber": "185503000098765",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Kolkata Main",
+        "currentBalance": 15000.0,
+        "averageMonthlyBalance": 620.0,
+        "accountOpenDate": "01/03/2026",
+        "totalTransactionsLast30Days": 9,
+        "totalDebitLast30Days": 20000.0,
+        "totalCreditLast30Days": 35000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Redmi 10",
+        "lastLoginIp": "103.111.45.19",
+        "lastLoginLocation": "Kolkata, India",
+        "lastLoginTimestamp": "2026-05-17T13:43:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 2,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "LOW"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.94,
+        "evidence": [
+          {
+            "evidenceId": "EV-03",
+            "source": "VELOCITY_SPIKE",
+            "derivedFrom": "Dwell time 22s: Structured below reporting threshold.",
+            "weight": 0.93,
+            "linkedRecordId": "TXN1124004"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "Secondary mule node used for structuring transaction splits."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN1124002",
+          "fromAccount": "185501000056789",
+          "toAccount": "185503000098765",
+          "amount": 35000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:42:45Z",
+          "narration": "UPI/Inward"
+        },
+        {
+          "txnId": "TXN1124004",
+          "fromAccount": "185503000098765",
+          "toAccount": "920020000087654",
+          "amount": 20000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:43:07Z",
+          "narration": "UPI/Outward"
+        }
+      ]
+    },
+    {
+      "nodeId": "MR1",
+      "accountId": "920020000087654",
+      "label": "MR1 — Global Exports",
+      "nodeType": "MERCHANT",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Global Exports Trade Corp",
+        "idType": "GSTIN",
+        "idNumber": "27AABCG1234E1Z9",
+        "dateOfBirth": "10/08/2018",
+        "address": "401, Nariman Point, Mumbai, Maharashtra",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "10/02/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX8765",
+        "occupation": "Export Import Trading",
+        "customerSince": "2018"
+      },
+      "cbs": {
+        "accountNumber": "920020000087654",
+        "ifscCode": "AXIS0009200",
+        "accountType": "CURRENT",
+        "branchName": "Nariman Point",
+        "currentBalance": 1420000.0,
+        "averageMonthlyBalance": 980000.0,
+        "accountOpenDate": "10/08/2018",
+        "totalTransactionsLast30Days": 96,
+        "totalDebitLast30Days": 1200000.0,
+        "totalCreditLast30Days": 1400000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "N/A",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "MacBook Pro",
+        "lastLoginIp": "115.112.44.88",
+        "lastLoginLocation": "Mumbai, India",
+        "lastLoginTimestamp": "2026-05-17T13:45:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "aiAnalysis": {
+        "aiClassification": "LIKELY_INNOCENT",
+        "confidence": 0.91,
+        "evidence": [
+          {
+            "evidenceId": "EV-04",
+            "source": "COMMERCIAL_REGISTRY",
+            "derivedFrom": "Verified corporate entity with 8 years of legitimate filings.",
+            "weight": 0.93,
+            "linkedRecordId": "GST-27AABCG1234E1Z9"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Merchant endpoint cashing out layered funds."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN1124003",
+          "fromAccount": "712308000034521",
+          "toAccount": "920020000087654",
+          "amount": 42000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:42:45Z",
+          "narration": "UPI/Settlement 1"
+        },
+        {
+          "txnId": "TXN1124004",
+          "fromAccount": "185503000098765",
+          "toAccount": "920020000087654",
+          "amount": 20000.0,
+          "currency": "INR",
+          "type": "UPI",
+          "timestamp": "2026-05-17T13:43:07Z",
+          "narration": "UPI/Settlement 2"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M1",
+      "amount": 50000.0,
+      "timestampMillis": 1779025320000,
+      "type": "UPI"
+    },
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M2",
+      "amount": 35000.0,
+      "timestampMillis": 1779025365000,
+      "type": "UPI"
+    },
+    {
+      "fromNodeId": "M1",
+      "toNodeId": "MR1",
+      "amount": 42000.0,
+      "timestampMillis": 1779025365000,
+      "type": "UPI"
+    },
+    {
+      "fromNodeId": "M2",
+      "toNodeId": "MR1",
+      "amount": 20000.0,
+      "timestampMillis": 1779025387000,
+      "type": "UPI"
+    }
+  ]
+}

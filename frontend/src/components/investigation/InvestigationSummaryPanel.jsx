@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ShieldCheck, Calendar, User, FileText, CheckCircle, ArrowRight, X } from 'lucide-react'
 import { useInvestigation } from '../../context/InvestigationContext'
+import { getBackendUrl } from '../../config/api'
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-IN', {
@@ -16,7 +17,7 @@ export default function InvestigationSummaryPanel({ onClose }) {
   const [report, setReport] = useState(null)
   const [error, setError] = useState(null)
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+  const backendUrl = getBackendUrl()
 
   useEffect(() => {
     const fetchSummary = async () => {

@@ -1,0 +1,287 @@
+{
+  "caseId": "case-FRA-2026-IOB-00695",
+  "caseStatus": "AWAITING_LEGAL_REVIEW",
+  "contextVersion": 1,
+  "snapshot": {
+    "caseId": "case-FRA-2026-IOB-00695",
+    "accountId": "185502000034567",
+    "customerName": "Ravi Traders",
+    "priority": "P3",
+    "riskAmount": 50000.0,
+    "tracedAmount": 50000.0,
+    "totalBalance": 2950000.0,
+    "triggerReason": "₹50K partial restriction applied on traced funds. Merchant claims legitimate payment received from known supplier.",
+    "generatedAt": "2026-05-17T10:15:33Z",
+    "status": "AWAITING_LEGAL_REVIEW"
+  },
+  "nodes": [
+    {
+      "nodeId": "V1",
+      "accountId": "185501000045678",
+      "label": "V1 — Vijay Sethi (Victim)",
+      "nodeType": "VICTIM",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Vijay Sethi",
+        "idType": "PAN",
+        "idNumber": "XXXXX1190D",
+        "dateOfBirth": "15/07/1980",
+        "address": "55, Mall Road, Shimla, HP",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "12/01/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX4567",
+        "occupation": "Hotelier",
+        "customerSince": "2015"
+      },
+      "cbs": {
+        "accountNumber": "185501000045678",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Shimla Main",
+        "currentBalance": 780000.0,
+        "averageMonthlyBalance": 450000.0,
+        "accountOpenDate": "10/06/2015",
+        "totalTransactionsLast30Days": 18,
+        "totalDebitLast30Days": 50000.0,
+        "totalCreditLast30Days": 95000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "Renu Sethi",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-10"
+      },
+      "device": {
+        "lastLoginDevice": "Samsung Tab S8",
+        "lastLoginIp": "117.211.55.90",
+        "lastLoginLocation": "Shimla, India",
+        "lastLoginTimestamp": "2026-05-17T10:10:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "complaint": {
+        "complaintId": "CYB2026-05-17-1092",
+        "victimName": "Vijay Sethi",
+        "crimeType": "ONLINE_SHOPPING_FRAUD",
+        "reportedAmount": 50000.0,
+        "registeredAt": "1930 Portal",
+        "firLinked": true
+      },
+      "aiAnalysis": {
+        "aiClassification": "CONFIRMED_VICTIM",
+        "confidence": 0.98,
+        "evidence": [
+          {
+            "evidenceId": "EV-01",
+            "source": "KYC_VERIFICATION",
+            "derivedFrom": "Verified individual account holder in good standing.",
+            "weight": 0.97,
+            "linkedRecordId": "KYC-V1"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Victim transfer of ₹50,000 to intermediary account."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN695001",
+          "fromAccount": "185501000045678",
+          "toAccount": "185502000034567",
+          "amount": 50000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T10:14:00Z",
+          "narration": "IMPS/Shopping payment"
+        }
+      ]
+    },
+    {
+      "nodeId": "M1",
+      "accountId": "185502000034567",
+      "label": "M1 — Intermediary Mule",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Amit Saxena",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-4422",
+        "dateOfBirth": "10/01/2003",
+        "address": "12, GT Road, Ghaziabad, UP",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "11/05/2026",
+        "riskCategory": "HIGH",
+        "mobile": "98XXXX3456",
+        "occupation": "Student",
+        "customerSince": "2026"
+      },
+      "cbs": {
+        "accountNumber": "185502000034567",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Ghaziabad Main",
+        "currentBalance": 1200.0,
+        "averageMonthlyBalance": 200.0,
+        "accountOpenDate": "11/05/2026",
+        "totalTransactionsLast30Days": 4,
+        "totalDebitLast30Days": 50000.0,
+        "totalCreditLast30Days": 50000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Vivo Y21",
+        "lastLoginIp": "103.24.12.8",
+        "lastLoginLocation": "Ghaziabad, India",
+        "lastLoginTimestamp": "2026-05-17T10:14:18Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "LOW"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.96,
+        "evidence": [
+          {
+            "evidenceId": "EV-02",
+            "source": "ACCOUNT_AGE",
+            "derivedFrom": "Account opened 6 days prior to high-velocity ₹50K pass-through. Dwell time 18s.",
+            "weight": 0.96,
+            "linkedRecordId": "CBS-M1"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "Fresh mule account used as pass-through."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN695001",
+          "fromAccount": "185501000045678",
+          "toAccount": "185502000034567",
+          "amount": 50000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T10:14:00Z",
+          "narration": "IMPS/Inward"
+        },
+        {
+          "txnId": "TXN695002",
+          "fromAccount": "185502000034567",
+          "toAccount": "916010000098765",
+          "amount": 50000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T10:14:18Z",
+          "narration": "IMPS/Wholesale Settlement"
+        }
+      ]
+    },
+    {
+      "nodeId": "MR1",
+      "accountId": "916010000098765",
+      "label": "MR1 — Ravi Traders (Merchant)",
+      "nodeType": "MERCHANT",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Ravi Traders Prop. R. Verma",
+        "idType": "GSTIN",
+        "idNumber": "09AABCR4455C1Z4",
+        "dateOfBirth": "15/03/2013",
+        "address": "45, Commercial Market, Kanpur, UP",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "14/01/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX9876",
+        "occupation": "General Merchant Wholesaler",
+        "customerSince": "2013"
+      },
+      "cbs": {
+        "accountNumber": "916010000098765",
+        "ifscCode": "UTIB0009160",
+        "accountType": "CURRENT",
+        "branchName": "Kanpur Main",
+        "currentBalance": 2950000.0,
+        "averageMonthlyBalance": 2100000.0,
+        "accountOpenDate": "15/03/2013",
+        "totalTransactionsLast30Days": 130,
+        "totalDebitLast30Days": 2800000.0,
+        "totalCreditLast30Days": 3100000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "N/A",
+        "lienAmount": 50000.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Desktop Billing Terminal",
+        "lastLoginIp": "122.161.44.10",
+        "lastLoginLocation": "Kanpur, India",
+        "lastLoginTimestamp": "2026-05-17T10:20:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "aiAnalysis": {
+        "aiClassification": "LIKELY_INNOCENT",
+        "confidence": 0.95,
+        "evidence": [
+          {
+            "evidenceId": "EV-03",
+            "source": "COMMERCIAL_REGISTRY",
+            "derivedFrom": "GST filings fully current. Supplier invoice verified for ₹50K procurement.",
+            "weight": 0.97,
+            "linkedRecordId": "GST-09AABCR4455C1Z4"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Legitimate merchant with verified invoice trail. Proportional hold only on ₹50,000."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN695002",
+          "fromAccount": "185502000034567",
+          "toAccount": "916010000098765",
+          "amount": 50000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T10:14:18Z",
+          "narration": "IMPS/Invoice settlement"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M1",
+      "amount": 50000.0,
+      "timestampMillis": 1779012840000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "M1",
+      "toNodeId": "MR1",
+      "amount": 50000.0,
+      "timestampMillis": 1779012858000,
+      "type": "IMPS"
+    }
+  ]
+}

@@ -2,9 +2,10 @@ import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Users, ShieldAlert, CheckCircle, PhoneCall, Upload, FileText, Loader2, AlertTriangle } from 'lucide-react'
 import { useApp, CASE_STATUS } from '../../context/AppContextSimplified'
+import { getBackendUrl } from '../../config/api'
 
 const fmt = (amount) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount)
-const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+const BACKEND = getBackendUrl()
 
 const INTERACTION_ACTIONS = [
   { action: 'CUSTOMER_CONTACTED', label: 'Customer Contacted', icon: PhoneCall },

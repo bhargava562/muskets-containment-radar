@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
 import mockData from '../data/iob_mock_data.json'
+import { getBackendUrl } from '../config/api'
 
 const AppContext = createContext(null)
 
@@ -124,24 +125,56 @@ export function AppProvider({ children }) {
 
   const [selectedCaseId, setSelectedCaseId] = useState(() => safeReadStorage(STORAGE_KEYS.SELECTED, null))
 
-  // Connect to mock transaction backend via SSE
+  // Connect to backend via SSE with error handling and reconnection backoff
   useEffect(() => {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
-    const es = new EventSource(`${backendUrl}/events`)
-    es.onmessage = (e) => {
-      const serverState = JSON.parse(e.data)
-      if (serverState.alertQueue && serverState.alertQueue.length > 0) {
-        const latestAlert = serverState.alertQueue[0]
-        setCases(prev => {
-          if (prev.some(c => c.id === latestAlert.caseId)) {
-            return prev
+    const backendUrl = getBackendUrl()
+    let es = null
+    let reconnectTimeout = null
+    let isDisposed = false
+
+    function connect() {
+      if (isDisposed) return
+      try {
+        es = new EventSource(`${backendUrl}/events`)
+        es.onmessage = (e) => {
+          try {
+            const serverState = JSON.parse(e.data)
+            if (serverState.alertQueue && serverState.alertQueue.length > 0) {
+              const latestAlert = serverState.alertQueue[0]
+              setCases(prev => {
+                if (prev.some(c => c.id === latestAlert.caseId)) {
+                  return prev
+                }
+                const newCase = buildCaseFromAlert(latestAlert)
+                return [newCase, ...prev]
+              })
+            }
+          } catch (parseErr) {
+            // Heartbeat/ping comment or non-JSON message
           }
-          const newCase = buildCaseFromAlert(latestAlert)
-          return [newCase, ...prev]
-        })
+        }
+        es.onerror = () => {
+          if (es) {
+            es.close()
+          }
+          if (!isDisposed) {
+            reconnectTimeout = setTimeout(connect, 5000)
+          }
+        }
+      } catch (err) {
+        if (!isDisposed) {
+          reconnectTimeout = setTimeout(connect, 5000)
+        }
       }
     }
-    return () => es.close()
+
+    connect()
+
+    return () => {
+      isDisposed = true
+      if (reconnectTimeout) clearTimeout(reconnectTimeout)
+      if (es) es.close()
+    }
   }, [])
 
   // Persist cases
@@ -364,8 +397,8 @@ export function AppProvider({ children }) {
     localStorage.setItem(STORAGE_KEYS.VERSION, STORAGE_VERSION)
     localStorage.setItem(STORAGE_KEYS.CASES, JSON.stringify(mockData.cases))
 
-    // Reset the mock backend state
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+    // Reset the backend state
+    const backendUrl = getBackendUrl()
     fetch(`${backendUrl}/reset`, { method: 'POST' }).catch(err => console.error('Failed to reset backend state:', err))
   }, [])
 

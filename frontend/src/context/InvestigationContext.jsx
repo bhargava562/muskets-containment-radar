@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { useApp } from './AppContextSimplified'
+import { getBackendUrl } from '../config/api'
 
 const InvestigationContext = createContext(null)
 
@@ -13,7 +14,7 @@ export function InvestigationProvider({ children }) {
   const [error, setError] = useState(null)
   const [selectedNodeId, setSelectedNodeId] = useState(null)
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+  const backendUrl = getBackendUrl()
 
   // Load snapshot when case is selected from the queue
   const startInvestigation = useCallback(async (caseId) => {

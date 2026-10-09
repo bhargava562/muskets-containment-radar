@@ -43,8 +43,12 @@ public class CaseContextBuilder {
         try {
             Resource resource = resourceLoader.getResource(resourcePath);
             if (!resource.exists()) {
-                log.warn("Seed resource does not exist: {}", resourcePath);
-                return Optional.empty();
+                log.warn("Seed resource does not exist: {}, falling back to base seed template", resourcePath);
+                resource = resourceLoader.getResource("classpath:seed/case-FRA-2026-IOB-00847.seed.json");
+                if (!resource.exists()) {
+                    log.error("Default seed resource case-FRA-2026-IOB-00847.seed.json not found!");
+                    return Optional.empty();
+                }
             }
 
             try (InputStream inputStream = resource.getInputStream()) {

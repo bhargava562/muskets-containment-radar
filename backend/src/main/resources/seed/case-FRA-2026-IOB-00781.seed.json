@@ -1,0 +1,409 @@
+{
+  "caseId": "case-FRA-2026-IOB-00781",
+  "caseStatus": "PENDING_TRIAGE",
+  "contextVersion": 1,
+  "snapshot": {
+    "caseId": "case-FRA-2026-IOB-00781",
+    "accountId": "602305001234567",
+    "customerName": "Deepa Rajendran",
+    "priority": "P2",
+    "riskAmount": 175000.0,
+    "tracedAmount": 128000.0,
+    "totalBalance": 2100000.0,
+    "triggerReason": "₹1.75L cascaded through 4 accounts in 67 seconds. TOR browser access detected. Partial lien of ₹1.28L approved by analyst.",
+    "generatedAt": "2026-05-17T12:30:05Z",
+    "status": "PENDING_TRIAGE"
+  },
+  "nodes": [
+    {
+      "nodeId": "V1",
+      "accountId": "185501000078901",
+      "label": "V1 — Deepa Rajendran (Victim)",
+      "nodeType": "VICTIM",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Deepa Rajendran",
+        "idType": "PAN",
+        "idNumber": "XXXXX5521C",
+        "dateOfBirth": "11/12/1986",
+        "address": "28, 1st Cross, Indiranagar, Bangalore",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "05/01/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX7890",
+        "occupation": "Software Architect",
+        "customerSince": "2016"
+      },
+      "cbs": {
+        "accountNumber": "185501000078901",
+        "ifscCode": "IOBA0001855",
+        "accountType": "SAVINGS",
+        "branchName": "Indiranagar",
+        "currentBalance": 2100000.0,
+        "averageMonthlyBalance": 850000.0,
+        "accountOpenDate": "14/02/2016",
+        "totalTransactionsLast30Days": 25,
+        "totalDebitLast30Days": 175000.0,
+        "totalCreditLast30Days": 190000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "Rajendran M.",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-14"
+      },
+      "device": {
+        "lastLoginDevice": "MacBook Air M2",
+        "lastLoginIp": "122.172.55.91",
+        "lastLoginLocation": "Bangalore, India",
+        "lastLoginTimestamp": "2026-05-17T12:28:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "complaint": {
+        "complaintId": "CYB2026-05-17-4491",
+        "victimName": "Deepa Rajendran",
+        "crimeType": "CREDIT_CARD_FRAUD",
+        "reportedAmount": 175000.0,
+        "registeredAt": "1930 Portal",
+        "firLinked": true
+      },
+      "aiAnalysis": {
+        "aiClassification": "CONFIRMED_VICTIM",
+        "confidence": 0.98,
+        "evidence": [
+          {
+            "evidenceId": "EV-01",
+            "source": "KYC_VERIFICATION",
+            "derivedFrom": "Longstanding customer with verified PAN credentials.",
+            "weight": 0.96,
+            "linkedRecordId": "KYC-V1"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Victim of credential harvesting and rapid darknet extraction sequence."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN781001",
+          "fromAccount": "185501000078901",
+          "toAccount": "602305001234567",
+          "amount": 100000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:00Z",
+          "narration": "IMPS/Immediate"
+        },
+        {
+          "txnId": "TXN781002",
+          "fromAccount": "185501000078901",
+          "toAccount": "039405009876543",
+          "amount": 75000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:15Z",
+          "narration": "IMPS/Immediate 2"
+        }
+      ]
+    },
+    {
+      "nodeId": "M1",
+      "accountId": "602305001234567",
+      "label": "M1 — Mule Delta",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Vikram Seth",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-6677",
+        "dateOfBirth": "24/01/2000",
+        "address": "45, Chandni Chowk, Delhi",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "19/03/2026",
+        "riskCategory": "HIGH",
+        "mobile": "99XXXX1234",
+        "occupation": "Unemployed",
+        "customerSince": "2026"
+      },
+      "cbs": {
+        "accountNumber": "602305001234567",
+        "ifscCode": "BARB0006023",
+        "accountType": "SAVINGS",
+        "branchName": "Chandni Chowk",
+        "currentBalance": 20000.0,
+        "averageMonthlyBalance": 500.0,
+        "accountOpenDate": "15/03/2026",
+        "totalTransactionsLast30Days": 11,
+        "totalDebitLast30Days": 80000.0,
+        "totalCreditLast30Days": 100000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "TOR Exit Browser",
+        "lastLoginIp": "198.51.100.44",
+        "lastLoginLocation": "Zurich, Switzerland",
+        "lastLoginTimestamp": "2026-05-17T12:29:15Z",
+        "uniqueDevicesLast30Days": 3,
+        "uniqueIpsLast30Days": 5,
+        "vpnDetected": true,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "HIGH"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.98,
+        "evidence": [
+          {
+            "evidenceId": "EV-02",
+            "source": "TOR_DETECTION",
+            "derivedFrom": "TOR browser session verified; dwell time 15 seconds.",
+            "weight": 0.97,
+            "linkedRecordId": "TXN781003"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "Primary darknet mule node cashing out directly to retail point."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN781001",
+          "fromAccount": "185501000078901",
+          "toAccount": "602305001234567",
+          "amount": 100000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:00Z",
+          "narration": "IMPS/Inward"
+        },
+        {
+          "txnId": "TXN781003",
+          "fromAccount": "602305001234567",
+          "toAccount": "185501000067890",
+          "amount": 80000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:15Z",
+          "narration": "IMPS/Forward"
+        }
+      ]
+    },
+    {
+      "nodeId": "M2",
+      "accountId": "039405009876543",
+      "label": "M2 — Mule Echo",
+      "nodeType": "MULE",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Gaurav Joshi",
+        "idType": "AADHAAR",
+        "idNumber": "XXXX-XXXX-9900",
+        "dateOfBirth": "18/08/1997",
+        "address": "10, Civil Lines, Jaipur, Rajasthan",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "10/02/2026",
+        "riskCategory": "HIGH",
+        "mobile": "97XXXX9876",
+        "occupation": "Shop Assistant",
+        "customerSince": "2026"
+      },
+      "cbs": {
+        "accountNumber": "039405009876543",
+        "ifscCode": "PUNB0000394",
+        "accountType": "SAVINGS",
+        "branchName": "Civil Lines",
+        "currentBalance": 27000.0,
+        "averageMonthlyBalance": 300.0,
+        "accountOpenDate": "02/02/2026",
+        "totalTransactionsLast30Days": 7,
+        "totalDebitLast30Days": 48000.0,
+        "totalCreditLast30Days": 75000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "None",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Oppo A78",
+        "lastLoginIp": "103.212.45.10",
+        "lastLoginLocation": "Jaipur, India",
+        "lastLoginTimestamp": "2026-05-17T12:29:26Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 2,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "LOW"
+      },
+      "aiAnalysis": {
+        "aiClassification": "SUSPECTED_MULE",
+        "confidence": 0.94,
+        "evidence": [
+          {
+            "evidenceId": "EV-03",
+            "source": "VELOCITY_SPIKE",
+            "derivedFrom": "Dwell time 11s: Rapid pass-through to merchant.",
+            "weight": 0.94,
+            "linkedRecordId": "TXN781004"
+          }
+        ],
+        "recommendedAction": "FREEZE_ACCOUNT",
+        "summary": "Secondary mule node in 67-second cascade sequence."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN781002",
+          "fromAccount": "185501000078901",
+          "toAccount": "039405009876543",
+          "amount": 75000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:15Z",
+          "narration": "IMPS/Inward"
+        },
+        {
+          "txnId": "TXN781004",
+          "fromAccount": "039405009876543",
+          "toAccount": "185501000067890",
+          "amount": 48000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:26Z",
+          "narration": "IMPS/Outward"
+        }
+      ]
+    },
+    {
+      "nodeId": "MR1",
+      "accountId": "185501000067890",
+      "label": "MR1 — Sunrise Hardware (Merchant Exit)",
+      "nodeType": "MERCHANT",
+      "officerVerdict": "UNREVIEWED",
+      "nodeAction": "NO_ACTION",
+      "kyc": {
+        "customerName": "Sunrise Hardware Supplies",
+        "idType": "GSTIN",
+        "idNumber": "08AABCS9988A1Z1",
+        "dateOfBirth": "14/05/2015",
+        "address": "88, Industrial Area, Jaipur, Rajasthan",
+        "kycStatus": "VERIFIED",
+        "lastVerifiedDate": "11/01/2026",
+        "riskCategory": "LOW",
+        "mobile": "98XXXX6789",
+        "occupation": "Hardware Wholesale",
+        "customerSince": "2015"
+      },
+      "cbs": {
+        "accountNumber": "185501000067890",
+        "ifscCode": "IOBA0001855",
+        "accountType": "CURRENT",
+        "branchName": "Jaipur Main",
+        "currentBalance": 2180000.0,
+        "averageMonthlyBalance": 1650000.0,
+        "accountOpenDate": "14/05/2015",
+        "totalTransactionsLast30Days": 115,
+        "totalDebitLast30Days": 1400000.0,
+        "totalCreditLast30Days": 1700000.0,
+        "accountStatus": "ACTIVE",
+        "nominee": "N/A",
+        "lienAmount": 0.0,
+        "lastDebitDate": "2026-05-17",
+        "lastCreditDate": "2026-05-17"
+      },
+      "device": {
+        "lastLoginDevice": "Lenovo Desktop",
+        "lastLoginIp": "122.160.88.19",
+        "lastLoginLocation": "Jaipur, India",
+        "lastLoginTimestamp": "2026-05-17T12:35:00Z",
+        "uniqueDevicesLast30Days": 1,
+        "uniqueIpsLast30Days": 1,
+        "vpnDetected": false,
+        "rootedDeviceDetected": false,
+        "simChanged": false,
+        "failedLoginAttempts": 0,
+        "geoVelocityFlag": "NONE"
+      },
+      "aiAnalysis": {
+        "aiClassification": "LIKELY_INNOCENT",
+        "confidence": 0.92,
+        "evidence": [
+          {
+            "evidenceId": "EV-04",
+            "source": "COMMERCIAL_REGISTRY",
+            "derivedFrom": "Legitimate enterprise with 11-year verified trading history.",
+            "weight": 0.95,
+            "linkedRecordId": "GST-08AABCS9988A1Z1"
+          }
+        ],
+        "recommendedAction": "NO_ACTION",
+        "summary": "Legitimate hardware supplier unwitting recipient. Partial lien applied on ₹1.28L."
+      },
+      "recentTransactions": [
+        {
+          "txnId": "TXN781003",
+          "fromAccount": "602305001234567",
+          "toAccount": "185501000067890",
+          "amount": 80000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:15Z",
+          "narration": "IMPS/Hardware Supply 1"
+        },
+        {
+          "txnId": "TXN781004",
+          "fromAccount": "039405009876543",
+          "toAccount": "185501000067890",
+          "amount": 48000.0,
+          "currency": "INR",
+          "type": "IMPS",
+          "timestamp": "2026-05-17T12:29:26Z",
+          "narration": "IMPS/Hardware Supply 2"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M1",
+      "amount": 100000.0,
+      "timestampMillis": 1779020940000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "V1",
+      "toNodeId": "M2",
+      "amount": 75000.0,
+      "timestampMillis": 1779020955000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "M1",
+      "toNodeId": "MR1",
+      "amount": 80000.0,
+      "timestampMillis": 1779020955000,
+      "type": "IMPS"
+    },
+    {
+      "fromNodeId": "M2",
+      "toNodeId": "MR1",
+      "amount": 48000.0,
+      "timestampMillis": 1779020966000,
+      "type": "IMPS"
+    }
+  ]
+}

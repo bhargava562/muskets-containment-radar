@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Scale, CheckCircle2, RotateCcw, XOctagon, FileText, Download, Loader2, Clock, ChevronRight, AlertTriangle } from 'lucide-react'
 import { useApp, CASE_STATUS } from '../../context/AppContextSimplified'
+import { getBackendUrl } from '../../config/api'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
 const fmt = (amount) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount)
 const fmtTime = (iso) => new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080'
+const BACKEND = getBackendUrl()
 
 // Checklist derived entirely client-side from fetched context — no new backend field needed
 function useReviewChecklist(ctx) {
